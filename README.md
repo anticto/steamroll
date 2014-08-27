@@ -7,7 +7,7 @@ This repository contains the code and configuration files for the game. Game ass
 Setting up the game
 ---------------------
 
-* Install Visual Studio Express 2014 for Desktops.
+* Install Visual Studio Express 2013 for Desktop.
 * Install Unreal Engine 4
 * Install github or source tree
 * Get this repository
