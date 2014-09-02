@@ -32,6 +32,7 @@ ASteamRollTestBall::ASteamRollTestBall(const class FPostConstructInitializePrope
 	Activated = false;
 
 	PrimaryActorTick.bCanEverTick = true;
+	SetReplicates(true);
 }
 
 

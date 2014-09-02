@@ -8,6 +8,8 @@ class ASteamRollTestGameMode : public AGameMode
 {
 	GENERATED_UCLASS_BODY()
 
+	virtual AActor* ChoosePlayerStart(AController* Player) override;
+
 };
 
 

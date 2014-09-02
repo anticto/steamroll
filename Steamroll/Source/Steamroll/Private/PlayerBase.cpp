@@ -6,28 +6,23 @@
 
 #include "TimerManager.h"
 #include "Engine.h"
+#include "UnrealNetwork.h"
 
 
 APlayerBase::APlayerBase(const class FPostConstructInitializeProperties& PCIP)
 	: Super(PCIP)
 {
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> BaseMesh(TEXT("/Game/Meshes/TemplateCube_Rounded.TemplateCube_Rounded"));
-
 	// Create mesh component for the base
 	Base = PCIP.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("Base0"));
-	Base->SetStaticMesh(BaseMesh.Object);
 	Base->SetSimulatePhysics(false);
-	Base->SetMobility(EComponentMobility::Static);
+	Base->SetMobility(EComponentMobility::Movable);
 	RootComponent = Base;
 
 	AimTransform = PCIP.CreateDefaultSubobject<USceneComponent>(this, TEXT("Tranform0"));
 	AimTransform->AttachTo(Base);
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> CannonMesh(TEXT("/Game/Shapes/Shape_Cylinder.Shape_Cylinder"));
-
 	// Create mesh component for the cannon
 	Cannon = PCIP.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("Cannon0"));
-	Cannon->SetStaticMesh(CannonMesh.Object);
 	Cannon->SetSimulatePhysics(false);
 	Cannon->SetMobility(EComponentMobility::Movable);
 	Cannon->AttachTo(AimTransform);
@@ -48,12 +43,9 @@ APlayerBase::APlayerBase(const class FPostConstructInitializeProperties& PCIP)
 	Camera->AttachTo(SpringArm, USpringArmComponent::SocketName);
 	Camera->bUseControllerViewRotation = false; // We don't want the controller rotating the camera
 
-	static ConstructorHelpers::FObjectFinder<UParticleSystem> ExplosionParticleSystem(TEXT("/Game/Particles/P_Explosion.P_Explosion"));
-
 	// Create explosion particle system
 	Explosion = PCIP.CreateDefaultSubobject<UParticleSystemComponent>(this, TEXT("Explosion0"));
 	Explosion->bAutoActivate = false;
-	Explosion->SetTemplate(ExplosionParticleSystem.Object);
 
 	FiringTimeout = 2.f;
 	MinLaunchSpeed = 1500.f;
@@ -74,32 +66,44 @@ void APlayerBase::SetupPlayerInputComponent(class UInputComponent* InputComponen
 
 void APlayerBase::MoveRight(float Val)
 {
-	AimTransform->AddRelativeRotation(FRotator(0.f, Val, 0.f));
+	if (Val != 0)
+	{
+		AimTransform->AddRelativeRotation(FRotator(0.f, Val, 0.f));
+
+		RotationServer(AimTransform->RelativeRotation);
+	}
 }
 
 
 void APlayerBase::MoveForward(float Val)
 {
-	AimTransform->AddRelativeRotation(FRotator(-Val, 0.f, 0.f));
-
-	FRotator Rotation = AimTransform->GetComponentRotation();
-
-	if (Rotation.Pitch < 0.f)
+	if (Val != 0)
 	{
-		Rotation.Pitch = 0.f;
-		AimTransform->SetRelativeRotation(Rotation);
-	}
-	else if (Rotation.Pitch > 65.f)
-	{
-		Rotation.Pitch = 65.f;
-		AimTransform->SetRelativeRotation(Rotation);
+		AimTransform->AddRelativeRotation(FRotator(-Val, 0.f, 0.f));
+
+		//FRotator Rotation = AimTransform->GetComponentRotation();
+		FRotator Rotation = AimTransform->RelativeRotation;
+
+		if (Rotation.Pitch < 0.f)
+		{
+			//Debug(FString::Printf(TEXT("Pitch=%f"), Rotation.Pitch));
+			Rotation.Pitch = 0.f;
+			AimTransform->SetRelativeRotation(Rotation);
+		}
+		else if (Rotation.Pitch > 65.f)
+		{
+			Rotation.Pitch = 65.f;
+			AimTransform->SetRelativeRotation(Rotation);
+		}
+
+		RotationServer(AimTransform->RelativeRotation);
 	}
 }
 
 
 void APlayerBase::Timeout()
 {
-	Fire(FiringTimeout);
+	FireServer(FiringTimeout, AimTransform->RelativeRotation);
 }
 
 
@@ -116,12 +120,7 @@ void APlayerBase::Fire(float ChargeTime)
 	float LaunchSpeed = FMath::Lerp(MinLaunchSpeed, MaxLaunchSpeed, LaunchPower);
 	Ball->Ball->SetPhysicsLinearVelocity(Direction * LaunchSpeed);
 
-	//Explosion->Activate(true);
-
-	AEmitter* Emitter = GetWorld()->SpawnActor<AEmitter>(AEmitter::StaticClass(), AimTransform->GetComponentLocation(), AimTransform->GetComponentRotation(), SpawnParams);
-	Emitter->SetTemplate(Explosion->Template);
-	Emitter->AddActorLocalOffset(FVector(400.f, 0.f, 0.f));
-	Emitter->SetActorScale3D(FVector(4.f, 4.f, 4.f));
+	ExplosionClient();
 }
 
 
@@ -138,9 +137,8 @@ void APlayerBase::FireRelease()
 	{
 		float TimeElapsed = GetWorldTimerManager().GetTimerElapsed(this, &APlayerBase::Timeout);
 		GetWorldTimerManager().PauseTimer(this, &APlayerBase::Timeout);
-		Debug(FString::Printf(TEXT("ChargeTime=%f"), TimeElapsed));
 
-		Fire(TimeElapsed);
+		FireServer(TimeElapsed, AimTransform->RelativeRotation);
 
 		GetWorldTimerManager().ClearTimer(this, &APlayerBase::Timeout);
 	}
@@ -153,5 +151,61 @@ void APlayerBase::Debug(FString Msg)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, Msg);
 	}
+}
+
+
+bool APlayerBase::FireServer_Validate(float ChargeTime, FRotator Rotation)
+{
+	return ChargeTime >= 0.f && ChargeTime <= FiringTimeout + 0.1f;
+}
+
+
+void APlayerBase::FireServer_Implementation(float ChargeTime, FRotator Rotation)
+{
+	AimTransform->SetRelativeRotation(Rotation);
+	Fire(ChargeTime);
+}
+
+
+void APlayerBase::ExplosionClient_Implementation()
+{
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = nullptr;
+	SpawnParams.Instigator = Instigator;
+
+	AEmitter* Emitter = GetWorld()->SpawnActor<AEmitter>(AEmitter::StaticClass(), AimTransform->GetComponentLocation(), AimTransform->GetComponentRotation(), SpawnParams);
+	Emitter->SetTemplate(Explosion->Template);
+	Emitter->AddActorLocalOffset(FVector(400.f, 0.f, 0.f));
+	Emitter->SetActorScale3D(FVector(4.f, 4.f, 4.f));
+}
+
+
+bool APlayerBase::RotationServer_Validate(FRotator Rotation)
+{
+	return true;
+}
+
+
+void APlayerBase::RotationServer_Implementation(FRotator Rotation)
+{
+	AimTransform->SetRelativeRotation(Rotation);
+	RotationClient(Rotation);
+}
+
+
+void APlayerBase::RotationClient_Implementation(FRotator Rotation)
+{
+	AimTransform->SetRelativeRotation(Rotation);
+}
+
+
+float APlayerBase::GetCharge()
+{
+	if (GetWorldTimerManager().IsTimerActive(this, &APlayerBase::Timeout))
+	{
+		return GetWorldTimerManager().GetTimerElapsed(this, &APlayerBase::Timeout) / FiringTimeout;
+	}
+
+	return 0.f;
 }
 

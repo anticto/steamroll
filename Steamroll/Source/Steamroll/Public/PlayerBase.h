@@ -40,6 +40,26 @@ class STEAMROLL_API APlayerBase : public APawn
 	UFUNCTION()
 	void Debug(FString Msg);
 
+	/** Firing message from client to server */
+	UFUNCTION(reliable, server, WithValidation)
+	void FireServer(float ChargeTime, FRotator Rotation);
+
+	///** Explosion message from server to clients */
+	UFUNCTION(unreliable, NetMulticast)
+	void ExplosionClient();
+
+	///** Firing message from client to server */
+	UFUNCTION(reliable, server, WithValidation)
+	void RotationServer(FRotator Rotation);
+
+	/** Firing message from server to clients */
+	UFUNCTION(reliable, NetMulticast)
+	void RotationClient(FRotator Rotation);
+
+	/** Return how much the player has charged the base from 0 to 1 */
+	UFUNCTION(BlueprintCallable, Category = Base)
+	float GetCharge();
+
 protected:
 
 	/** Called for side to side input */
