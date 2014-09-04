@@ -2,7 +2,6 @@
 
 #include "Steamroll.h"
 #include "SteamRollTestGameMode.h"
-#include "SteamRollTestBall.h"
 #include "PlayerBase.h"
 
 #include "Engine.h"
@@ -11,7 +10,6 @@ ASteamRollTestGameMode::ASteamRollTestGameMode(const class FPostConstructInitial
 	: Super(PCIP)
 {
 	// set default pawn class to our ball
-	//DefaultPawnClass = ASteamRollTestBall::StaticClass();
 	DefaultPawnClass = APlayerBase::StaticClass();
 }
 

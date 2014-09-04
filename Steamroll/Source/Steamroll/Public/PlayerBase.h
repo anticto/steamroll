@@ -33,6 +33,10 @@ class STEAMROLL_API APlayerBase : public APawn
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Base)
 	TSubobjectPtr<class UCameraComponent> Camera;
 
+	/** What subclass of SteamRollTestBall is going to be fired */
+	UPROPERTY(EditAnywhere, Category = Base)
+	TSubclassOf<class ASteamrollBall> WhatToSpawn;
+
 	/** Particle system used for the cannon firing */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Base)
 	TSubobjectPtr<class UParticleSystemComponent> Explosion;

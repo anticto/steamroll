@@ -2,7 +2,7 @@
 
 #include "Steamroll.h"
 #include "PlayerBase.h"
-#include "SteamRollTestBall.h"
+#include "SteamrollBall.h"
 
 #include "TimerManager.h"
 #include "Engine.h"
@@ -112,13 +112,18 @@ void APlayerBase::Fire(float ChargeTime)
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Owner = nullptr;
 	SpawnParams.Instigator = Instigator;
+	SpawnParams.bNoCollisionFail = true;
 
-	ASteamRollTestBall* Ball = GetWorld()->SpawnActor<ASteamRollTestBall>(ASteamRollTestBall::StaticClass(), AimTransform->GetComponentLocation(), AimTransform->GetComponentRotation(), SpawnParams);
-	Ball->AddActorLocalOffset(FVector(400.f, 0.f, 0.f));
-	FVector Direction = AimTransform->GetComponentToWorld().TransformVector(FVector(1.f, 0.f, 0.f));
-	float LaunchPower = ChargeTime / FiringTimeout;
-	float LaunchSpeed = FMath::Lerp(MinLaunchSpeed, MaxLaunchSpeed, LaunchPower);
-	Ball->Ball->SetPhysicsLinearVelocity(Direction * LaunchSpeed);
+	ASteamrollBall* Ball = GetWorld()->SpawnActor<ASteamrollBall>(WhatToSpawn, AimTransform->GetComponentLocation(), AimTransform->GetComponentRotation(), SpawnParams);
+	
+	if (Ball)
+	{
+		Ball->AddActorLocalOffset(FVector(400.f, 0.f, 0.f));
+		FVector Direction = AimTransform->GetComponentToWorld().TransformVector(FVector(1.f, 0.f, 0.f));
+		float LaunchPower = ChargeTime / FiringTimeout;
+		float LaunchSpeed = FMath::Lerp(MinLaunchSpeed, MaxLaunchSpeed, LaunchPower);
+		Ball->Sphere->SetPhysicsLinearVelocity(Direction * LaunchSpeed);
+	}
 
 	ExplosionClient();
 }
