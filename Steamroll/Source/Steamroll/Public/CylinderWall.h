@@ -4,13 +4,13 @@
 
 #include "GameFramework/Actor.h"
 #include "ExplosionDestructibleInterface.h"
-#include "DynamicWall.generated.h"
+#include "CylinderWall.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class STEAMROLL_API ADynamicWall : public AActor, public IExplosionDestructibleInterface
+class STEAMROLL_API ACylinderWall : public AActor, public IExplosionDestructibleInterface
 {
 	GENERATED_UCLASS_BODY()
 
@@ -18,25 +18,16 @@ class STEAMROLL_API ADynamicWall : public AActor, public IExplosionDestructibleI
 	TSubobjectPtr<class USceneComponent> TransformBase;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Wall)
-	TSubobjectPtr<class USceneComponent> TransformLeft;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Wall)
-	TSubobjectPtr<class USceneComponent> TransformRight;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Wall)
-	TSubobjectPtr<class UStaticMeshComponent> WallLeft;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Wall)
-	TSubobjectPtr<class UStaticMeshComponent> WallRight;
+	TSubobjectPtr<class UStaticMeshComponent> Cylinder;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Wall)
 	bool ExpandedVertically;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Wall)
-	bool ExpandedHorizontallyLeft;
+	bool ExpandedHorizontally;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Wall)
-	bool ExpandedHorizontallyRight;
+	float ExpansionSpeed;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Wall)
 	float MaxScaleWidth;
@@ -45,5 +36,5 @@ class STEAMROLL_API ADynamicWall : public AActor, public IExplosionDestructibleI
 	float MaxScaleHeight;
 
 	virtual void Tick(float DeltaSeconds) override;
-
+	
 };
