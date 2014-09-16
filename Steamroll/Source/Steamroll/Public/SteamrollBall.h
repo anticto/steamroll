@@ -18,9 +18,13 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Ball)
 	bool Activated;
 
+	/** Last tick's ball location */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Ball)
+	FVector LastLoc;
+
 	virtual void Tick(float DeltaSeconds) override;
 
-	UFUNCTION(BlueprintCallable, Category = Ball)
+	UFUNCTION(BlueprintNativeEvent, Category = Ball)
 	void ActivateBall();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Slots)
@@ -45,16 +49,23 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface
 
 	/** Returns a world transform representing the ball's location and orientation without its spin, that is, the orientation is its linear direction */
 	UFUNCTION(BlueprintCallable, Category = Ball)
-	FTransform GetBallFlattenedTransform(const FVector& LastLoc) const;
+	FTransform GetBallFlattenedTransform(const FVector& LastLocation, float WallDeploymentAngle) const;
 
 	/** Returns the ball world location adjusting for its radius while keeping it slightly above the floor */
 	UFUNCTION(BlueprintCallable, Category = Ball)
-	FTransform GetBallAdjustedTransform(const FVector& LastLoc) const;
+	FTransform GetBallAdjustedTransform() const;
 
-	UFUNCTION(BlueprintCallable, Category = Slots)
-	bool ImplementsExplosionDestructible();
+	/** Returns true if the ball is touching the floor */
+	UFUNCTION(BlueprintCallable, Category = Ball)
+	bool IsTouchingFloor() const;
+
+	/** Returns true if the ball is touching the floor */
+	UFUNCTION(BlueprintCallable, Category = Ball)
+	void StopBall();
 
 protected:
+	/** Speed considered to be stopped and deactivate sphysics simulation */
+	float StoppingSpeed;
 	float Age;
 	bool Dragging;
 	static float StartDraggingTime;

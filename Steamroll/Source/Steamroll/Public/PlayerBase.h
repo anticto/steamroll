@@ -78,6 +78,18 @@ protected:
 	/** Called to fire the cannon */
 	void FireRelease();
 
+	/** Similar to FireRelease but with controlled power for debugging purposes */
+	void FireDebug1();
+	void FireDebug2();
+	void FireDebug3();
+	void FireDebug4();
+	void FireDebug5();
+	void FireDebug6();
+	void FireDebug7();
+	void FireDebug8();
+	void FireDebug9();
+	void FireDebug10();
+
 	/** Actual Firing procedure */
 	void Fire(float ChargeTime);
 

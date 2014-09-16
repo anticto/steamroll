@@ -7,7 +7,7 @@
 ASteamrollPlayerController::ASteamrollPlayerController(const class FPostConstructInitializeProperties& PCIP)
 	: Super(PCIP)
 {
-
+	WallDeploymentAngle = 0.f;
 }
 
 TEnumAsByte<ESlotTypeEnum::SlotType> ASteamrollPlayerController::GetSlotState(int32 SlotIndex)

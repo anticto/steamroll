@@ -48,7 +48,7 @@ APlayerBase::APlayerBase(const class FPostConstructInitializeProperties& PCIP)
 	Explosion->bAutoActivate = false;
 
 	FiringTimeout = 2.f;
-	MinLaunchSpeed = 1500.f;
+	MinLaunchSpeed = 50.f;
 	MaxLaunchSpeed = 20000.f;
 }
 
@@ -61,6 +61,17 @@ void APlayerBase::SetupPlayerInputComponent(class UInputComponent* InputComponen
 
 	InputComponent->BindAction("Fire", IE_Pressed, this, &APlayerBase::FireCharge);
 	InputComponent->BindAction("Fire", IE_Released, this, &APlayerBase::FireRelease);
+
+	InputComponent->BindAction("FireDebug_1", IE_Released, this, &APlayerBase::FireDebug1);
+	InputComponent->BindAction("FireDebug_2", IE_Released, this, &APlayerBase::FireDebug2);
+	InputComponent->BindAction("FireDebug_3", IE_Released, this, &APlayerBase::FireDebug3);
+	InputComponent->BindAction("FireDebug_4", IE_Released, this, &APlayerBase::FireDebug4);
+	InputComponent->BindAction("FireDebug_5", IE_Released, this, &APlayerBase::FireDebug5);
+	InputComponent->BindAction("FireDebug_6", IE_Released, this, &APlayerBase::FireDebug6);
+	InputComponent->BindAction("FireDebug_7", IE_Released, this, &APlayerBase::FireDebug7);
+	InputComponent->BindAction("FireDebug_8", IE_Released, this, &APlayerBase::FireDebug8);
+	InputComponent->BindAction("FireDebug_9", IE_Released, this, &APlayerBase::FireDebug9);
+	InputComponent->BindAction("FireDebug_10", IE_Released, this, &APlayerBase::FireDebug10);
 }
 
 
@@ -118,7 +129,7 @@ void APlayerBase::Fire(float ChargeTime)
 	
 	if (Ball)
 	{
-		Ball->AddActorLocalOffset(FVector(400.f, 0.f, 0.f));
+		Ball->AddActorLocalOffset(FVector(500.f, 0.f, 0.f));
 		FVector Direction = AimTransform->GetComponentToWorld().TransformVector(FVector(1.f, 0.f, 0.f));
 		float LaunchPower = ChargeTime / FiringTimeout;
 		float LaunchSpeed = FMath::Lerp(MinLaunchSpeed, MaxLaunchSpeed, LaunchPower);
@@ -148,6 +159,18 @@ void APlayerBase::FireRelease()
 		GetWorldTimerManager().ClearTimer(this, &APlayerBase::Timeout);
 	}
 }
+
+
+void APlayerBase::FireDebug1() { FireServer(0.1f * FiringTimeout, AimTransform->RelativeRotation); }
+void APlayerBase::FireDebug2() { FireServer(0.2f * FiringTimeout, AimTransform->RelativeRotation); }
+void APlayerBase::FireDebug3() { FireServer(0.3f * FiringTimeout, AimTransform->RelativeRotation); }
+void APlayerBase::FireDebug4() { FireServer(0.4f * FiringTimeout, AimTransform->RelativeRotation); }
+void APlayerBase::FireDebug5() { FireServer(0.5f * FiringTimeout, AimTransform->RelativeRotation); }
+void APlayerBase::FireDebug6() { FireServer(0.6f * FiringTimeout, AimTransform->RelativeRotation); }
+void APlayerBase::FireDebug7() { FireServer(0.7f * FiringTimeout, AimTransform->RelativeRotation); }
+void APlayerBase::FireDebug8() { FireServer(0.8f * FiringTimeout, AimTransform->RelativeRotation); }
+void APlayerBase::FireDebug9() { FireServer(0.9f * FiringTimeout, AimTransform->RelativeRotation); }
+void APlayerBase::FireDebug10() { FireServer(1.0f * FiringTimeout, AimTransform->RelativeRotation); }
 
 
 void APlayerBase::Debug(FString Msg)
@@ -182,6 +205,7 @@ void APlayerBase::ExplosionClient_Implementation()
 	Emitter->SetTemplate(Explosion->Template);
 	Emitter->AddActorLocalOffset(FVector(400.f, 0.f, 0.f));
 	Emitter->SetActorScale3D(FVector(4.f, 4.f, 4.f));
+	Emitter->SetLifeSpan(4.f);
 }
 
 

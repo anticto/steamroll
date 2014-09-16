@@ -16,6 +16,9 @@ class STEAMROLL_API ASteamrollPlayerController : public APlayerController
 	GENERATED_UCLASS_BODY()
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Slots)
+	float WallDeploymentAngle;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Slots)
 	FSlotsConfigStruct SlotsConfig;
 
 	/** Gets a slot's state, SlotIndex goes from 1 to 4 */
