@@ -31,6 +31,24 @@ void ASteamrollBall::Tick(float DeltaSeconds)
 	bool TouchingFloor = IsTouchingFloor();
 	float SpeedSquared = GetVelocity().SizeSquared();
 
+	if (HasSlotState(ESlotTypeEnum::SE_CONTACT))
+	{
+		TArray<AActor*> Actors;
+		TArray<AActor *> ActorsToIgnore;
+		ActorsToIgnore.Add(this);
+		TArray<TEnumAsByte<EObjectTypeQuery> > ObjectTypes;
+		
+		UKismetSystemLibrary::SphereOverlapActors_NEW(GetWorld(), this->GetActorLocation(), Sphere->GetUnscaledSphereRadius() + 50.f, ObjectTypes, nullptr, ActorsToIgnore, Actors);
+		
+		for (auto Actor : Actors)
+		{
+			if (InterfaceCast<IExplosionDestructibleInterface>(Actor))
+			{
+				ActivateBall();
+			}
+		}
+	}
+
 	if (!Activated && SpeedSquared < StoppingSpeed * StoppingSpeed && TouchingFloor)
 	{
 		ActivateBall();
@@ -56,16 +74,17 @@ void ASteamrollBall::Tick(float DeltaSeconds)
 		Sphere->SetAngularDamping(0.f);
 	}
 
-	if (TouchingFloor)
-	{
-		float r = Sphere->GetScaledSphereRadius();
-		DrawDebugBox(GetWorld(), GetActorLocation(), FVector(r, r, r), FColor::Green);
-	}
-
-	if (Dragging)
-	{
-		DrawDebug2DDonut(GetWorld(), GetTransform().ToMatrixWithScale(), Sphere->GetScaledSphereRadius(), Sphere->GetUnscaledSphereRadius() * 2.f, 20, FColor::Red);
-	}
+	//// Uncoment for debug boxes
+	//if (TouchingFloor)
+	//{
+	//	float r = Sphere->GetScaledSphereRadius();
+	//	DrawDebugBox(GetWorld(), GetActorLocation(), FVector(r, r, r), FColor::Green);
+	//}
+	//
+	//if (Dragging)
+	//{
+	//	DrawDebug2DDonut(GetWorld(), GetTransform().ToMatrixWithScale(), Sphere->GetScaledSphereRadius(), Sphere->GetUnscaledSphereRadius() * 2.f, 20, FColor::Red);
+	//}
 
 	LastLoc = GetActorLocation();
 }

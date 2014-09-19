@@ -24,7 +24,7 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface
 
 	virtual void Tick(float DeltaSeconds) override;
 
-	UFUNCTION(BlueprintNativeEvent, Category = Ball)
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = Ball)
 	void ActivateBall();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Slots)

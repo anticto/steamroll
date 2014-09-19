@@ -43,6 +43,10 @@ void ADynamicWall::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 
 	TArray<TEnumAsByte<EObjectTypeQuery> > ObjectTypes;
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic));
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldDynamic));
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_PhysicsBody));
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn));
 
 	TArray<AActor *> ActorsToIgnore;
 	ActorsToIgnore.Add(this);

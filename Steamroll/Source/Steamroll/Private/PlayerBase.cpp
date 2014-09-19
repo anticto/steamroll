@@ -3,6 +3,7 @@
 #include "Steamroll.h"
 #include "PlayerBase.h"
 #include "SteamrollBall.h"
+#include "SteamrollPlayerController.h"
 
 #include "TimerManager.h"
 #include "Engine.h"
@@ -50,6 +51,73 @@ APlayerBase::APlayerBase(const class FPostConstructInitializeProperties& PCIP)
 	FiringTimeout = 2.f;
 	MinLaunchSpeed = 50.f;
 	MaxLaunchSpeed = 20000.f;
+
+	RaiseCamera = false;
+	LowerCamera = false;
+	CameraSpeed = 300.f;
+	MaxHeight = 500.f;
+	MinHeight = 0.f;
+	CurrCameraTime = 0.f;
+
+	PrimaryActorTick.bCanEverTick = true;
+}
+
+
+void APlayerBase::BeginPlay()
+{
+	Super::BeginPlay();
+
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+
+	if (PlayerController)
+	{
+		APlayerCameraManager* CameraManager = PlayerController->PlayerCameraManager;
+
+		if (CameraManager)
+		{
+			CameraAnimInst = CameraManager->PlayCameraAnim(CameraAnim, 0.f, 1.f, 0.f, 0.f, true);
+		}
+	}
+}
+
+
+void APlayerBase::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if (RaiseCamera)
+	{
+		CurrCameraTime += DeltaSeconds;
+		CurrCameraTime = FMath::Min(CurrCameraTime, CameraAnim->AnimLength);
+	}
+
+	if (LowerCamera)
+	{
+		CurrCameraTime -= DeltaSeconds;
+		CurrCameraTime = FMath::Max(CurrCameraTime, 0.001f); // 0.001 not 0 becase going back to 0 would sometimes make te camera anim loop around to the end due to precision issues
+	}
+
+	SetCameraAnim(CurrCameraTime, DeltaSeconds); // Multiplied by AnimLength to map the 0-1 interval to the anim duration
+
+	//if (RaiseCamera)
+	//{
+	//	Camera->AddRelativeLocation(FVector(0.f, 0.f, CameraSpeed * DeltaSeconds));
+
+	//	if (Camera->RelativeLocation.Z > MaxHeight)
+	//	{
+	//		Camera->SetRelativeLocation(FVector(Camera->RelativeLocation.X, Camera->RelativeLocation.Y, MaxHeight));
+	//	}
+	//}
+
+	//if (LowerCamera)
+	//{
+	//	Camera->AddRelativeLocation(FVector(0.f, 0.f, -CameraSpeed * DeltaSeconds));
+
+	//	if (Camera->RelativeLocation.Z < MinHeight)
+	//	{
+	//		Camera->SetRelativeLocation(FVector(Camera->RelativeLocation.X, Camera->RelativeLocation.Y, MinHeight));
+	//	}
+	//}
 }
 
 
@@ -72,6 +140,10 @@ void APlayerBase::SetupPlayerInputComponent(class UInputComponent* InputComponen
 	InputComponent->BindAction("FireDebug_8", IE_Released, this, &APlayerBase::FireDebug8);
 	InputComponent->BindAction("FireDebug_9", IE_Released, this, &APlayerBase::FireDebug9);
 	InputComponent->BindAction("FireDebug_10", IE_Released, this, &APlayerBase::FireDebug10);
+
+	InputComponent->BindAction("Undo", IE_Pressed, this, &APlayerBase::Undo);
+	InputComponent->BindAction("DestroyBalls", IE_Pressed, this, &APlayerBase::DestroyBalls);
+	InputComponent->BindAction("RemoteTrigger", IE_Pressed, this, &APlayerBase::ActivateBall);
 }
 
 
@@ -126,6 +198,7 @@ void APlayerBase::Fire(float ChargeTime)
 	SpawnParams.bNoCollisionFail = true;
 
 	ASteamrollBall* Ball = GetWorld()->SpawnActor<ASteamrollBall>(WhatToSpawn, AimTransform->GetComponentLocation(), AimTransform->GetComponentRotation(), SpawnParams);
+	SetLastDeployedActor(Ball);
 	
 	if (Ball)
 	{
@@ -236,5 +309,80 @@ float APlayerBase::GetCharge()
 	}
 
 	return 0.f;
+}
+
+
+void APlayerBase::Undo()
+{
+	ASteamrollPlayerController* SteamrollPlayerController = Cast<ASteamrollPlayerController>(this->GetController());
+
+	if (SteamrollPlayerController && SteamrollPlayerController->LastDeployedActor)
+	{
+		SteamrollPlayerController->LastDeployedActor->Destroy();
+		SteamrollPlayerController->LastDeployedActor = nullptr;
+	}
+}
+
+
+void APlayerBase::SetLastDeployedActor(AActor* Actor)
+{
+	ASteamrollPlayerController* SteamrollPlayerController = Cast<ASteamrollPlayerController>(this->GetController());
+
+	if (SteamrollPlayerController)
+	{
+		SteamrollPlayerController->LastDeployedActor = Actor;
+	}
+}
+
+
+void APlayerBase::DestroyBalls()
+{
+	for (TActorIterator<ASteamrollBall> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		ActorItr->Destroy();
+	}
+}
+
+
+void APlayerBase::ActivateBall()
+{
+	for (TActorIterator<ASteamrollBall> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		if (!ActorItr->Activated && ActorItr->HasSlotState(ESlotTypeEnum::SE_IMP))
+		{
+			if (ActorItr->IsTouchingFloor())
+			{
+				ActorItr->Sphere->SetPhysicsLinearVelocity(ActorItr->Sphere->GetPhysicsLinearVelocity() + FVector(0.f, 0.f, 1000.f));
+			}
+		}
+		else
+		{
+			ActorItr->ActivateBall();
+		}
+	}
+}
+
+
+void APlayerBase::SetCameraAnim(float Time, float DeltaSeconds)
+{
+	if (CameraAnim && CameraAnimInst)
+	{
+		float CurrentTime = CameraAnimInst->CurTime;
+		float DeltaTime;
+
+		if (Time >= CurrentTime)
+		{
+			DeltaTime = Time - CurrentTime;
+		}
+		else
+		{
+			float RemainingLength = CameraAnimInst->CamAnim->AnimLength - CurrentTime;
+			DeltaTime = Time + RemainingLength;
+		}
+
+		CameraAnimInst->Update(1.f, 1.f, 0.f, 0.f, 0.f);
+		CameraAnimInst->AdvanceAnim(DeltaTime, true);
+		CameraAnimInst->Update(0.f, 1.f, 0.f, 0.f, 0.f);
+	}
 }
 

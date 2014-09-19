@@ -41,6 +41,18 @@ class STEAMROLL_API APlayerBase : public APawn
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Base)
 	TSubobjectPtr<class UParticleSystemComponent> Explosion;
 
+	// Camera controls
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Base)
+	bool RaiseCamera;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Base)
+	bool LowerCamera;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Base)
+	UCameraAnim* CameraAnim;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Base)
+	UCameraAnimInst* CameraAnimInst;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Base)
+	float CurrCameraTime;
+
 	UFUNCTION()
 	void Debug(FString Msg);
 
@@ -64,7 +76,14 @@ class STEAMROLL_API APlayerBase : public APawn
 	UFUNCTION(BlueprintCallable, Category = Base)
 	float GetCharge();
 
+	/** Sets the current play time of the Camera Anim */
+	UFUNCTION(BlueprintCallable, Category = Base)
+	void SetCameraAnim(float Time, float DeltaSeconds);
+
 protected:
+
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
 
 	/** Called for side to side input */
 	void MoveRight(float Val);
@@ -105,4 +124,15 @@ protected:
 	float MinLaunchSpeed;
 	float MaxLaunchSpeed;
 
+	/** Deletes last deployed actor */
+	void Undo();
+
+	void SetLastDeployedActor(AActor* Actor);
+	void DestroyBalls();
+	void ActivateBall();
+
+	// Camera controls	
+	float CameraSpeed;
+	float MaxHeight;
+	float MinHeight;
 };

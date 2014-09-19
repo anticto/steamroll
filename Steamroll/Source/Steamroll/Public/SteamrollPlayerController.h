@@ -16,6 +16,9 @@ class STEAMROLL_API ASteamrollPlayerController : public APlayerController
 	GENERATED_UCLASS_BODY()
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Slots)
+	AActor* LastDeployedActor;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Slots)
 	float WallDeploymentAngle;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Slots)

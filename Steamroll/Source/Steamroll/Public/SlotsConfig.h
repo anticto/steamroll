@@ -15,6 +15,11 @@ namespace ESlotTypeEnum
 		SE_EMPTY 	UMETA(DisplayName = "Empty"),
 		SE_WALL 	UMETA(DisplayName = "Wall"),
 		SE_EXPL		UMETA(DisplayName = "Explosion"),
+		SE_RAMP 	UMETA(DisplayName = "Ramp"),
+		SE_TIME 	UMETA(DisplayName = "Timer"),
+		SE_REMOTE 	UMETA(DisplayName = "Remote Trigger"),
+		SE_CONTACT 	UMETA(DisplayName = "Contact Trigger"),
+		SE_IMP	 	UMETA(DisplayName = "Impulse"),
 
 		//
 		SE_Max		UMETA(Hidden),
