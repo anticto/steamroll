@@ -6,18 +6,16 @@
 #include "SteamrollPlayerController.h"
 #include "Kismet/KismetMathLibrary.h"
 
-float ASteamrollBall::StartDraggingTime = 2.f;
 
 ASteamrollBall::ASteamrollBall(const class FPostConstructInitializeProperties& PCIP)
-	: Super(PCIP)
+	: Super(PCIP), DraggingBall()
 {
 	Sphere = PCIP.CreateDefaultSubobject<USphereComponent>(this, TEXT("Sphere"));
 	RootComponent = Sphere;
 
-	StoppingSpeed = 10;
+	DraggingBallSetSphere(Sphere);
+
 	Activated = false;
-	Age = 0.f;
-	Dragging = false;
 
 	SetReplicates(true);
 	PrimaryActorTick.bCanEverTick = true;
@@ -28,7 +26,7 @@ void ASteamrollBall::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	bool TouchingFloor = IsTouchingFloor();
+	bool bTouchingFloor = IsTouchingFloor();
 	float SpeedSquared = GetVelocity().SizeSquared();
 
 	if (HasSlotState(ESlotTypeEnum::SE_CONTACT))
@@ -49,30 +47,7 @@ void ASteamrollBall::Tick(float DeltaSeconds)
 		}
 	}
 
-	if (!Activated && SpeedSquared < StoppingSpeed * StoppingSpeed && TouchingFloor)
-	{
-		ActivateBall();
-	}
-	else if (SpeedSquared < StoppingSpeed * StoppingSpeed)
-	{
-		StopBall();
-	}
-
-	Age += DeltaSeconds;
-
-	if (!Dragging && Age > StartDraggingTime && TouchingFloor)
-	{
-		Dragging = true;
-		Sphere->SetLinearDamping(3.f);
-		Sphere->SetAngularDamping(3.f);
-	}
-	else if (!TouchingFloor)
-	{
-		Dragging = false;
-		Age = 0.f;
-		Sphere->SetLinearDamping(0.01f);
-		Sphere->SetAngularDamping(0.f);
-	}
+	DraggingBallTick(DeltaSeconds, bTouchingFloor, SpeedSquared);
 
 	//// Uncoment for debug boxes
 	//if (TouchingFloor)
@@ -93,6 +68,7 @@ void ASteamrollBall::Tick(float DeltaSeconds)
 void ASteamrollBall::ActivateBall_Implementation()
 {
 	Activated = true;
+	GetWorldTimerManager().ClearTimer(this, &ASteamrollBall::Timeout);  // In case the timer slot was set and somehow the ball was activated before it fired (remote activation for example)
 	StopBall();
 }
 
@@ -176,5 +152,41 @@ bool ASteamrollBall::IsTouchingFloor() const
 		                               ECC_PhysicsBody, //collision channel
 		                               RV_TraceParams
 		                               );
+}
+
+
+bool ASteamrollBall::IsActivated()
+{
+	return Activated;
+}
+
+
+void ASteamrollBall::DraggingBallActivate()
+{
+	ActivateBall();
+}
+
+
+void ASteamrollBall::DraggingBallStop()
+{
+	StopBall();
+}
+
+
+void ASteamrollBall::Timeout()
+{
+	if (IsTouchingFloor())
+	{
+		ActivateBall();
+	}
+}
+
+
+void ASteamrollBall::BeginPlay()
+{
+	if (HasSlotState(ESlotTypeEnum::SE_TIME))
+	{
+		GetWorldTimerManager().SetTimer(this, &ASteamrollBall::Timeout, 2.f, false);
+	}
 }
 

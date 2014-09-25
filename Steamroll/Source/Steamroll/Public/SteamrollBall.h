@@ -4,10 +4,11 @@
 #include "GameFramework/Pawn.h"
 #include "SlotsConfig.h"
 #include "ExplosionDestructibleInterface.h"
+#include "DraggingBall.h"
 #include "SteamrollBall.generated.h"
 
 UCLASS(config=Game)
-class ASteamrollBall : public AActor, public IExplosionDestructibleInterface
+class ASteamrollBall : public AActor, public IExplosionDestructibleInterface, public DraggingBall
 {
 	GENERATED_UCLASS_BODY()
 
@@ -64,10 +65,14 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface
 	void StopBall();
 
 protected:
-	/** Speed considered to be stopped and deactivate sphysics simulation */
-	float StoppingSpeed;
-	float Age;
-	bool Dragging;
-	static float StartDraggingTime;
+	
+	bool IsActivated();
+	void DraggingBallActivate();
+	void DraggingBallStop();
+
+	/** Timer slot timeout */
+	void Timeout();
+
+	virtual void BeginPlay() override;
 
 };

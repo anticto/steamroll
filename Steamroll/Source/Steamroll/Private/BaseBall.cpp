@@ -7,6 +7,8 @@
 ABaseBall::ABaseBall(const class FPostConstructInitializeProperties& PCIP)
 	: Super(PCIP)
 {
+	Activated = true;
+
 	Sphere = PCIP.CreateDefaultSubobject<USphereComponent>(this, TEXT("Sphere"));
 	SphereMesh = PCIP.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("SphereMesh"));
 	GyroMesh = PCIP.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("GyroMesh"));	
@@ -18,28 +20,42 @@ ABaseBall::ABaseBall(const class FPostConstructInitializeProperties& PCIP)
 	GyroMesh->AttachTo(AimTransform);
 	SpringArm->AttachTo(AimTransform);
 	Camera->AttachTo(SpringArm);
+
+	DraggingBallSetSphere(Sphere);
+
+	PrimaryActorTick.bCanEverTick = true;
+}
+
+
+void ABaseBall::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	bool bTouchingFloor = IsTouchingFloor();
+	float SpeedSquared = GetVelocity().SizeSquared();
+
+	DraggingBallTick(DeltaSeconds, bTouchingFloor, SpeedSquared);
 }
 
 
 void ABaseBall::Fire(float ChargeTime)
 {
-	// Firing direction
-	FVector Direction = AimTransform->GetComponentToWorld().TransformVector(FVector(1.f, 0.f, 0.f));
-	Direction.Z = 0.f;
+	if (Activated)
+	{
+		DraggingBallReset();
+		Activated = false;
 
-	// Firing power
-	float LaunchPower = ChargeTime / FiringTimeout;
-	float LaunchSpeed = FMath::Lerp(MinLaunchSpeed, MaxLaunchSpeed, LaunchPower);
-	Sphere->SetPhysicsLinearVelocity(Direction * LaunchSpeed);
+		// Firing direction
+		FVector Direction = AimTransform->GetComponentToWorld().TransformVector(FVector(1.f, 0.f, 0.f));
+		Direction.Z = 0.f;
 
-	// Fix camera and gyro rotation
-	FRotator Rotator = SpringArm->GetComponentRotation();
-	SpringArm->bAbsoluteRotation = true;
-	SpringArm->SetWorldRotation(Rotator);
+		// Firing power
+		float LaunchPower = ChargeTime / FiringTimeout;
+		float LaunchSpeed = FMath::Lerp(MinLaunchSpeed, MaxLaunchSpeed, LaunchPower);
+		Sphere->SetPhysicsLinearVelocity(Direction * LaunchSpeed);
 
-	GyroMesh->bAbsoluteRotation = true;
-
-	ExplosionClient();
+		ExplosionClient();
+	}
 }
 
 
@@ -56,4 +72,42 @@ void ABaseBall::Explode()
 	//Emitter->SetLifeSpan(4.f);
 }
 
+
+bool ABaseBall::IsActivated()
+{
+	return Activated;
+}
+
+
+void ABaseBall::DraggingBallActivate()
+{
+	Activated = true;
+}
+
+
+void ABaseBall::DraggingBallStop()
+{
+	Sphere->PutRigidBodyToSleep();
+	Sphere->SetAllPhysicsLinearVelocity(FVector(0.f, 0.f, 0.f));
+	Sphere->SetAllPhysicsAngularVelocity(FVector(0.f, 0.f, 0.f));
+}
+
+
+bool ABaseBall::IsTouchingFloor() const
+{
+	FCollisionQueryParams RV_TraceParams = FCollisionQueryParams(FName(TEXT("RV_Trace")), true, this);
+	RV_TraceParams.bTraceComplex = true;
+	RV_TraceParams.bTraceAsyncScene = true;
+	RV_TraceParams.bReturnPhysicalMaterial = false;
+	//Re-initialize hit info
+	FHitResult RV_Hit(ForceInit);
+
+	return GetWorld()->LineTraceSingle(
+		RV_Hit, //result
+		GetActorLocation(), //start
+		GetActorLocation() + FVector(0.f, 0.f, -Sphere->GetScaledSphereRadius() - 1.f), //end
+		ECC_PhysicsBody, //collision channel
+		RV_TraceParams
+		);
+}
 

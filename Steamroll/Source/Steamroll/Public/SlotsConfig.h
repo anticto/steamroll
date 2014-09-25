@@ -20,6 +20,10 @@ namespace ESlotTypeEnum
 		SE_REMOTE 	UMETA(DisplayName = "Remote Trigger"),
 		SE_CONTACT 	UMETA(DisplayName = "Contact Trigger"),
 		SE_IMP	 	UMETA(DisplayName = "Impulse"),
+		SE_LIGHT	UMETA(DisplayName = "Light"),
+		SE_CAMERA	UMETA(DisplayName = "Camera"),
+		SE_PORTAL	UMETA(DisplayName = "Portal"),
+		SE_LAUNCH	UMETA(DisplayName = "Launcher"),
 
 		//
 		SE_Max		UMETA(Hidden),
