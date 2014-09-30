@@ -101,6 +101,7 @@ void APlayerBase::Fire(float ChargeTime)
 		float LaunchPower = ChargeTime / FiringTimeout;
 		float LaunchSpeed = FMath::Lerp(MinLaunchSpeed, MaxLaunchSpeed, LaunchPower);
 		Ball->Sphere->SetPhysicsLinearVelocity(Direction * LaunchSpeed);
+		//Ball->Sphere->SetPhysicsAngularVelocity(Direction * 50000000);
 	}
 
 	ExplosionClient();
