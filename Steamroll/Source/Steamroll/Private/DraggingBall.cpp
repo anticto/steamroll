@@ -42,7 +42,7 @@ void DraggingBall::DraggingBallTick(float DeltaSeconds, bool bTouchingFloor, flo
 	{
 		DraggingBallActivate();
 	}
-	else if (SpeedSquared < StoppingSpeed * StoppingSpeed)
+	else if (Dragging && SpeedSquared < StoppingSpeed * StoppingSpeed)
 	{
 		DraggingBallStop();
 	}

@@ -19,6 +19,11 @@ ASteamrollBall::ASteamrollBall(const class FPostConstructInitializeProperties& P
 
 	SetReplicates(true);
 	PrimaryActorTick.bCanEverTick = true;
+
+	CollectedQuantity = 0.f;
+	CollectCapacity = 10.f;
+
+	bExplosionBlockedByContactSlot = false;
 }
 
 
@@ -31,8 +36,10 @@ void ASteamrollBall::Tick(float DeltaSeconds)
 
 	if (HasSlotState(ESlotTypeEnum::SE_CONTACT))
 	{
+		bExplosionBlockedByContactSlot = true;
+
 		TArray<AActor*> Actors;
-		TArray<AActor *> ActorsToIgnore;
+		TArray<AActor*> ActorsToIgnore;
 		ActorsToIgnore.Add(this);
 		TArray<TEnumAsByte<EObjectTypeQuery> > ObjectTypes;
 		
@@ -43,6 +50,8 @@ void ASteamrollBall::Tick(float DeltaSeconds)
 			if (InterfaceCast<IExplosionDestructibleInterface>(Actor))
 			{
 				ActivateBall();
+				bExplosionBlockedByContactSlot = false;
+				break;
 			}
 		}
 	}
@@ -188,5 +197,10 @@ void ASteamrollBall::BeginPlay()
 	{
 		GetWorldTimerManager().SetTimer(this, &ASteamrollBall::Timeout, 2.f, false);
 	}
+}
+
+void ASteamrollBall::WakeBall()
+{
+	DraggingBallReset();
 }
 

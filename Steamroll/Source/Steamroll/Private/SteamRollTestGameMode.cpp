@@ -11,6 +11,12 @@ ASteamRollTestGameMode::ASteamRollTestGameMode(const class FPostConstructInitial
 {
 	// set default pawn class to our ball
 	DefaultPawnClass = APlayerBase::StaticClass();
+
+	if (GEngine && GEngine->GameViewport)
+	{
+		// Remove the default pause message
+		GEngine->GameViewport->SetSuppressTransitionMessage(true);
+	}
 }
 
 

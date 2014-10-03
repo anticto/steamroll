@@ -23,6 +23,14 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface, pu
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Ball)
 	FVector LastLoc;
 
+	/** Collect ball's collected resource quantity */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Collect)
+	float CollectedQuantity;
+
+	/** How much collectable resource this ball can carry */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Collect)
+	float CollectCapacity;
+
 	virtual void Tick(float DeltaSeconds) override;
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = Ball)
@@ -34,6 +42,9 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface, pu
 	/** Gets a slot's state, SlotIndex goes from 1 to 4 */
 	UFUNCTION(BlueprintCallable, Category = Slots)
 	TEnumAsByte<ESlotTypeEnum::SlotType> GetSlotState(int32 SlotIndex);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Slots)
+	bool bExplosionBlockedByContactSlot;
 
 	/** Sets a slot's state, SlotIndex goes from 1 to 4 */
 	UFUNCTION(BlueprintCallable, Category = Slots)
@@ -63,6 +74,10 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface, pu
 	/** Returns true if the ball is touching the floor */
 	UFUNCTION(BlueprintCallable, Category = Ball)
 	void StopBall();
+
+	/** Resets the dragging parameters and restarts the physical simulation if sleeping */
+	UFUNCTION(BlueprintCallable, Category = Ball)
+	void WakeBall();
 
 protected:
 	

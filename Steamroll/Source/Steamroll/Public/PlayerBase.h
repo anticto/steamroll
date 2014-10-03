@@ -33,6 +33,10 @@ class STEAMROLL_API APlayerBase : public ASteamrollPawn
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Base)
 	TSubobjectPtr<class UParticleSystemComponent> Explosion;
 
+	/** Base's collected resource quantity */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Collect)
+	float CollectedQuantity;
+
 
 protected:
 
