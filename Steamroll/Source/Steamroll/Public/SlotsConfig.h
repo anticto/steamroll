@@ -25,6 +25,7 @@ namespace ESlotTypeEnum
 		SE_PORTAL	UMETA(DisplayName = "Portal"),
 		SE_LAUNCH	UMETA(DisplayName = "Launcher"),
 		SE_COLLECT	UMETA(DisplayName = "Collect"),
+		SE_PAINT	UMETA(DisplayName = "Paint"),
 
 		//
 		SE_Max		UMETA(Hidden),

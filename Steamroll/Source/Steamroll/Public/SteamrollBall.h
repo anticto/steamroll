@@ -79,7 +79,12 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface, pu
 	UFUNCTION(BlueprintCallable, Category = Ball)
 	void WakeBall();
 
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = Slots)
+	void SplatPaint();
+
 protected:
+
+	float TimeForNextPaint;
 	
 	bool IsActivated();
 	void DraggingBallActivate();

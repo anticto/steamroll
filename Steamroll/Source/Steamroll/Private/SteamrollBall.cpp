@@ -24,6 +24,8 @@ ASteamrollBall::ASteamrollBall(const class FPostConstructInitializeProperties& P
 	CollectCapacity = 10.f;
 
 	bExplosionBlockedByContactSlot = false;
+
+	TimeForNextPaint = 1.f;
 }
 
 
@@ -33,6 +35,20 @@ void ASteamrollBall::Tick(float DeltaSeconds)
 
 	bool bTouchingFloor = IsTouchingFloor();
 	float SpeedSquared = GetVelocity().SizeSquared();
+
+	if (HasSlotState(ESlotTypeEnum::SE_PAINT))
+	{
+		if (!IsActivated() && SpeedSquared >= StoppingSpeed * StoppingSpeed && bTouchingFloor)
+		{
+			TimeForNextPaint -= DeltaSeconds;
+
+			if (TimeForNextPaint < 0.f)
+			{
+				SplatPaint();
+				TimeForNextPaint = 1.f;
+			}
+		}
+	}
 
 	if (HasSlotState(ESlotTypeEnum::SE_CONTACT))
 	{
@@ -202,5 +218,11 @@ void ASteamrollBall::BeginPlay()
 void ASteamrollBall::WakeBall()
 {
 	DraggingBallReset();
+}
+
+
+void ASteamrollBall::SplatPaint_Implementation()
+{
+	
 }
 
