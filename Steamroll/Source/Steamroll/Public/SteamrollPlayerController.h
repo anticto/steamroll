@@ -47,13 +47,16 @@ class STEAMROLL_API ASteamrollPlayerController : public APlayerController
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Radar)
 	int32 CurrentCamera;
 
-	UFUNCTION(BlueprintCallable, Category = Slots)
+	UFUNCTION(BlueprintCallable, Category = Radar)
 	void AddBallCamera(AActor* BallCamera);
 
-	UFUNCTION(BlueprintCallable, Category = Slots)
+	UFUNCTION(BlueprintCallable, Category = Radar)
 	AActor* GetNextBallCamera();
 
-	UFUNCTION(BlueprintCallable, Category = Slots)
+	UFUNCTION(BlueprintCallable, Category = Radar)
 	AActor* GetPrevBallCamera();
+
+	UFUNCTION(BlueprintCallable, Category = Game)
+	void DoGameOver();
 	
 };

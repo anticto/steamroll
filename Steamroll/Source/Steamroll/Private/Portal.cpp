@@ -21,7 +21,7 @@ void APortal::OnBeginOverlap(class AActor* OtherActor, class UPrimitiveComponent
 
 	if (SteamrollBall && LinkedPortal)
 	{
-		FTransform Inverse = GetTransform().InverseSafe();
+		FTransform Inverse = GetTransform().Inverse();
 
 		FVector LocalLocation = Inverse.TransformPosition(SteamrollBall->GetActorLocation());
 		FVector LocalVelocity = Inverse.TransformVector(SteamrollBall->Sphere->GetPhysicsLinearVelocity());

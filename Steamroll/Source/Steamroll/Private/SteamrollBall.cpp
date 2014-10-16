@@ -4,7 +4,6 @@
 #include "SteamrollBall.h"
 #include "Engine.h"
 #include "SteamrollPlayerController.h"
-#include "Kismet/KismetMathLibrary.h"
 
 
 ASteamrollBall::ASteamrollBall(const class FPostConstructInitializeProperties& PCIP)
@@ -42,7 +41,7 @@ void ASteamrollBall::Tick(float DeltaSeconds)
 		{
 			TimeForNextPaint -= DeltaSeconds;
 
-			if (TimeForNextPaint < 0.f)
+			if (TimeForNextPaint <= 0.f)
 			{
 				SplatPaint();
 				TimeForNextPaint = 1.f;
@@ -59,8 +58,9 @@ void ASteamrollBall::Tick(float DeltaSeconds)
 		ActorsToIgnore.Add(this);
 		TArray<TEnumAsByte<EObjectTypeQuery> > ObjectTypes;
 		
-		UKismetSystemLibrary::SphereOverlapActors_NEW(GetWorld(), this->GetActorLocation(), Sphere->GetUnscaledSphereRadius() + 50.f, ObjectTypes, nullptr, ActorsToIgnore, Actors);
-		
+		//UKismetSystemLibrary::SphereOverlapActors_NEW(GetWorld(), this->GetActorLocation(), Sphere->GetUnscaledSphereRadius() + 50.f, ObjectTypes, nullptr, ActorsToIgnore, Actors);
+		Sphere->GetOverlappingActors(Actors);
+
 		for (auto Actor : Actors)
 		{
 			if (InterfaceCast<IExplosionDestructibleInterface>(Actor))
@@ -209,11 +209,14 @@ void ASteamrollBall::Timeout()
 
 void ASteamrollBall::BeginPlay()
 {
+	Super::BeginPlay();
+
 	if (HasSlotState(ESlotTypeEnum::SE_TIME))
 	{
 		GetWorldTimerManager().SetTimer(this, &ASteamrollBall::Timeout, 2.f, false);
 	}
 }
+
 
 void ASteamrollBall::WakeBall()
 {

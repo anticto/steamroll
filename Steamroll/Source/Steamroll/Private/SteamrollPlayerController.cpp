@@ -86,3 +86,14 @@ AActor* ASteamrollPlayerController::GetPrevBallCamera()
 }
 
 
+void ASteamrollPlayerController::DoGameOver()
+{
+	//FString MapName = GetWorld()->GetMapName();
+
+	//if (MapName != nullptr)
+	//{
+	//	GetWorld()->ServerTravel(MapName);
+	//}
+}
+
+
