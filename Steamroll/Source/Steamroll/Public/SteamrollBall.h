@@ -39,12 +39,12 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface, pu
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Slots)
 	FSlotsConfigStruct SlotsConfig;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Slots)
+	bool bExplosionBlockedByContactSlot;
+
 	/** Gets a slot's state, SlotIndex goes from 1 to 4 */
 	UFUNCTION(BlueprintCallable, Category = Slots)
 	TEnumAsByte<ESlotTypeEnum::SlotType> GetSlotState(int32 SlotIndex);
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Slots)
-	bool bExplosionBlockedByContactSlot;
 
 	/** Sets a slot's state, SlotIndex goes from 1 to 4 */
 	UFUNCTION(BlueprintCallable, Category = Slots)

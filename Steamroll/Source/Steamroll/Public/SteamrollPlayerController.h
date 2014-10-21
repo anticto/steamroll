@@ -33,6 +33,13 @@ class STEAMROLL_API ASteamrollPlayerController : public APlayerController
 	UFUNCTION(BlueprintCallable, Category = Slots)
 	void SetSlotState(int32 SlotIndex, TEnumAsByte<ESlotTypeEnum::SlotType> SlotTypeEnum);
 
+	/** Gets a slot's param, SlotIndex goes from 1 to 4 */
+	UFUNCTION(BlueprintCallable, Category = Slots)
+	float GetSlotParam(int32 SlotIndex, int32 ParamIndex);
+
+	/** Sets a slot's param, SlotIndex goes from 1 to 4 */
+	UFUNCTION(BlueprintCallable, Category = Slots)
+	void SetSlotParam(int32 SlotIndex, int32 ParamIndex, float Value);
 
 	// Radar and ball camera properties and functions
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Radar)

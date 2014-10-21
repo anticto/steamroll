@@ -12,15 +12,28 @@ ASteamrollPlayerController::ASteamrollPlayerController(const class FPostConstruc
 	CurrentCamera = -1;
 }
 
+
 TEnumAsByte<ESlotTypeEnum::SlotType> ASteamrollPlayerController::GetSlotState(int32 SlotIndex)
 {
-	return SlotsConfig.Slots[SlotIndex - 1];
+	return SlotsConfig.GetSlotType(SlotIndex);
 }
 
 
 void ASteamrollPlayerController::SetSlotState(int32 SlotIndex, TEnumAsByte<ESlotTypeEnum::SlotType> SlotTypeEnum)
 {
-	SlotsConfig.Slots[SlotIndex - 1] = SlotTypeEnum;
+	SlotsConfig.SetSlotType(SlotIndex, SlotTypeEnum);
+}
+
+
+float ASteamrollPlayerController::GetSlotParam(int32 SlotIndex, int32 ParamIndex)
+{
+	return SlotsConfig.GetSlotParam(SlotIndex, ParamIndex);
+}
+
+
+void ASteamrollPlayerController::SetSlotParam(int32 SlotIndex, int32 ParamIndex, float Value)
+{
+	SlotsConfig.SetSlotParam(SlotIndex, ParamIndex, Value);
 }
 
 

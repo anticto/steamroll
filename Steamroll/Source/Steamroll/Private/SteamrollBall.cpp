@@ -108,13 +108,13 @@ void ASteamrollBall::StopBall()
 
 TEnumAsByte<ESlotTypeEnum::SlotType> ASteamrollBall::GetSlotState(int32 SlotIndex)
 {
-	return SlotsConfig.Slots[SlotIndex - 1];
+	return SlotsConfig.GetSlotType(SlotIndex);
 }
 
 
 void ASteamrollBall::SetSlotState(int32 SlotIndex, TEnumAsByte<ESlotTypeEnum::SlotType> SlotTypeEnum)
 {
-	SlotsConfig.Slots[SlotIndex - 1] = SlotTypeEnum;
+	SlotsConfig.SetSlotType(SlotIndex, SlotTypeEnum);
 }
 
 
@@ -128,13 +128,13 @@ ASteamrollPlayerController* ASteamrollBall::GetLocalPlayerController()
 
 bool ASteamrollBall::HasSlotState(TEnumAsByte<ESlotTypeEnum::SlotType> SlotTypeEnum)
 {
-	return SlotsConfig.HasSlotState(SlotTypeEnum);
+	return SlotsConfig.HasSlotType(SlotTypeEnum);
 }
 
 
 int32 ASteamrollBall::CountSlotState(TEnumAsByte<ESlotTypeEnum::SlotType> SlotTypeEnum)
 {
-	return SlotsConfig.CountSlotState(SlotTypeEnum);
+	return SlotsConfig.CountSlotType(SlotTypeEnum);
 }
 
 
@@ -209,8 +209,22 @@ void ASteamrollBall::Timeout()
 
 void ASteamrollBall::BeginPlay()
 {
-	Super::BeginPlay();
+	// Copy the slot configuration from the player controller
+	UWorld *World = GetWorld();
 
+	if (GEngine && World)
+	{
+		ASteamrollPlayerController* PlayerController = Cast<ASteamrollPlayerController>(GEngine->GetFirstLocalPlayerController(World));
+
+		if (PlayerController)
+		{
+			SlotsConfig = PlayerController->SlotsConfig;
+		}
+	}
+
+	Super::BeginPlay();	
+
+	// If there's a timer slot, start a timer
 	if (HasSlotState(ESlotTypeEnum::SE_TIME))
 	{
 		GetWorldTimerManager().SetTimer(this, &ASteamrollBall::Timeout, 2.f, false);

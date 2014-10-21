@@ -34,27 +34,85 @@ namespace ESlotTypeEnum
 
 
 USTRUCT()
+struct FSlotStruct
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slots")
+	TEnumAsByte<ESlotTypeEnum::SlotType> SlotType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slots")
+	float SlotParam1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slots")
+	float SlotParam2;
+
+	FSlotStruct(TEnumAsByte<ESlotTypeEnum::SlotType> SlotType = ESlotTypeEnum::SE_EMPTY, float SlotParam1 = 0.f, float SlotParam2 = 0.f)
+	{
+		this->SlotType = SlotType;
+		this->SlotParam1 = SlotParam1;
+		this->SlotParam2 = SlotParam2;
+	}
+};
+
+
+USTRUCT()
 struct FSlotsConfigStruct
 {
 	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slots")
-	TEnumAsByte<ESlotTypeEnum::SlotType> Slots[4];
+	TArray<FSlotStruct> Slots;
 
 	FSlotsConfigStruct()
 	{
 		for (uint32 i = 0; i < 4; ++i)
 		{
-			Slots[i] = ESlotTypeEnum::SE_EMPTY;
+			Slots.Add(FSlotStruct(ESlotTypeEnum::SE_EMPTY));
 		}		
 	}
 
 
-	bool HasSlotState(TEnumAsByte<ESlotTypeEnum::SlotType> SlotTypeEnum)
+	/** Gets a slot's state, SlotIndex goes from 1 to 4 */
+	TEnumAsByte<ESlotTypeEnum::SlotType> GetSlotType(int32 SlotIndex)
+	{
+		return Slots[SlotIndex - 1].SlotType;
+	}
+
+
+	/** Sets a slot's state, SlotIndex goes from 1 to 4 */
+	void SetSlotType(int32 SlotIndex, TEnumAsByte<ESlotTypeEnum::SlotType> SlotTypeEnum)
+	{
+		Slots[SlotIndex - 1].SlotType = SlotTypeEnum;
+	}
+
+
+	/** Gets a slot's param, SlotIndex goes from 1 to 4, ParamIndex from 1 to 2 */
+	float GetSlotParam(int32 SlotIndex, int32 ParamIndex)
+	{
+		return ParamIndex == 2 ? Slots[SlotIndex - 1].SlotParam2 : Slots[SlotIndex - 1].SlotParam1;
+	}
+
+
+	/** Sets a slot's param, SlotIndex goes from 1 to 4, ParamIndex from 1 to 2 */
+	void SetSlotParam(int32 SlotIndex, int32 ParamIndex, float Value)
+	{
+		if (ParamIndex == 2)
+		{
+			Slots[SlotIndex - 1].SlotParam2 = Value;
+		}
+		else
+		{
+			Slots[SlotIndex - 1].SlotParam1 = Value;
+		}
+	}
+
+
+	bool HasSlotType(TEnumAsByte<ESlotTypeEnum::SlotType> SlotTypeEnum)
 	{
 		for (uint32 i = 0; i < 4; ++i)
 		{
-			if (Slots[i] == SlotTypeEnum)
+			if (Slots[i].SlotType == SlotTypeEnum)
 			{
 				return true;
 			}
@@ -63,13 +121,14 @@ struct FSlotsConfigStruct
 		return false;
 	}
 
-	int32 CountSlotState(TEnumAsByte<ESlotTypeEnum::SlotType> SlotTypeEnum)
+
+	int32 CountSlotType(TEnumAsByte<ESlotTypeEnum::SlotType> SlotTypeEnum)
 	{
 		int32 Count = 0;
 
 		for (uint32 i = 0; i < 4; ++i)
 		{
-			if (Slots[i] == SlotTypeEnum)
+			if (Slots[i].SlotType == SlotTypeEnum)
 			{
 				Count++;
 			}
@@ -79,16 +138,3 @@ struct FSlotsConfigStruct
 	}
 };
 
-
-/**
- * 
- */
-UCLASS()
-class STEAMROLL_API USlotsConfig : public UObject
-{
-	GENERATED_UCLASS_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Slots)
-	TEnumAsByte<ESlotTypeEnum::SlotType> SlotTypeEnum;
-	
-};
