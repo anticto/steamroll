@@ -34,7 +34,7 @@ namespace ESlotTypeEnum
 }
 
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FSlotStruct
 {
 	GENERATED_USTRUCT_BODY()
@@ -54,7 +54,7 @@ struct FSlotStruct
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slots")
 	bool Used;
 
-	FSlotStruct(TEnumAsByte<ESlotTypeEnum::SlotType> SlotType = ESlotTypeEnum::SE_EMPTY, float SlotParam1 = 0.f, float SlotParam2 = 0.f)
+	FSlotStruct(TEnumAsByte<ESlotTypeEnum::SlotType> SlotType = ESlotTypeEnum::SE_EMPTY, float SlotParam1 = 0.5f, float SlotParam2 = 0.5f)
 	{
 		this->SlotType = SlotType;
 		this->SlotParam1 = SlotParam1;
@@ -70,7 +70,7 @@ struct FSlotStruct
 };
 
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FSlotsConfigStruct
 {
 	GENERATED_USTRUCT_BODY()
