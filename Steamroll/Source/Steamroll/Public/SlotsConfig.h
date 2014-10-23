@@ -26,6 +26,7 @@ namespace ESlotTypeEnum
 		SE_LAUNCH	UMETA(DisplayName = "Launcher"),
 		SE_COLLECT	UMETA(DisplayName = "Collect"),
 		SE_PAINT	UMETA(DisplayName = "Paint"),
+		SE_STOP 	UMETA(DisplayName = "Stop Trigger"),
 
 		//
 		SE_Max		UMETA(Hidden),
@@ -47,11 +48,24 @@ struct FSlotStruct
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slots")
 	float SlotParam2;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slots")
+	TArray<bool> Connections;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slots")
+	bool Used;
+
 	FSlotStruct(TEnumAsByte<ESlotTypeEnum::SlotType> SlotType = ESlotTypeEnum::SE_EMPTY, float SlotParam1 = 0.f, float SlotParam2 = 0.f)
 	{
 		this->SlotType = SlotType;
 		this->SlotParam1 = SlotParam1;
 		this->SlotParam2 = SlotParam2;
+
+		for (uint32 i = 0; i < 4; ++i)
+		{
+			Connections.Add(true);
+		}
+
+		Used = false;
 	}
 };
 
@@ -105,6 +119,31 @@ struct FSlotsConfigStruct
 		{
 			Slots[SlotIndex - 1].SlotParam1 = Value;
 		}
+	}
+
+	/** Gets a slot's connections, SlotIndex goes from 1 to 4, ConnectionIndex from 1 to 4 */
+	bool GetSlotConnection(int32 SlotIndex, int32 ConnectionIndex)
+	{
+		return Slots[SlotIndex - 1].Connections[ConnectionIndex - 1];
+	}
+
+
+	/** Sets a slot's param, SlotIndex goes from 1 to 4, ConnectionIndex from 1 to 4 */
+	void SetSlotConnection(int32 SlotIndex, int32 ConnectionIndex, bool bIsConnected)
+	{
+		Slots[SlotIndex - 1].Connections[ConnectionIndex - 1] = bIsConnected;
+	}
+
+
+	bool IsSlotUsed(int32 SlotIndex) const
+	{
+		return Slots[SlotIndex - 1].Used;
+	}
+
+
+	void SetSlotUsed(int32 SlotIndex)
+	{
+		Slots[SlotIndex - 1].Used = true;
 	}
 
 

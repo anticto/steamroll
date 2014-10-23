@@ -82,6 +82,9 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface, pu
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = Slots)
 	void SplatPaint();
 
+	UFUNCTION(BlueprintImplementableEvent, Category = Slots)
+	virtual void ActivateSlotEvent(const TEnumAsByte<ESlotTypeEnum::SlotType>& SlotType, float Param1, float Param2);
+
 protected:
 
 	float TimeForNextPaint;
@@ -91,8 +94,17 @@ protected:
 	void DraggingBallStop();
 
 	/** Timer slot timeout */
-	void Timeout();
+	void Timeout1();
+	void Timeout2();
+	void Timeout3();
+	void Timeout4();
 
 	virtual void BeginPlay() override;
+
+	void ActivateTimerTrigger(int32 SlotIndex);
+	void ActivateRemoteTriggers();
+	void ActivateStopTriggers();
+	void ActivateConnectedSlots(int32 SlotIndex);
+	void ActivateSlot(int32 SlotIndex);
 
 };

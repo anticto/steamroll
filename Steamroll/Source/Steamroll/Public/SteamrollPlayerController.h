@@ -41,6 +41,14 @@ class STEAMROLL_API ASteamrollPlayerController : public APlayerController
 	UFUNCTION(BlueprintCallable, Category = Slots)
 	void SetSlotParam(int32 SlotIndex, int32 ParamIndex, float Value);
 
+	/** Gets a slot's connections, SlotIndex goes from 1 to 4, ConnectionIndex from 1 to 4 */
+	UFUNCTION(BlueprintCallable, Category = Slots)
+	bool GetSlotConnection(int32 SlotIndex, int32 ConnectionIndex);
+
+	/** Sets a slot's param, SlotIndex goes from 1 to 4, ConnectionIndex from 1 to 4 */
+	UFUNCTION(BlueprintCallable, Category = Slots)
+	void SetSlotConnection(int32 SlotIndex, int32 ConnectionIndex, bool bIsConnected);
+
 	// Radar and ball camera properties and functions
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Radar)
 	ASceneCapture2D* RadarCamera;

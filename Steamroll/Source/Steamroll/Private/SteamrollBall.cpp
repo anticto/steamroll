@@ -93,7 +93,7 @@ void ASteamrollBall::Tick(float DeltaSeconds)
 void ASteamrollBall::ActivateBall_Implementation()
 {
 	Activated = true;
-	GetWorldTimerManager().ClearTimer(this, &ASteamrollBall::Timeout);  // In case the timer slot was set and somehow the ball was activated before it fired (remote activation for example)
+	//GetWorldTimerManager().ClearTimer(this, &ASteamrollBall::Timeout1);  // In case the timer slot was set and somehow the ball was activated before it fired (remote activation for example)
 	StopBall();
 }
 
@@ -198,12 +198,27 @@ void ASteamrollBall::DraggingBallStop()
 }
 
 
-void ASteamrollBall::Timeout()
+void ASteamrollBall::Timeout1()
 {
-	if (IsTouchingFloor())
-	{
-		ActivateBall();
-	}
+	ActivateTimerTrigger(1);
+}
+
+
+void ASteamrollBall::Timeout2()
+{
+	ActivateTimerTrigger(2);
+}
+
+
+void ASteamrollBall::Timeout3()
+{
+	ActivateTimerTrigger(3);
+}
+
+
+void ASteamrollBall::Timeout4()
+{
+	ActivateTimerTrigger(4);
 }
 
 
@@ -224,10 +239,21 @@ void ASteamrollBall::BeginPlay()
 
 	Super::BeginPlay();	
 
-	// If there's a timer slot, start a timer
-	if (HasSlotState(ESlotTypeEnum::SE_TIME))
+	// If there are timer slots, start timers
+	for (int32 i = 1; i < 5; i++)
 	{
-		GetWorldTimerManager().SetTimer(this, &ASteamrollBall::Timeout, 2.f, false);
+		if (SlotsConfig.GetSlotType(i) == ESlotTypeEnum::SE_TIME)
+		{
+			float Timeout = SlotsConfig.GetSlotParam(i, 1) * 10.f;
+
+			switch (i)
+			{
+			case 1: GetWorldTimerManager().SetTimer(this, &ASteamrollBall::Timeout1, Timeout, false); break;
+			case 2: GetWorldTimerManager().SetTimer(this, &ASteamrollBall::Timeout2, Timeout, false); break;
+			case 3: GetWorldTimerManager().SetTimer(this, &ASteamrollBall::Timeout3, Timeout, false); break;
+			case 4: GetWorldTimerManager().SetTimer(this, &ASteamrollBall::Timeout4, Timeout, false); break;
+			}
+		}
 	}
 }
 
@@ -241,5 +267,61 @@ void ASteamrollBall::WakeBall()
 void ASteamrollBall::SplatPaint_Implementation()
 {
 	
+}
+
+
+void ASteamrollBall::ActivateTimerTrigger(int32 SlotIndex)
+{
+	ActivateConnectedSlots(SlotIndex);
+}
+
+
+void ASteamrollBall::ActivateRemoteTriggers()
+{
+	for (int32 i = 1; i < 5; i++)
+	{
+		if (SlotsConfig.GetSlotType(i) == ESlotTypeEnum::SE_REMOTE)
+		{
+			ActivateConnectedSlots(i);
+		}
+	}
+}
+
+
+void ASteamrollBall::ActivateStopTriggers()
+{
+	for (int32 i = 1; i < 5; i++)
+	{
+		if (SlotsConfig.GetSlotType(i) == ESlotTypeEnum::SE_STOP)
+		{
+			ActivateConnectedSlots(i);
+		}
+	}
+}
+
+
+void ASteamrollBall::ActivateConnectedSlots(int32 SlotIndex)
+{
+	//if (IsTouchingFloor())
+	//{
+		for (uint32 i = 1; i < 5; i++)
+		{
+			if (SlotsConfig.GetSlotConnection(SlotIndex, i))
+			{
+				ActivateSlot(i);
+			}
+		}
+	//}
+}
+
+
+void ASteamrollBall::ActivateSlot(int32 SlotIndex)
+{
+	if (!SlotsConfig.IsSlotUsed(SlotIndex))
+	{
+		SlotsConfig.SetSlotUsed(SlotIndex);
+
+		ActivateSlotEvent(SlotsConfig.GetSlotType(SlotIndex), SlotsConfig.GetSlotParam(SlotIndex, 1), SlotsConfig.GetSlotParam(SlotIndex, 2));
+	}
 }
 

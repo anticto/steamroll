@@ -37,6 +37,18 @@ void ASteamrollPlayerController::SetSlotParam(int32 SlotIndex, int32 ParamIndex,
 }
 
 
+bool ASteamrollPlayerController::GetSlotConnection(int32 SlotIndex, int32 ConnectionIndex)
+{
+	return SlotsConfig.GetSlotConnection(SlotIndex, ConnectionIndex);
+}
+
+
+void ASteamrollPlayerController::SetSlotConnection(int32 SlotIndex, int32 ConnectionIndex, bool bIsConnected)
+{
+	SlotsConfig.SetSlotConnection(SlotIndex, ConnectionIndex, bIsConnected);
+}
+
+
 void ASteamrollPlayerController::AddBallCamera(AActor* BallCamera)
 {
 	BallCameras.Add(BallCamera);
