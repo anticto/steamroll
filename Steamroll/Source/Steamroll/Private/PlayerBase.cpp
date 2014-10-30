@@ -158,7 +158,7 @@ void APlayerBase::ActivateBall()
 		}
 		else
 		{
-			ActorItr->ActivateBall();
+			ActorItr->ActivateRemoteTriggers();
 		}
 	}
 }

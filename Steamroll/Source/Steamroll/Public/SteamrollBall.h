@@ -24,11 +24,11 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface, pu
 	FVector LastLoc;
 
 	/** Collect ball's collected resource quantity */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Collect)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Collect)
 	float CollectedQuantity;
 
 	/** How much collectable resource this ball can carry */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Collect)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Collect)
 	float CollectCapacity;
 
 	virtual void Tick(float DeltaSeconds) override;
@@ -36,7 +36,7 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface, pu
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = Ball)
 	void ActivateBall();
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Slots)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Slots)
 	FSlotsConfigStruct SlotsConfig;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Slots)
@@ -85,6 +85,8 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface, pu
 	UFUNCTION(BlueprintImplementableEvent, Category = Slots)
 	virtual void ActivateSlotEvent(const TEnumAsByte<ESlotTypeEnum::SlotType>& SlotType, float Param1, float Param2);
 
+	void ActivateRemoteTriggers();
+
 protected:
 
 	float TimeForNextPaint;
@@ -102,7 +104,6 @@ protected:
 	virtual void BeginPlay() override;
 
 	void ActivateTimerTrigger(int32 SlotIndex);
-	void ActivateRemoteTriggers();
 	void ActivateStopTriggers();
 	void ActivateConnectedSlots(int32 SlotIndex);
 	void ActivateSlot(int32 SlotIndex);
