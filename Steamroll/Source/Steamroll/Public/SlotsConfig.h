@@ -54,11 +54,11 @@ struct FSlotStruct
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slots")
 	bool Used;
 
-	FSlotStruct(TEnumAsByte<ESlotTypeEnum::SlotType> SlotType = ESlotTypeEnum::SE_EMPTY, float SlotParam1 = 0.5f, float SlotParam2 = 0.5f)
+	FSlotStruct()
 	{
-		this->SlotType = SlotType;
-		this->SlotParam1 = SlotParam1;
-		this->SlotParam2 = SlotParam2;
+		SlotType = ESlotTypeEnum::SE_EMPTY;
+		SlotParam1 = 0.5f;
+		SlotParam2 = 0.5f;
 
 		for (uint32 i = 0; i < 4; ++i)
 		{
@@ -75,15 +75,15 @@ struct FSlotsConfigStruct
 {
 	GENERATED_USTRUCT_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slots")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Slots)
 	TArray<FSlotStruct> Slots;
 
 	FSlotsConfigStruct()
 	{
 		for (uint32 i = 0; i < 4; ++i)
 		{
-			Slots.Add(FSlotStruct(ESlotTypeEnum::SE_EMPTY));
-		}		
+			Slots.Add(FSlotStruct(FSlotStruct()));
+		}
 	}
 
 
@@ -92,22 +92,22 @@ struct FSlotsConfigStruct
 	{
 		return Slots[SlotIndex - 1].SlotType;
 	}
-
-
+	
+	
 	/** Sets a slot's state, SlotIndex goes from 1 to 4 */
 	void SetSlotType(int32 SlotIndex, TEnumAsByte<ESlotTypeEnum::SlotType> SlotTypeEnum)
 	{
 		Slots[SlotIndex - 1].SlotType = SlotTypeEnum;
 	}
-
-
+	
+	
 	/** Gets a slot's param, SlotIndex goes from 1 to 4, ParamIndex from 1 to 2 */
 	float GetSlotParam(int32 SlotIndex, int32 ParamIndex)
 	{
 		return ParamIndex == 2 ? Slots[SlotIndex - 1].SlotParam2 : Slots[SlotIndex - 1].SlotParam1;
 	}
-
-
+	
+	
 	/** Sets a slot's param, SlotIndex goes from 1 to 4, ParamIndex from 1 to 2 */
 	void SetSlotParam(int32 SlotIndex, int32 ParamIndex, float Value)
 	{
@@ -120,33 +120,33 @@ struct FSlotsConfigStruct
 			Slots[SlotIndex - 1].SlotParam1 = Value;
 		}
 	}
-
+	
 	/** Gets a slot's connections, SlotIndex goes from 1 to 4, ConnectionIndex from 1 to 4 */
 	bool GetSlotConnection(int32 SlotIndex, int32 ConnectionIndex)
 	{
 		return Slots[SlotIndex - 1].Connections[ConnectionIndex - 1];
 	}
-
-
+	
+	
 	/** Sets a slot's param, SlotIndex goes from 1 to 4, ConnectionIndex from 1 to 4 */
 	void SetSlotConnection(int32 SlotIndex, int32 ConnectionIndex, bool bIsConnected)
 	{
 		Slots[SlotIndex - 1].Connections[ConnectionIndex - 1] = bIsConnected;
 	}
-
-
+	
+	
 	bool IsSlotUsed(int32 SlotIndex) const
 	{
 		return Slots[SlotIndex - 1].Used;
 	}
-
-
+	
+	
 	void SetSlotUsed(int32 SlotIndex)
 	{
 		Slots[SlotIndex - 1].Used = true;
 	}
-
-
+	
+	
 	bool HasSlotType(TEnumAsByte<ESlotTypeEnum::SlotType> SlotTypeEnum)
 	{
 		for (uint32 i = 0; i < 4; ++i)
@@ -156,15 +156,15 @@ struct FSlotsConfigStruct
 				return true;
 			}
 		}
-
+	
 		return false;
 	}
-
-
+	
+	
 	int32 CountSlotType(TEnumAsByte<ESlotTypeEnum::SlotType> SlotTypeEnum)
 	{
 		int32 Count = 0;
-
+	
 		for (uint32 i = 0; i < 4; ++i)
 		{
 			if (Slots[i].SlotType == SlotTypeEnum)
@@ -172,7 +172,7 @@ struct FSlotsConfigStruct
 				Count++;
 			}
 		}
-
+	
 		return Count;
 	}
 };

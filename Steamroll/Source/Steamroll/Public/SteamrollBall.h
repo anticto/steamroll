@@ -33,14 +33,14 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface, pu
 
 	virtual void Tick(float DeltaSeconds) override;
 
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = Ball)
-	void ActivateBall();
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Slots)
 	FSlotsConfigStruct SlotsConfig;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Slots)
 	bool bExplosionBlockedByContactSlot;
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = Ball)
+	void ActivateBall();
 
 	/** Gets a slot's state, SlotIndex goes from 1 to 4 */
 	UFUNCTION(BlueprintCallable, Category = Slots)
@@ -106,6 +106,6 @@ protected:
 	void ActivateTimerTrigger(int32 SlotIndex);
 	void ActivateStopTriggers();
 	void ActivateConnectedSlots(int32 SlotIndex);
-	void ActivateSlot(int32 SlotIndex);
+	bool ActivateSlot(int32 SlotIndex);
 
 };

@@ -88,14 +88,14 @@ void APlayerBase::Fire(float ChargeTime)
 {
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Owner = nullptr;
-	SpawnParams.Instigator = Instigator;
+	SpawnParams.Instigator = Instigator; // Must set instigator because otherwise the game logic will assume the ball was placed in the level by a designer and won't copy the player's slot configuration
 	SpawnParams.bNoCollisionFail = true;
 
 	ASteamrollBall* Ball = GetWorld()->SpawnActor<ASteamrollBall>(WhatToSpawn, AimTransform->GetComponentLocation(), AimTransform->GetComponentRotation(), SpawnParams);
-	SetLastDeployedActor(Ball);
 	
 	if (Ball)
 	{
+		SetLastDeployedActor(Ball);
 		Ball->AddActorLocalOffset(FVector(500.f, 0.f, 0.f));
 		FVector Direction = AimTransform->GetComponentToWorld().TransformVector(FVector(1.f, 0.f, 0.f));
 		float LaunchPower = ChargeTime / FiringTimeout;

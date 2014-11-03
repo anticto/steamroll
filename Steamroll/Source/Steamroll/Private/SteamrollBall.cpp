@@ -226,8 +226,8 @@ void ASteamrollBall::BeginPlay()
 {
 	// Copy the slot configuration from the player controller
 	UWorld *World = GetWorld();
-
-	if (GEngine && World)
+	
+	if (Instigator && GEngine && World)
 	{
 		ASteamrollPlayerController* PlayerController = Cast<ASteamrollPlayerController>(GEngine->GetFirstLocalPlayerController(World));
 
@@ -308,20 +308,27 @@ void ASteamrollBall::ActivateConnectedSlots(int32 SlotIndex)
 		{
 			if (SlotsConfig.GetSlotConnection(SlotIndex, i))
 			{
-				ActivateSlot(i);
+				// Only activate the first available slot
+				if (ActivateSlot(i)) break;
 			}
 		}
 	//}
 }
 
 
-void ASteamrollBall::ActivateSlot(int32 SlotIndex)
+bool ASteamrollBall::ActivateSlot(int32 SlotIndex)
 {
-	if (!SlotsConfig.IsSlotUsed(SlotIndex))
+	TEnumAsByte<ESlotTypeEnum::SlotType> Type = GetSlotState(SlotIndex);
+	bool bIsTrigger = Type == ESlotTypeEnum::SE_TIME || Type == ESlotTypeEnum::SE_CONTACT || Type == ESlotTypeEnum::SE_REMOTE || Type == ESlotTypeEnum::SE_STOP;
+
+	if (!SlotsConfig.IsSlotUsed(SlotIndex) && !bIsTrigger)
 	{
 		SlotsConfig.SetSlotUsed(SlotIndex);
-
 		ActivateSlotEvent(SlotsConfig.GetSlotType(SlotIndex), SlotsConfig.GetSlotParam(SlotIndex, 1), SlotsConfig.GetSlotParam(SlotIndex, 2));
+
+		return true;
 	}
+
+	return false;
 }
 
