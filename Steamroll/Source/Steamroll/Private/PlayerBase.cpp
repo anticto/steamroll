@@ -89,18 +89,22 @@ void APlayerBase::Fire(float ChargeTime)
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Owner = nullptr;
 	SpawnParams.Instigator = Instigator; // Must set instigator because otherwise the game logic will assume the ball was placed in the level by a designer and won't copy the player's slot configuration
-	SpawnParams.bNoCollisionFail = true;
+	SpawnParams.bNoCollisionFail = false;
 
-	ASteamrollBall* Ball = GetWorld()->SpawnActor<ASteamrollBall>(WhatToSpawn, AimTransform->GetComponentLocation(), AimTransform->GetComponentRotation(), SpawnParams);
+	FVector FiringOffset = AimTransform->GetComponentToWorld().TransformVector(FVector(550.f, 0.f, +10.f));
+
+	ASteamrollBall* Ball = GetWorld()->SpawnActor<ASteamrollBall>(WhatToSpawn, AimTransform->GetComponentLocation() + FiringOffset, AimTransform->GetComponentRotation(), SpawnParams);
 	
 	if (Ball)
 	{
 		SetLastDeployedActor(Ball);
-		Ball->AddActorLocalOffset(FVector(500.f, 0.f, 0.f));
+		//Ball->AddActorLocalOffset(FVector(550.f, 0.f, +10.f));
 		FVector Direction = AimTransform->GetComponentToWorld().TransformVector(FVector(1.f, 0.f, 0.f));
 		float LaunchPower = ChargeTime / FiringTimeout;
 		float LaunchSpeed = FMath::Lerp(MinLaunchSpeed, MaxLaunchSpeed, LaunchPower);
-		Ball->Sphere->SetPhysicsLinearVelocity(Direction * LaunchSpeed);
+		Ball->SetVelocity(Direction * LaunchSpeed);
+
+		//Debug(FString::Printf(TEXT("LaunchVelocity=%s"), *(Direction * LaunchSpeed).ToString()));
 		//Ball->Sphere->SetPhysicsAngularVelocity(Direction * 50000000);
 	}
 

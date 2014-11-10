@@ -4,6 +4,8 @@
 #include "SteamrollBall.h"
 #include "Engine.h"
 #include "SteamrollPlayerController.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "UnrealMathUtility.h"
 
 
 ASteamrollBall::ASteamrollBall(const class FPostConstructInitializeProperties& PCIP)
@@ -25,6 +27,8 @@ ASteamrollBall::ASteamrollBall(const class FPostConstructInitializeProperties& P
 	bExplosionBlockedByContactSlot = false;
 
 	TimeForNextPaint = 1.f;
+
+	Velocity = FVector(0.f);
 }
 
 
@@ -33,6 +37,8 @@ void ASteamrollBall::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 
 	bool bTouchingFloor = IsTouchingFloor();
+	UpdateBallPhysics(DeltaSeconds, bTouchingFloor);
+
 	float SpeedSquared = GetVelocity().SizeSquared();
 
 	if (HasSlotState(ESlotTypeEnum::SE_PAINT))
@@ -140,11 +146,11 @@ int32 ASteamrollBall::CountSlotState(TEnumAsByte<ESlotTypeEnum::SlotType> SlotTy
 
 FTransform ASteamrollBall::GetBallFlattenedTransform(const FVector& LastLocation, float WallDeploymentAngle) const
 {
-	FVector Direction = GetActorLocation() - LastLocation;
+	FVector Direction = GetVelocity();
 	Direction.Z = 0.f;
 	Direction.Normalize();
 
-	FVector Location = GetActorLocation() - FVector(0.f, 0.f, Sphere->GetScaledSphereRadius() - 10.f);
+	FVector Location = GetActorLocation() - FVector(0.f, 0.f, Sphere->GetScaledSphereRadius() - 0.5f);
 
 	FRotator WallDeploymentRotation(0.f, WallDeploymentAngle, 0.f);
 	Direction = WallDeploymentRotation.RotateVector(Direction);
@@ -330,5 +336,155 @@ bool ASteamrollBall::ActivateSlot(int32 SlotIndex)
 	}
 
 	return false;
+}
+
+
+FVector ASteamrollBall::GetVelocity() const
+{
+	return Velocity;
+}
+
+
+void ASteamrollBall::SetVelocity(const FVector& NewVelocity)
+{
+	Velocity = NewVelocity;
+}
+
+
+void ASteamrollBall::UpdateBallPhysics(float DeltaSeconds, bool bTouchingFloor)
+{
+	/** How many collision tests are going to be made per tick */
+	const static uint32 NumIterations = 10;
+	const static float DepenetrationSpeed = 1000.f;
+
+	TArray<AActor*> OverlappingActors;
+	Sphere->GetOverlappingActors(OverlappingActors);
+
+	if (!bTouchingFloor)
+	{
+		Velocity.Z += GetWorld()->GetGravityZ() * DeltaSeconds;
+	}
+
+	float Speed = Velocity.Size();
+	FVector CurrentLocation = GetActorLocation();
+	FVector NewLocation = CurrentLocation + Velocity * DeltaSeconds;
+
+	// Make ball rotate in the movement direction only if there's significat horizontal movement
+	float HorizontalSpeed = FVector2D(Velocity.X, Velocity.Y).Size();
+
+	if (HorizontalSpeed > 0.1f)
+	{
+		FVector RotationVector = FVector::CrossProduct(Velocity / Speed, FVector(0.f, 0.f, 1.f)); // Compute rotation axis
+		RotationVector.Normalize();
+		float NumRotations = HorizontalSpeed * DeltaSeconds / (2.f * PI * Sphere->GetScaledSphereRadius()); // Distance travelled / Sphere circumference
+		float RotationAngle = -360.f * NumRotations;
+
+		FVector RotatedForwardVector = FVector(0.f, 0.f, 1.f).RotateAngleAxis(RotationAngle, RotationVector);
+		FQuat Quat = FQuat::FindBetween(FVector(0.f, 0.f, 1.f), RotatedForwardVector);
+		Sphere->AddWorldRotation(Quat.Rotator());
+	}
+
+	TArray<AActor*> ActorsToIgnore;
+	ActorsToIgnore.Add(this);
+	FHitResult OutHit;
+	LastCollidedActor = nullptr;
+
+	float RemainingTime = DeltaSeconds;
+
+	for (uint32 Iteration = 0; Iteration < NumIterations && RemainingTime > 0.f; ++Iteration)
+	{
+		if (UKismetSystemLibrary::SphereTraceSingle_NEW(GetWorld(), CurrentLocation, NewLocation, Sphere->GetScaledSphereRadius(), UEngineTypes::ConvertToTraceType(ECollisionChannel::ECC_PhysicsBody), true, ActorsToIgnore, EDrawDebugTrace::None, OutHit, true))
+		{
+			//DrawDebugLine(GetWorld(), OutHit.ImpactPoint, OutHit.ImpactPoint + OutHit.ImpactNormal * 100.f, FColor::Red);
+
+			LastCollidedActor = &*OutHit.Actor;			
+			
+			RemainingTime = RemainingTime - OutHit.Time * RemainingTime;
+			CurrentLocation = OutHit.Location;// -Velocity.SafeNormal() * 0.001f;
+			SetActorLocation(CurrentLocation);
+
+			ASteamrollBall* OtherBall = Cast<ASteamrollBall>(LastCollidedActor);
+
+			if (OtherBall) // Collided with another ball
+			{
+				//Check the balls do not intersect
+				FVector PushVector = CurrentLocation - OtherBall->GetActorLocation();
+				float Dist = PushVector.Size();
+
+				if (Dist < Sphere->GetScaledSphereRadius() + OtherBall->Sphere->GetScaledSphereRadius())
+				{
+					PushVector = Dist > 0 ? PushVector / Dist : FVector::UpVector;
+					SetActorLocation(GetActorLocation() + PushVector * DepenetrationSpeed * DeltaSeconds);
+				}
+
+				FVector& V1 = Velocity;
+				FVector V2 = OtherBall->GetVelocity();
+				FVector& N = OutHit.ImpactNormal;
+				//FVector N = OutHit.Location - OtherBall->GetActorLocation();
+				N.Normalize();
+
+				FVector V1n = (V1 | N) * N; // Normal Velocity
+				FVector V1t = V1 - V1n; // Tangential velocity
+				
+				FVector V2n = (V2 | N) * N;
+				FVector V2t = V2 - V2n;
+
+				float Restitution = 0.8f;
+				Velocity = (V1t + V2n) * Restitution;
+				OtherBall->SetVelocity((V2t + V1n) * Restitution);
+				
+				// TODO: Activate steamball by contact trigger
+				
+				break;
+			}
+			else
+			{				
+				//ActorsToIgnore.Add(LastCollidedActor);
+				if (Iteration > 0)
+				{
+					ActorsToIgnore.Pop();
+				}
+
+				ActorsToIgnore.Push(LastCollidedActor);
+
+				FVector ReflectedVector = (NewLocation - CurrentLocation).MirrorByVector(OutHit.ImpactNormal);
+				ReflectedVector.Normalize();
+				//DrawDebugLine(GetWorld(), OutHit.ImpactPoint, OutHit.ImpactPoint + ReflectedVector * 100.f, FColor::Green);
+				float Restitution = OutHit.PhysMaterial->Restitution;
+				float ImpactVelocityProjection = FVector::DotProduct(OutHit.ImpactNormal, Velocity);
+				Velocity = ReflectedVector * Speed;
+				Velocity = Velocity + OutHit.ImpactNormal * ImpactVelocityProjection * (1.f - Restitution);
+			}
+
+			NewLocation = CurrentLocation + Velocity * RemainingTime;
+		}
+		else
+		{
+			SetActorLocation(NewLocation);
+			break;
+		}
+
+		if (Iteration == NumIterations - 1)
+		{
+			// Too many iterations so the collision situation might be too complicated to solve with the current velocity, let the ball drop freely
+			//Velocity = FVector::ZeroVector;
+			DrawDebugSphere(GetWorld(), GetActorLocation(), Sphere->GetScaledSphereRadius() + 0.1f, 20, FColor::Red, false, 0.5f);
+			break;
+		}
+	}
+
+	Velocity = Velocity - Velocity * 0.4f * DeltaSeconds;
+
+	if (HorizontalSpeed < 0.1f)
+	{
+		Velocity.X = 0.f;
+		Velocity.Y = 0.f;
+	}
+
+	Sphere->UpdateOverlaps();
+	Sphere->UpdatePhysicsVolume(true);
+
+	//GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, FString::Printf(TEXT("Velocity=%s"), *(Velocity).ToString()));
+	//UE_LOG(LogTemp, Warning, TEXT("Velocity=%s"), *(Velocity).ToString());
 }
 

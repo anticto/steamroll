@@ -87,6 +87,9 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface, pu
 
 	void ActivateRemoteTriggers();
 
+	FVector GetVelocity() const;
+	void SetVelocity(const FVector& NewVelocity);
+
 protected:
 
 	float TimeForNextPaint;
@@ -103,9 +106,19 @@ protected:
 
 	virtual void BeginPlay() override;
 
+	/** Trigger and slot activation system */
 	void ActivateTimerTrigger(int32 SlotIndex);
 	void ActivateStopTriggers();
 	void ActivateConnectedSlots(int32 SlotIndex);
 	bool ActivateSlot(int32 SlotIndex);
+
+	/** Collision/Physics system */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Physics)
+	FVector Velocity;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Physics)
+	AActor* LastCollidedActor;
+
+	void UpdateBallPhysics(float DeltaSeconds, bool bTouchingFloor);
 
 };
