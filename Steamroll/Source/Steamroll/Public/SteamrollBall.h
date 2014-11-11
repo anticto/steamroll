@@ -82,6 +82,9 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface, pu
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = Slots)
 	void SplatPaint();
 
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = Slots)
+	void ExplosionEvent();
+
 	UFUNCTION(BlueprintImplementableEvent, Category = Slots)
 	virtual void ActivateSlotEvent(const TEnumAsByte<ESlotTypeEnum::SlotType>& SlotType, float Param1, float Param2);
 
@@ -119,6 +122,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Physics)
 	AActor* LastCollidedActor;
 
+	/** How many consecutive frames the ball has been colliding with a ball, used to stop the ball velocity if it has become stuck */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Physics)
+	uint32 NumFramesCollidingWithBall;
+
 	void UpdateBallPhysics(float DeltaSeconds, bool bTouchingFloor);
+	void SeparateBalls(ASteamrollBall* OtherBall, const FVector& PushVector, float DepenetrationSpeed, float DeltaSeconds);
+	void RotateBall(FVector& Velocity, float Speed, float DeltaSeconds);
 
 };

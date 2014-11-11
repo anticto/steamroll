@@ -6,6 +6,7 @@
 #include "SteamrollBall.h"
 
 #include "EngineUtils.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 
 APlayerBase::APlayerBase(const class FPostConstructInitializeProperties& PCIP)
@@ -92,20 +93,28 @@ void APlayerBase::Fire(float ChargeTime)
 	SpawnParams.bNoCollisionFail = false;
 
 	FVector FiringOffset = AimTransform->GetComponentToWorld().TransformVector(FVector(550.f, 0.f, +10.f));
+	FVector FiringLocation = AimTransform->GetComponentLocation() + FiringOffset;
 
-	ASteamrollBall* Ball = GetWorld()->SpawnActor<ASteamrollBall>(WhatToSpawn, AimTransform->GetComponentLocation() + FiringOffset, AimTransform->GetComponentRotation(), SpawnParams);
-	
-	if (Ball)
+	TArray<AActor*> OverlappingActors, ActorsToIgnore;
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+	//ObjectTypes.Add();
+
+	if (!UKismetSystemLibrary::SphereOverlapActors_NEW(GetWorld(), FiringLocation, 100.f, ObjectTypes, nullptr, ActorsToIgnore, OverlappingActors))
 	{
-		SetLastDeployedActor(Ball);
-		//Ball->AddActorLocalOffset(FVector(550.f, 0.f, +10.f));
-		FVector Direction = AimTransform->GetComponentToWorld().TransformVector(FVector(1.f, 0.f, 0.f));
-		float LaunchPower = ChargeTime / FiringTimeout;
-		float LaunchSpeed = FMath::Lerp(MinLaunchSpeed, MaxLaunchSpeed, LaunchPower);
-		Ball->SetVelocity(Direction * LaunchSpeed);
+		ASteamrollBall* Ball = GetWorld()->SpawnActor<ASteamrollBall>(WhatToSpawn, FiringLocation, AimTransform->GetComponentRotation(), SpawnParams);
 
-		//Debug(FString::Printf(TEXT("LaunchVelocity=%s"), *(Direction * LaunchSpeed).ToString()));
-		//Ball->Sphere->SetPhysicsAngularVelocity(Direction * 50000000);
+		if (Ball)
+		{
+			SetLastDeployedActor(Ball);
+			//Ball->AddActorLocalOffset(FVector(550.f, 0.f, +10.f));
+			FVector Direction = AimTransform->GetComponentToWorld().TransformVector(FVector(1.f, 0.f, 0.f));
+			float LaunchPower = ChargeTime / FiringTimeout;
+			float LaunchSpeed = FMath::Lerp(MinLaunchSpeed, MaxLaunchSpeed, LaunchPower);
+			Ball->SetVelocity(Direction * LaunchSpeed);
+
+			//Debug(FString::Printf(TEXT("LaunchVelocity=%s"), *(Direction * LaunchSpeed).ToString()));
+			//Ball->Sphere->SetPhysicsAngularVelocity(Direction * 50000000);
+		}
 	}
 
 	ExplosionClient();
