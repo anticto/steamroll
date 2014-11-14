@@ -23,9 +23,11 @@ ASteamrollPawn::ASteamrollPawn(const class FPostConstructInitializeProperties& P
 	MinHeight = 0.f;
 	CurrCameraTime = 0.f;
 
-	FiringTimeout = 2.f;
+	FiringTimeout = 4.f;
 	MinLaunchSpeed = 50.f;
-	MaxLaunchSpeed = 20000.f;
+	MaxLaunchSpeed = 8000.f;
+	bFiring = false;
+	bFireSimulation = false;
 
 	PrimaryActorTick.bCanEverTick = true;
 }
@@ -81,6 +83,7 @@ void ASteamrollPawn::SetupPlayerInputComponent(class UInputComponent* InputCompo
 	InputComponent->BindAction("FireDebug_10", IE_Released, this, &ASteamrollPawn::FireDebug10);
 
 	InputComponent->BindAction("DestroyBalls", IE_Pressed, this, &ASteamrollPawn::DestroyBalls);
+	InputComponent->BindAction("FireSimulation", IE_Pressed, this, &ASteamrollPawn::ToggleFireSimulation);
 
 	InputComponent->BindAction("RaiseCamera", IE_Pressed, this, &ASteamrollPawn::RaiseCameraPressed);
 	InputComponent->BindAction("RaiseCamera", IE_Released, this, &ASteamrollPawn::RaiseCameraReleased);
@@ -163,10 +166,10 @@ float ASteamrollPawn::GetCharge()
 {
 	if (GetWorldTimerManager().IsTimerActive(this, &ASteamrollPawn::Timeout))
 	{
-		return GetWorldTimerManager().GetTimerElapsed(this, &ASteamrollPawn::Timeout) / FiringTimeout;
+		return GetWorldTimerManager().GetTimerElapsed(this, &ASteamrollPawn::Timeout);
 	}
 
-	return 0.f;
+	return bFiring ? FiringTimeout : 0.f;
 }
 
 
@@ -220,28 +223,38 @@ void ASteamrollPawn::InitCameraAnim()
 
 void ASteamrollPawn::FireCharge()
 {
+	bFiring = true;
 	GetWorldTimerManager().SetTimer(this, &ASteamrollPawn::Timeout, FiringTimeout, false);
 }
 
 
 void ASteamrollPawn::FireRelease()
-{
-	// To prevent multiple firing when releasing the fire button check that we actually loaded/charged before releasing
-	if (GetWorldTimerManager().IsTimerActive(this, &ASteamrollPawn::Timeout))
+{	
+	if (bFiring)
 	{
-		float TimeElapsed = GetWorldTimerManager().GetTimerElapsed(this, &ASteamrollPawn::Timeout);
-		GetWorldTimerManager().PauseTimer(this, &ASteamrollPawn::Timeout);
+		// To prevent multiple firing when releasing the fire button check that we actually loaded/charged before releasing
+		if (GetWorldTimerManager().IsTimerActive(this, &ASteamrollPawn::Timeout))
+		{
+			float TimeElapsed = GetWorldTimerManager().GetTimerElapsed(this, &ASteamrollPawn::Timeout);
+			GetWorldTimerManager().PauseTimer(this, &ASteamrollPawn::Timeout);
 
-		FireServer(TimeElapsed, AimTransform->RelativeRotation);
+			FireServer(TimeElapsed, AimTransform->RelativeRotation);
 
-		GetWorldTimerManager().ClearTimer(this, &ASteamrollPawn::Timeout);
+			GetWorldTimerManager().ClearTimer(this, &ASteamrollPawn::Timeout);
+		}
+		else
+		{
+			FireServer(FiringTimeout, AimTransform->RelativeRotation);
+		}
+
+		bFiring = false;
 	}
 }
 
 
 void ASteamrollPawn::Timeout()
 {
-	FireServer(FiringTimeout, AimTransform->RelativeRotation);
+	//FireServer(FiringTimeout, AimTransform->RelativeRotation);
 }
 
 
@@ -263,6 +276,12 @@ void ASteamrollPawn::DestroyBalls()
 	{
 		ActorItr->Destroy();
 	}
+}
+
+
+void ASteamrollPawn::ToggleFireSimulation()
+{
+	bFireSimulation = !bFireSimulation;
 }
 
 

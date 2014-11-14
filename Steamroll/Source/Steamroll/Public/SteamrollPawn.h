@@ -109,6 +109,8 @@ protected:
 	/** Destroys all the balls in the scene */
 	void DestroyBalls();
 
+	void ToggleFireSimulation();
+
 	void RaiseCameraPressed();
 	void RaiseCameraReleased();
 	void LowerCameraPressed();
@@ -118,6 +120,8 @@ protected:
 	float FiringTimeout;
 	float MinLaunchSpeed;
 	float MaxLaunchSpeed;
+	bool bFiring;
+	bool bFireSimulation;
 
 	// Camera controls	
 	float CameraSpeed;

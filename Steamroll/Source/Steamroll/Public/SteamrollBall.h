@@ -90,8 +90,14 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface, pu
 
 	void ActivateRemoteTriggers();
 
+	// Physical Simulation
+	bool bSimulationBall;
+
 	FVector GetVelocity() const;
 	void SetVelocity(const FVector& NewVelocity);
+	void DrawPhysicalSimulation(TArray<FVector>* SimulationLocations);
+	static void UpdateBallPhysics(ASteamrollBall& Ball, TArray<FVector>* SimulationLocations, float DeltaSeconds, bool bTouchingFloor);
+	static FVector DragPhysics(const FVector& Velocity, float TravelTime, float DragCoefficient);
 
 protected:
 
@@ -115,7 +121,7 @@ protected:
 	void ActivateConnectedSlots(int32 SlotIndex);
 	bool ActivateSlot(int32 SlotIndex);
 
-	/** Collision/Physics system */
+	/** Collision/Physics system */	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Physics)
 	FVector Velocity;
 
@@ -126,8 +132,11 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Physics)
 	uint32 NumFramesCollidingWithBall;
 
-	void UpdateBallPhysics(float DeltaSeconds, bool bTouchingFloor);
-	void SeparateBalls(ASteamrollBall* OtherBall, const FVector& PushVector, float DepenetrationSpeed, float DeltaSeconds);
+	void UpdateBallPhysics(float DeltaSeconds, bool bTouchingFloor);	
+	void SeparateBalls(ASteamrollBall* OtherBall, const FVector& PushVector, float DepenetrationSpeed, float DeltaSeconds, TArray<FVector>* SimulationLocations);
 	void RotateBall(FVector& Velocity, float Speed, float DeltaSeconds);
+
+private:
+	static void AddLocation(TArray<FVector>* SimulationLocations, const FVector& Location);
 
 };

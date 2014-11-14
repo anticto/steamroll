@@ -44,6 +44,8 @@ APlayerBase::APlayerBase(const class FPostConstructInitializeProperties& PCIP)
 	// Create explosion particle system
 	Explosion = PCIP.CreateDefaultSubobject<UParticleSystemComponent>(this, TEXT("Explosion0"));
 	Explosion->bAutoActivate = false;
+
+	PrimaryActorTick.bCanEverTick = true;
 }
 
 
@@ -56,6 +58,73 @@ void APlayerBase::SetupPlayerInputComponent(class UInputComponent* InputComponen
 
 	InputComponent->BindAction("Undo", IE_Pressed, this, &APlayerBase::Undo);
 	InputComponent->BindAction("RemoteTrigger", IE_Pressed, this, &APlayerBase::ActivateBall);
+}
+
+
+ASteamrollBall* APlayerBase::CreateSimulatedBall()
+{
+	ASteamrollBall* SimulatedBall = Cast<ASteamrollBall>(GetWorld()->SpawnActor(ASteamrollBall::StaticClass()));
+
+	if (SimulatedBall)
+	{
+		SimulatedBall->bHidden = true;
+		SimulatedBall->bSimulationBall = true;
+		SimulatedBall->SetActorEnableCollision(false);
+		SimulatedBall->Sphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		SimulatedBall->Sphere->SetSimulatePhysics(false);
+		SimulatedBall->SetActorLocation(FVector(0.f, 0.f, -5000.f));
+		SimulatedBall->Sphere->SetSphereRadius(99.442101f);
+	}
+
+	return SimulatedBall;
+}
+
+
+void APlayerBase::BeginPlay()
+{
+	Super::BeginPlay();
+
+	SimulatedBall = CreateSimulatedBall();
+}
+
+
+void APlayerBase::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	float Charge = bFireSimulation ? FiringTimeout : GetCharge();
+
+	if (Charge > 0.f)
+	{
+		if (SimulatedBall)
+		{
+			SimulatedBall->Destroy();
+		}
+
+		SimulatedBall = CreateSimulatedBall();
+
+		TArray<AActor*> OverlappingActors, ActorsToIgnore;
+		TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+		FVector LaunchLocation = GetLaunchLocation();
+
+		if (!UKismetSystemLibrary::SphereOverlapActors_NEW(GetWorld(), LaunchLocation, 100.f, ObjectTypes, nullptr, ActorsToIgnore, OverlappingActors))
+		{
+			SimulatedBall->SetActorLocation(LaunchLocation);
+			SimulatedBall->SetVelocity(GetLaunchVelocity(Charge));
+
+			FVector AuxLocation = SimulatedBall->GetActorLocation();
+
+			TArray<FVector> SimulatedLocations;
+			ASteamrollBall::UpdateBallPhysics(*SimulatedBall, &SimulatedLocations, 10.f, false);
+
+			SimulatedBall->DrawPhysicalSimulation(&SimulatedLocations);
+
+			SimulatedBall->SetActorEnableCollision(false);
+			SimulatedBall->Sphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			SimulatedBall->Sphere->SetSimulatePhysics(false);
+			SimulatedBall->SetActorLocation(FVector(0.f, 0.f, -5000.f));
+		}
+	}
 }
 
 
@@ -85,6 +154,24 @@ void APlayerBase::MoveForward(float Val)
 }
 
 
+FVector APlayerBase::GetLaunchLocation() const
+{
+	FVector FiringOffset = AimTransform->GetComponentToWorld().TransformVector(FVector(550.f, 0.f, +10.f));
+
+	return AimTransform->GetComponentLocation() + FiringOffset;
+}
+
+
+FVector APlayerBase::GetLaunchVelocity(float ChargeTime) const
+{
+	FVector Direction = AimTransform->GetComponentToWorld().TransformVector(FVector(1.f, 0.f, 0.f));
+	float LaunchPower = ChargeTime / FiringTimeout;
+	float LaunchSpeed = FMath::Lerp(MinLaunchSpeed, MaxLaunchSpeed, LaunchPower);
+
+	return Direction * LaunchSpeed;
+}
+
+
 void APlayerBase::Fire(float ChargeTime)
 {
 	FActorSpawnParameters SpawnParams;
@@ -92,28 +179,19 @@ void APlayerBase::Fire(float ChargeTime)
 	SpawnParams.Instigator = Instigator; // Must set instigator because otherwise the game logic will assume the ball was placed in the level by a designer and won't copy the player's slot configuration
 	SpawnParams.bNoCollisionFail = false;
 
-	FVector FiringOffset = AimTransform->GetComponentToWorld().TransformVector(FVector(550.f, 0.f, +10.f));
-	FVector FiringLocation = AimTransform->GetComponentLocation() + FiringOffset;
+	FVector LaunchLocation = GetLaunchLocation();
 
 	TArray<AActor*> OverlappingActors, ActorsToIgnore;
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
-	//ObjectTypes.Add();
 
-	if (!UKismetSystemLibrary::SphereOverlapActors_NEW(GetWorld(), FiringLocation, 100.f, ObjectTypes, nullptr, ActorsToIgnore, OverlappingActors))
+	if (!UKismetSystemLibrary::SphereOverlapActors_NEW(GetWorld(), LaunchLocation, 100.f, ObjectTypes, nullptr, ActorsToIgnore, OverlappingActors))
 	{
-		ASteamrollBall* Ball = GetWorld()->SpawnActor<ASteamrollBall>(WhatToSpawn, FiringLocation, AimTransform->GetComponentRotation(), SpawnParams);
+		ASteamrollBall* Ball = GetWorld()->SpawnActor<ASteamrollBall>(WhatToSpawn, LaunchLocation, AimTransform->GetComponentRotation(), SpawnParams);
 
 		if (Ball)
 		{
 			SetLastDeployedActor(Ball);
-			//Ball->AddActorLocalOffset(FVector(550.f, 0.f, +10.f));
-			FVector Direction = AimTransform->GetComponentToWorld().TransformVector(FVector(1.f, 0.f, 0.f));
-			float LaunchPower = ChargeTime / FiringTimeout;
-			float LaunchSpeed = FMath::Lerp(MinLaunchSpeed, MaxLaunchSpeed, LaunchPower);
-			Ball->SetVelocity(Direction * LaunchSpeed);
-
-			//Debug(FString::Printf(TEXT("LaunchVelocity=%s"), *(Direction * LaunchSpeed).ToString()));
-			//Ball->Sphere->SetPhysicsAngularVelocity(Direction * 50000000);
+			Ball->SetVelocity(GetLaunchVelocity(ChargeTime));
 		}
 	}
 

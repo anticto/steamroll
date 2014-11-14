@@ -37,12 +37,20 @@ class STEAMROLL_API APlayerBase : public ASteamrollPawn
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Collect)
 	float CollectedQuantity;
 
+	/** Base's collected resource quantity */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = SimulatedBall)
+	ASteamrollBall* SimulatedBall;
+
 
 protected:
 
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
 	// End of APawn interface
+
+	virtual void BeginPlay() override;
+
+	virtual void Tick(float DeltaSeconds) override;
 
 	/** Called to angle the cannon */
 	void MoveForward(float Val);
@@ -58,5 +66,8 @@ protected:
 
 	void SetLastDeployedActor(AActor* Actor);
 	void ActivateBall();
+	FVector GetLaunchLocation() const;
+	FVector GetLaunchVelocity(float ChargeTime) const;
+	ASteamrollBall* CreateSimulatedBall();
 
 };
