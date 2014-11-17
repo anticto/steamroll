@@ -96,7 +96,7 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface, pu
 	FVector GetVelocity() const;
 	void SetVelocity(const FVector& NewVelocity);
 	void DrawPhysicalSimulation(TArray<FVector>* SimulationLocations);
-	static void UpdateBallPhysics(ASteamrollBall& Ball, TArray<FVector>* SimulationLocations, float DeltaSeconds, bool bTouchingFloor);
+	static void UpdateBallPhysics(ASteamrollBall& Ball, TArray<FVector>* SimulationLocations, float DeltaSeconds);
 	static FVector DragPhysics(const FVector& Velocity, float TravelTime, float DragCoefficient);
 
 protected:
@@ -132,7 +132,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Physics)
 	uint32 NumFramesCollidingWithBall;
 
-	void UpdateBallPhysics(float DeltaSeconds, bool bTouchingFloor);	
+	void UpdateBallPhysics(float DeltaSeconds);	
 	void SeparateBalls(ASteamrollBall* OtherBall, const FVector& PushVector, float DepenetrationSpeed, float DeltaSeconds, TArray<FVector>* SimulationLocations);
 	void RotateBall(FVector& Velocity, float Speed, float DeltaSeconds);
 

@@ -17,19 +17,27 @@ class STEAMROLL_API ASteamrollPawn : public APawn
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Base)
 	TSubobjectPtr<class USceneComponent> AimTransform;
 
-	/** Camera to view the ball */
+	/** Camera attached to the base */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Base)
 	TSubobjectPtr<class UCameraComponent> Camera;
+
+	/** Camera free to move around the level */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Base)
+	TSubobjectPtr<class UCameraComponent> Camera2;
 
 	// Camera controls
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Base)
 	bool RaiseCamera;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Base)
 	bool LowerCamera;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Base)
 	UCameraAnim* CameraAnim;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Base)
 	UCameraAnimInst* CameraAnimInst;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Base)
 	float CurrCameraTime;
 

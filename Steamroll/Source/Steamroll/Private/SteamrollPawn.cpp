@@ -15,6 +15,7 @@ ASteamrollPawn::ASteamrollPawn(const class FPostConstructInitializeProperties& P
 {
 	AimTransform = PCIP.CreateDefaultSubobject<USceneComponent>(this, TEXT("Tranform0"));
 	Camera = PCIP.CreateDefaultSubobject<UCameraComponent>(this, TEXT("BaseCamera0"));
+	Camera2 = PCIP.CreateDefaultSubobject<UCameraComponent>(this, TEXT("FreeCamera0"));
 
 	RaiseCamera = false;
 	LowerCamera = false;
@@ -23,7 +24,7 @@ ASteamrollPawn::ASteamrollPawn(const class FPostConstructInitializeProperties& P
 	MinHeight = 0.f;
 	CurrCameraTime = 0.f;
 
-	FiringTimeout = 4.f;
+	FiringTimeout = 6.f;
 	MinLaunchSpeed = 50.f;
 	MaxLaunchSpeed = 8000.f;
 	bFiring = false;
@@ -201,7 +202,14 @@ ASteamrollPlayerController* ASteamrollPawn::GetLocalPlayerController()
 {
 	UWorld* World = GetWorld();
 
-	return World ? Cast<ASteamrollPlayerController>(GEngine->GetFirstLocalPlayerController(World)) : nullptr;
+	APlayerController* PlayerController = nullptr;
+
+	if (GEngine && World)
+	{
+		PlayerController = GEngine->GetFirstLocalPlayerController(World);
+	}
+
+	return PlayerController ? Cast<ASteamrollPlayerController>(GEngine->GetFirstLocalPlayerController(World)) : nullptr;
 }
 
 

@@ -40,6 +40,8 @@ APlayerBase::APlayerBase(const class FPostConstructInitializeProperties& PCIP)
 	// Create a camera and attach to boom	
 	Camera->AttachTo(SpringArm, USpringArmComponent::SocketName);
 	Camera->bUseControllerViewRotation = false; // We don't want the controller rotating the camera
+	Camera2->AttachTo(RootComponent);
+	Camera2->bUseControllerViewRotation = false;
 
 	// Create explosion particle system
 	Explosion = PCIP.CreateDefaultSubobject<UParticleSystemComponent>(this, TEXT("Explosion0"));
@@ -115,7 +117,7 @@ void APlayerBase::Tick(float DeltaSeconds)
 			FVector AuxLocation = SimulatedBall->GetActorLocation();
 
 			TArray<FVector> SimulatedLocations;
-			ASteamrollBall::UpdateBallPhysics(*SimulatedBall, &SimulatedLocations, 10.f, false);
+			ASteamrollBall::UpdateBallPhysics(*SimulatedBall, &SimulatedLocations, 10.f);
 
 			SimulatedBall->DrawPhysicalSimulation(&SimulatedLocations);
 

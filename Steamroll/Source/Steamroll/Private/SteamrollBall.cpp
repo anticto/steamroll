@@ -44,7 +44,7 @@ void ASteamrollBall::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 
 	bool bTouchingFloor = IsTouchingFloor();
-	UpdateBallPhysics(DeltaSeconds, bTouchingFloor);
+	UpdateBallPhysics(DeltaSeconds);
 
 	float SpeedSquared = GetVelocity().SizeSquared();
 
@@ -177,8 +177,8 @@ FTransform ASteamrollBall::GetBallAdjustedTransform() const
 bool ASteamrollBall::IsTouchingFloor() const
 {
 	FCollisionQueryParams RV_TraceParams = FCollisionQueryParams(FName(TEXT("RV_Trace")), true, this);
-	RV_TraceParams.bTraceComplex = true;
-	RV_TraceParams.bTraceAsyncScene = true;
+	RV_TraceParams.bTraceComplex = false;
+	RV_TraceParams.bTraceAsyncScene = false;
 	RV_TraceParams.bReturnPhysicalMaterial = false;
 	//Re-initialize hit info
 	FHitResult RV_Hit(ForceInit);
@@ -377,9 +377,9 @@ void ASteamrollBall::SetVelocity(const FVector& NewVelocity)
 }
 
 
-void ASteamrollBall::UpdateBallPhysics(float DeltaSeconds, bool bTouchingFloor)
+void ASteamrollBall::UpdateBallPhysics(float DeltaSeconds)
 {
-	UpdateBallPhysics(*this, nullptr, DeltaSeconds, bTouchingFloor);
+	UpdateBallPhysics(*this, nullptr, DeltaSeconds);
 }
 
 
@@ -392,11 +392,11 @@ void ASteamrollBall::AddLocation(TArray<FVector>* SimulationLocations, const FVe
 }
 
 
-void ASteamrollBall::UpdateBallPhysics(ASteamrollBall& Ball, TArray<FVector>* SimulationLocations, float DeltaSecondsUnsubdivided, bool bTouchingFloor)
+void ASteamrollBall::UpdateBallPhysics(ASteamrollBall& Ball, TArray<FVector>* SimulationLocations, float DeltaSecondsUnsubdivided)
 {
 	/** How many collision tests are going to be made per subtick */
 	const static uint32 NumIterations = 10;
-	const static float MaxDeltaSeconds = 1.f / 4.f;
+	const static float MaxDeltaSeconds = 1.f / 30.f;
 	const static float DepenetrationSpeed = 1000.f;
 	const static float DragCoefficient = 0.4f;
 
@@ -413,10 +413,11 @@ void ASteamrollBall::UpdateBallPhysics(ASteamrollBall& Ball, TArray<FVector>* Si
 
 	while (CurrentTime <= DeltaSecondsUnsubdivided)
 	{
+		bool bTouchingFloor = Ball.IsTouchingFloor();
+
 		if (!bTouchingFloor)
 		{
-			// Only add gravity if not touching the floor and don't add velocity proportional to DeltaSeconds if the ball is stopped as it may produce jumps on balls resting on the floor if framerate is very low
-			Velocity.Z += Velocity.Z == 0.f ? -0.1f : Ball.GetWorld()->GetGravityZ() * DeltaSeconds;
+			Velocity.Z += Ball.GetWorld()->GetGravityZ() * DeltaSeconds;
 		}
 		else
 		{
@@ -448,10 +449,24 @@ void ASteamrollBall::UpdateBallPhysics(ASteamrollBall& Ball, TArray<FVector>* Si
 			{
 				if (OutHit.Time == 0.f && OutHit.Location == OutHit.ImpactPoint)
 				{
-					// Warning! Hack to discard some degenarate collisions that sometimes ue4 returns where the above condition is satistied (impossible, as the location of a sphere cannot be the impact point and on top of that the time of impact be zero)
+					if (Iteration == NumIterations - 3)
+					{
+						ActorsToIgnore.Add(&*OutHit.Actor); // We are probably stuck on an object Iteration is very high, ignore the problematic object
+					}
+
+					// Warning! Hack to discard some degenerate collisions that sometimes ue4 returns where the above condition is satistied (impossible, as the location of a sphere cannot be the impact point and on top of that the time of impact be zero)
 					//ActorsToIgnore.Add(&*OutHit.Actor);
-					CurrentLocation += Velocity.SafeNormal() * 0.01f;
+					if (OutHit.bStartPenetrating && OutHit.PenetrationDepth > 0.f)
+					{
+						CurrentLocation += OutHit.Normal * OutHit.PenetrationDepth;						
+					}
+					else
+					{
+						CurrentLocation -= Velocity.SafeNormal() * 0.01f;
+					}
+
 					Ball.SetActorLocation(CurrentLocation);
+
 					continue;
 				}
 
@@ -459,9 +474,14 @@ void ASteamrollBall::UpdateBallPhysics(ASteamrollBall& Ball, TArray<FVector>* Si
 
 				float TravelTime = OutHit.Time * RemainingTime;
 				Velocity = DragPhysics(Velocity, TravelTime, DragCoefficient);
-				Ball.RotateBall(Velocity, Speed, TravelTime);
+				
+				if (!SimulationLocations)
+				{
+					Ball.RotateBall(Velocity, Speed, TravelTime);
+				}
+
 				RemainingTime = RemainingTime - TravelTime;
-				CurrentLocation = OutHit.Location;// -Velocity.SafeNormal() * 0.001f;
+				CurrentLocation = OutHit.Location + OutHit.ImpactNormal * 0.1f;
 
 				Ball.SetActorLocation(CurrentLocation);
 				AddLocation(SimulationLocations, CurrentLocation);
@@ -529,11 +549,12 @@ void ASteamrollBall::UpdateBallPhysics(ASteamrollBall& Ball, TArray<FVector>* Si
 					
 					FVector ReflectedVector = Velocity.MirrorByVector(OutHit.ImpactNormal);
 					ReflectedVector.Normalize();
-					DrawDebugDirectionalArrow(Ball.GetWorld(), OutHit.ImpactPoint, OutHit.ImpactPoint + OutHit.ImpactNormal * 100.f, 3.f, FColor::Yellow);
-					DrawDebugDirectionalArrow(Ball.GetWorld(), OutHit.ImpactPoint, OutHit.ImpactPoint + ReflectedVector * 100.f, 3.f, FColor::Green);
-					//DrawDebugString(Ball.GetWorld(), OutHit.ImpactPoint, FString::Printf(TEXT("Itr=%d"), Iteration), nullptr, FColor::White, 0.f);
-
 					Speed = Velocity.Size();
+
+					//DrawDebugDirectionalArrow(Ball.GetWorld(), OutHit.ImpactPoint, OutHit.ImpactPoint + OutHit.ImpactNormal * 100.f, 3.f, FColor::Yellow);
+					//DrawDebugDirectionalArrow(Ball.GetWorld(), OutHit.ImpactPoint, OutHit.ImpactPoint + ReflectedVector * 100.f, 3.f, FColor::Green);
+					//DrawDebugString(Ball.GetWorld(), OutHit.ImpactPoint, FString::Printf(TEXT("Itr=%d, Speed=%f"), Iteration, Speed), nullptr, FColor::White, 0.f);
+					
 					Velocity = ReflectedVector * Speed;
 					FVector VelocityN = OutHit.ImpactNormal * (Velocity | OutHit.ImpactNormal);
 					FVector VelocityT = Velocity - VelocityN;
@@ -544,12 +565,20 @@ void ASteamrollBall::UpdateBallPhysics(ASteamrollBall& Ball, TArray<FVector>* Si
 				NewLocation = CurrentLocation + Velocity * RemainingTime;
 			}
 			else
-			{
+			{				
 				CollidedWithBallThisFrame = nullptr;
-				Ball.RotateBall(Velocity, Speed, RemainingTime);
+
+				if (!SimulationLocations)
+				{
+					Ball.RotateBall(Velocity, Speed, RemainingTime);
+				}
+
 				Velocity = DragPhysics(Velocity, RemainingTime, DragCoefficient);
 				Ball.SetActorLocation(NewLocation); // No collision, so the ball can travel all the way
 				AddLocation(SimulationLocations, NewLocation);
+
+				//if(SimulationLocations) DrawDebugString(Ball.GetWorld(), OutHit.ImpactPoint, FString::Printf(TEXT("Full Itr=%d, Speed=%f"), Iteration, Velocity.Size()), nullptr, FColor::White, 0.f);
+
 				break;
 			}
 
@@ -558,9 +587,10 @@ void ASteamrollBall::UpdateBallPhysics(ASteamrollBall& Ball, TArray<FVector>* Si
 				// Too many iterations so the collision situation might be too complicated to solve with the current velocity, let the ball drop freely
 				Velocity = FVector::ZeroVector;
 
-				if (!SimulationLocations)
+				if (SimulationLocations)
 				{
-					DrawDebugSphere(Ball.GetWorld(), Ball.GetActorLocation(), Ball.Sphere->GetScaledSphereRadius() + 0.1f, 20, FColor::Red, false, 0.5f);
+					DrawDebugSphere(Ball.GetWorld(), Ball.GetActorLocation(), Ball.Sphere->GetScaledSphereRadius() + 0.1f, 20, FColor::Magenta, false, 0.f);
+					//DrawDebugString(Ball.GetWorld(), OutHit.ImpactPoint, FString::Printf(TEXT("Iteration Limit!")), nullptr, FColor::Red, 0.f);
 				}
 
 				break;
@@ -608,6 +638,8 @@ void ASteamrollBall::UpdateBallPhysics(ASteamrollBall& Ball, TArray<FVector>* Si
 		DeltaSeconds = FMath::Min(DeltaSeconds, DeltaSecondsUnsubdivided - CurrentTime + 0.01f);
 		CurrentTime += DeltaSeconds;
 	}
+
+	//if (SimulationLocations) DrawDebugString(Ball.GetWorld(), Ball.GetActorLocation(), FString::Printf(TEXT("Simulation end!")), nullptr, FColor::Red, 0.f);
 }
 
 
@@ -665,10 +697,14 @@ void ASteamrollBall::DrawPhysicalSimulation(TArray<FVector>* SimulationLocations
 
 	DrawDebugSphere(GetWorld(), SimulationLocations->operator[](0), Radius, 10, FColor::Yellow, false, -1.f);
 
-	for (int32 Itr = 1; Itr < SimulationLocations->Num(); ++Itr)
+	uint32 Step = 4;
+
+	for (int32 Itr = Step; Itr < SimulationLocations->Num() - 1; Itr += Step)
 	{
-		DrawDebugCylinder(GetWorld(), SimulationLocations->operator[](Itr - 1), SimulationLocations->operator[](Itr), Sphere->GetScaledSphereRadius(), 10, FColor::Blue, false, -1.f);
-		DrawDebugSphere(GetWorld(), SimulationLocations->operator[](Itr), Radius, 10, FColor::Red, false, -1.f);
+		DrawDebugCylinder(GetWorld(), SimulationLocations->operator[](Itr - Step), SimulationLocations->operator[](Itr), Sphere->GetScaledSphereRadius(), 10, FColor::Blue, false, -1.f);
+		//DrawDebugSphere(GetWorld(), SimulationLocations->operator[](Itr), Radius, 10, FColor::Red, false, -1.f);
 	}
+
+	DrawDebugSphere(GetWorld(), SimulationLocations->operator[](SimulationLocations->Num() - 1), Radius, 10, FColor::Yellow, false, -1.f);
 }
 
