@@ -4,6 +4,7 @@
 #include "PlayerBase.h"
 #include "SteamrollPlayerController.h"
 #include "SteamrollBall.h"
+#include "TrajectoryComponent.h"
 
 #include "EngineUtils.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -114,12 +115,11 @@ void APlayerBase::Tick(float DeltaSeconds)
 			SimulatedBall->SetActorLocation(LaunchLocation);
 			SimulatedBall->SetVelocity(GetLaunchVelocity(Charge));
 
-			FVector AuxLocation = SimulatedBall->GetActorLocation();
-
-			TArray<FVector> SimulatedLocations;
-			ASteamrollBall::UpdateBallPhysics(*SimulatedBall, &SimulatedLocations, 10.f);
-
-			SimulatedBall->DrawPhysicalSimulation(&SimulatedLocations);
+			SimulatedBall->TrajectoryComponent->SimulatedLocations.Empty();
+			
+			ASteamrollBall::UpdateBallPhysics(*SimulatedBall, 10.f);
+			
+			//SimulatedBall->DrawPhysicalSimulation();
 
 			SimulatedBall->SetActorEnableCollision(false);
 			SimulatedBall->Sphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);

@@ -7,6 +7,7 @@
 #include "DraggingBall.h"
 #include "SteamrollBall.generated.h"
 
+
 UCLASS(config=Game)
 class ASteamrollBall : public AActor, public IExplosionDestructibleInterface, public DraggingBall
 {
@@ -15,6 +16,9 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface, pu
 	/** Capsule used for the ball collison and physics */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Ball)
 	TSubobjectPtr<class USphereComponent> Sphere;
+
+	UPROPERTY()
+	TSubobjectPtr<class UTrajectoryComponent> TrajectoryComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Ball)
 	bool Activated;
@@ -95,8 +99,8 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface, pu
 
 	FVector GetVelocity() const;
 	void SetVelocity(const FVector& NewVelocity);
-	void DrawPhysicalSimulation(TArray<FVector>* SimulationLocations);
-	static void UpdateBallPhysics(ASteamrollBall& Ball, TArray<FVector>* SimulationLocations, float DeltaSeconds);
+	void DrawPhysicalSimulation();
+	static void UpdateBallPhysics(ASteamrollBall& Ball, float DeltaSeconds);
 	static FVector DragPhysics(const FVector& Velocity, float TravelTime, float DragCoefficient);
 
 protected:
@@ -133,10 +137,10 @@ protected:
 	uint32 NumFramesCollidingWithBall;
 
 	void UpdateBallPhysics(float DeltaSeconds);	
-	void SeparateBalls(ASteamrollBall* OtherBall, const FVector& PushVector, float DepenetrationSpeed, float DeltaSeconds, TArray<FVector>* SimulationLocations);
+	void SeparateBalls(ASteamrollBall* OtherBall, const FVector& PushVector, float DepenetrationSpeed, float DeltaSeconds);
 	void RotateBall(FVector& Velocity, float Speed, float DeltaSeconds);
 
 private:
-	static void AddLocation(TArray<FVector>* SimulationLocations, const FVector& Location);
+	void AddLocation(const FVector& Location);
 
 };
