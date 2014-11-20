@@ -70,12 +70,12 @@ ASteamrollBall* APlayerBase::CreateSimulatedBall()
 
 	if (SimulatedBall)
 	{
-		SimulatedBall->bHidden = true;
+		SimulatedBall->bHidden = false;
 		SimulatedBall->bSimulationBall = true;
 		SimulatedBall->SetActorEnableCollision(false);
 		SimulatedBall->Sphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		SimulatedBall->Sphere->SetSimulatePhysics(false);
-		SimulatedBall->SetActorLocation(FVector(0.f, 0.f, -5000.f));
+		SimulatedBall->SetActorLocation(GetActorLocation());
 		SimulatedBall->Sphere->SetSphereRadius(99.442101f);
 	}
 
@@ -124,7 +124,7 @@ void APlayerBase::Tick(float DeltaSeconds)
 			SimulatedBall->SetActorEnableCollision(false);
 			SimulatedBall->Sphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			SimulatedBall->Sphere->SetSimulatePhysics(false);
-			SimulatedBall->SetActorLocation(FVector(0.f, 0.f, -5000.f));
+			SimulatedBall->SetActorLocation(GetActorLocation());
 		}
 	}
 }

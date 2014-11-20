@@ -16,6 +16,7 @@ ASteamrollBall::ASteamrollBall(const class FPostConstructInitializeProperties& P
 	RootComponent = Sphere;
 
 	TrajectoryComponent = PCIP.CreateDefaultSubobject<UTrajectoryComponent>(this, TEXT("TrajectoryComponent"));
+	TrajectoryComponent->AttachTo(RootComponent);
 
 	DraggingBallSetSphere(Sphere);
 

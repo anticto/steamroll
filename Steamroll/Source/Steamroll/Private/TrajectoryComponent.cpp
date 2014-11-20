@@ -75,9 +75,11 @@ FPrimitiveSceneProxy* UTrajectoryComponent::CreateSceneProxy()
 		{
 			const bool bVisible = true;
 			FPrimitiveViewRelevance Result;
-			Result.bDrawRelevance = IsShown(View) && bVisible;
+			Result.bDrawRelevance = true;// IsShown(View) && bVisible;
+			Result.bStaticRelevance = true;
 			Result.bDynamicRelevance = true;
 			Result.bShadowRelevance = IsShadowCast(View);
+			Result.bNormalTranslucencyRelevance = true;
 			Result.bEditorPrimitiveRelevance = UseEditorCompositing(View);
 			return Result;
 		}
@@ -94,6 +96,20 @@ FPrimitiveSceneProxy* UTrajectoryComponent::CreateSceneProxy()
 }
 
 
+FBoxSphereBounds UTrajectoryComponent::CalcBounds(const FTransform & LocalToWorld) const
+{
+	FBoxSphereBounds BoxSphereBounds;
+	float Extent = BIG_NUMBER;
+
+	BoxSphereBounds.Origin = FVector(0.f, 0.f, 0.f);
+	BoxSphereBounds.BoxExtent = FVector(Extent, Extent, Extent);
+	BoxSphereBounds.BoxExtent = FVector(Extent, Extent, Extent);
+	BoxSphereBounds.SphereRadius = Extent;
+
+	return BoxSphereBounds;
+}
+
+
 bool UTrajectoryComponent::IsZeroExtent() const
 {
 	return false;
@@ -102,7 +118,7 @@ bool UTrajectoryComponent::IsZeroExtent() const
 
 FCollisionShape UTrajectoryComponent::GetCollisionShape(float Inflation) const
 {
-	return FCollisionShape::MakeSphere(0.f);
+	return FCollisionShape::MakeSphere(1000000.f);
 }
 
 
