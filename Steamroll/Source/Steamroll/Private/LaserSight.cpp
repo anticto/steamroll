@@ -28,7 +28,7 @@ void ALaserSight::Tick(float DeltaSeconds)
 	RV_TraceParams.bReturnPhysicalMaterial = false;
 	//Re-initialize hit info
 	FHitResult RV_Hit(ForceInit);
-	FVector DirectionVector = GetActorUpVector() * RayLength;
+	FVector DirectionVector = GetActorForwardVector() * RayLength;
 
 	if (GetWorld()->LineTraceSingle(
 		RV_Hit, //result
