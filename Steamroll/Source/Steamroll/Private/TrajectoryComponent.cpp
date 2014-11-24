@@ -51,13 +51,21 @@ FPrimitiveSceneProxy* UTrajectoryComponent::CreateSceneProxy()
 
 			DrawSphere(PDI, SimulatedLocations->operator[](0), FVector(Radius), 10, 10, Material->GetRenderProxy(false), 0, false);
 
-			uint32 Step = 4;
+			uint32 Step = 1;
+			FVector LastLocation = SimulatedLocations->operator[](0);
 
 			for (int32 Itr = Step; Itr < SimulatedLocations->Num() - 1; Itr += Step)
 			{				
 				//DrawDebugCylinder(GetWorld(), SimulatedLocations->operator[](Itr - Step), SimulatedLocations->operator[](Itr), Sphere->GetScaledSphereRadius(), 10, FColor::Blue, false, -1.f);
-				FVector ZAxis = SimulatedLocations->operator[](Itr) - SimulatedLocations->operator[](Itr - Step);
-				float Len = ZAxis.Size();
+				FVector ZAxis = SimulatedLocations->operator[](Itr) - LastLocation;//SimulatedLocations->operator[](Itr - Step);
+				float Len = ZAxis.SizeSquared();
+
+				if (Len < FMath::Square(50.f))
+				{
+					continue;
+				}
+
+				Len = FMath::Sqrt(Len);
 				ZAxis /= Len;
 				FVector XAxis = FMath::Abs(ZAxis | FVector(0.f, 0.f, 1.f)) < 0.9f ? FVector::CrossProduct(ZAxis, FVector(0.f, 0.f, 1.f)) : FVector::CrossProduct(ZAxis, FVector(1.f, 0.f, 0.f));
 				FVector YAxis = FVector::CrossProduct(ZAxis, XAxis);
@@ -66,6 +74,8 @@ FPrimitiveSceneProxy* UTrajectoryComponent::CreateSceneProxy()
 				//DrawSphere(PDI, SimulatedLocations->operator[](Itr), FVector(Radius), 10, 10, Material->GetRenderProxy(false), 0, false);
 				DrawCylinder(PDI, Origin, XAxis, YAxis, ZAxis, Radius, Len / 2.f, 5, Material->GetRenderProxy(false), 0);
 				//DrawDebugLine(GetWorld(), SimulatedLocations->operator[](Itr - Step), SimulatedLocations->operator[](Itr), FColor::Blue, false, -1.f, 0, 2.f * Sphere->GetScaledSphereRadius());
+
+				LastLocation = SimulatedLocations->operator[](Itr);
 			}
 
 			DrawSphere(PDI, SimulatedLocations->operator[](SimulatedLocations->Num() - 1), FVector(Radius), 10, 10, Material->GetRenderProxy(false), 0, false);

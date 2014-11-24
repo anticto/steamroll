@@ -100,11 +100,15 @@ void APlayerBase::Tick(float DeltaSeconds)
 	if (SimulatedBall)
 	{
 		SimulatedBall->Destroy();
+		SimulatedBall = nullptr;
 	}
 
 	if (Charge > 0.f)
 	{
-		SimulatedBall = CreateSimulatedBall();
+		if (!SimulatedBall)
+		{
+			SimulatedBall = CreateSimulatedBall();
+		}
 
 		TArray<AActor*> OverlappingActors, ActorsToIgnore;
 		TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
@@ -158,7 +162,7 @@ void APlayerBase::MoveForward(float Val)
 
 FVector APlayerBase::GetLaunchLocation() const
 {
-	FVector FiringOffset = AimTransform->GetComponentToWorld().TransformVector(FVector(450.f, 0.f, +100.f));
+	FVector FiringOffset = AimTransform->GetComponentToWorld().TransformVector(FVector(450.f, 0.f, +120.f));
 
 	return AimTransform->GetComponentLocation() + FiringOffset;
 }
