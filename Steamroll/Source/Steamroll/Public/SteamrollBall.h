@@ -90,6 +90,9 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface, pu
 	void ExplosionEvent();
 
 	UFUNCTION(BlueprintImplementableEvent, Category = Slots)
+	virtual void SnapRampEvent(const FVector& Location, const FVector& Normal);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = Slots)
 	virtual void ActivateSlotEvent(const TEnumAsByte<ESlotTypeEnum::SlotType>& SlotType, float Param1, float Param2);
 
 	void ActivateRemoteTriggers();
@@ -116,6 +119,7 @@ protected:
 	void Timeout2();
 	void Timeout3();
 	void Timeout4();
+	bool bIsTimerRunning[5];
 
 	virtual void BeginPlay() override;
 
@@ -124,6 +128,7 @@ protected:
 	void ActivateStopTriggers();
 	void ActivateConnectedSlots(int32 SlotIndex);
 	bool ActivateSlot(int32 SlotIndex);
+	void ActivateSnapRamp(const FVector& Location, const FVector& Normal);
 
 	/** Collision/Physics system */	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Physics)

@@ -35,6 +35,11 @@ ASteamrollBall::ASteamrollBall(const class FPostConstructInitializeProperties& P
 	Velocity = FVector(0.f);
 	NumFramesCollidingWithBall = 0;
 	bSimulationBall = false;
+
+	for (uint32 i = 1; i < 5; ++i)
+	{
+		bIsTimerRunning[i] = false;
+	}
 }
 
 
@@ -231,24 +236,28 @@ void ASteamrollBall::DraggingBallStop()
 void ASteamrollBall::Timeout1()
 {
 	ActivateTimerTrigger(1);
+	bIsTimerRunning[1] = false;
 }
 
 
 void ASteamrollBall::Timeout2()
 {
 	ActivateTimerTrigger(2);
+	bIsTimerRunning[2] = false;
 }
 
 
 void ASteamrollBall::Timeout3()
 {
 	ActivateTimerTrigger(3);
+	bIsTimerRunning[3] = false;
 }
 
 
 void ASteamrollBall::Timeout4()
 {
 	ActivateTimerTrigger(4);
+	bIsTimerRunning[4] = false;
 }
 
 
@@ -275,6 +284,7 @@ void ASteamrollBall::BeginPlay()
 		if (SlotsConfig.GetSlotType(i) == ESlotTypeEnum::SE_TIME)
 		{
 			float Timeout = SlotsConfig.GetSlotParam(i, 1) * 10.f;
+			bIsTimerRunning[i] = true;
 
 			switch (i)
 			{
@@ -338,8 +348,8 @@ void ASteamrollBall::ActivateStopTriggers()
 
 void ASteamrollBall::ActivateConnectedSlots(int32 SlotIndex)
 {
-	//if (IsTouchingFloor())
-	//{
+	if (IsTouchingFloor())
+	{
 		for (uint32 i = 1; i < 5; i++)
 		{
 			if (SlotsConfig.GetSlotConnection(SlotIndex, i))
@@ -348,7 +358,7 @@ void ASteamrollBall::ActivateConnectedSlots(int32 SlotIndex)
 				if (ActivateSlot(i)) break;
 			}
 		}
-	//}
+	}
 }
 
 
@@ -357,7 +367,7 @@ bool ASteamrollBall::ActivateSlot(int32 SlotIndex)
 	TEnumAsByte<ESlotTypeEnum::SlotType> Type = GetSlotState(SlotIndex);
 	bool bIsTrigger = Type == ESlotTypeEnum::SE_TIME || Type == ESlotTypeEnum::SE_CONTACT || Type == ESlotTypeEnum::SE_REMOTE || Type == ESlotTypeEnum::SE_STOP;
 
-	if (!SlotsConfig.IsSlotUsed(SlotIndex) && !bIsTrigger)
+	if (!SlotsConfig.IsSlotUsed(SlotIndex) && !bIsTrigger && Type != ESlotTypeEnum::SE_RAMP) // Ramps snap when hit a wall
 	{
 		SlotsConfig.SetSlotUsed(SlotIndex);
 		ActivateSlotEvent(SlotsConfig.GetSlotType(SlotIndex), SlotsConfig.GetSlotParam(SlotIndex, 1), SlotsConfig.GetSlotParam(SlotIndex, 2));
@@ -556,6 +566,11 @@ void ASteamrollBall::UpdateBallPhysics(ASteamrollBall& Ball, float DeltaSecondsU
 					ReflectedVector.Normalize();
 					Speed = Velocity.Size();
 
+					if (!Ball.bSimulationBall && Speed > 0.f && ((ReflectedVector | (Velocity / Speed)) < 0.f) && (FMath::Abs(OutHit.ImpactNormal | FVector::UpVector) < 0.1f))
+					{
+						Ball.ActivateSnapRamp(OutHit.ImpactPoint, OutHit.ImpactNormal);
+					}
+
 					//DrawDebugDirectionalArrow(Ball.GetWorld(), OutHit.ImpactPoint, OutHit.ImpactPoint + OutHit.ImpactNormal * 100.f, 3.f, FColor::Yellow);
 					//DrawDebugDirectionalArrow(Ball.GetWorld(), OutHit.ImpactPoint, OutHit.ImpactPoint + ReflectedVector * 100.f, 3.f, FColor::Green);
 					//DrawDebugString(Ball.GetWorld(), OutHit.ImpactPoint, FString::Printf(TEXT("Itr=%d, Speed=%f"), Iteration, Speed), nullptr, FColor::White, 0.f);
@@ -714,5 +729,36 @@ void ASteamrollBall::DrawPhysicalSimulation()
 	}
 	
 	DrawDebugSphere(GetWorld(), SimulatedLocations->operator[](SimulatedLocations->Num() - 1), Radius, 10, FColor::Yellow, false, -1.f);
+}
+
+
+void ASteamrollBall::ActivateSnapRamp(const FVector& Location, const FVector& Normal)
+{
+	for (int32 i = 1; i < 5; i++)
+	{
+		bool bConnectedToTrigger = false;
+
+		for (uint32 j = 1; j < 5; j++)
+		{
+			TEnumAsByte<ESlotTypeEnum::SlotType> Type = GetSlotState(j);
+			bool bIsTrigger = Type == ESlotTypeEnum::SE_TIME;
+
+			if (i != j && bIsTrigger && SlotsConfig.GetSlotConnection(j, i))
+			{
+				if (bIsTimerRunning[j])
+				{
+					bConnectedToTrigger = true;
+					break;
+				}
+			}
+		}
+
+		if (!bConnectedToTrigger && SlotsConfig.GetSlotType(i) == ESlotTypeEnum::SE_RAMP && !SlotsConfig.IsSlotUsed(i))
+		{
+			SlotsConfig.SetSlotUsed(i);
+			SnapRampEvent(Location, Normal);
+			break;
+		}
+	}
 }
 
