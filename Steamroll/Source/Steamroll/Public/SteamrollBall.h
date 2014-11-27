@@ -73,7 +73,7 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface, pu
 
 	/** Returns true if the ball is touching the floor */
 	UFUNCTION(BlueprintCallable, Category = Ball)
-	bool IsTouchingFloor() const;
+	bool IsTouchingFloor(bool bSphereTrace = false) const;
 
 	/** Returns true if the ball is touching the floor */
 	UFUNCTION(BlueprintCallable, Category = Ball)
@@ -103,12 +103,14 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface, pu
 	FVector GetVelocity() const;
 	void SetVelocity(const FVector& NewVelocity);
 	void DrawPhysicalSimulation();
-	static void UpdateBallPhysics(ASteamrollBall& Ball, float DeltaSeconds);
+	static float UpdateBallPhysics(ASteamrollBall& Ball, float DeltaSeconds);
 	static FVector DragPhysics(const FVector& Velocity, float TravelTime, float DragCoefficient);
 
 protected:
 
 	float TimeForNextPaint;
+	float CurrentTime;
+	float RemainingTime;
 	
 	bool IsActivated();
 	void DraggingBallActivate();
@@ -141,11 +143,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Physics)
 	uint32 NumFramesCollidingWithBall;
 
-	void UpdateBallPhysics(float DeltaSeconds);	
+	float UpdateBallPhysics(float DeltaSeconds);	
 	void SeparateBalls(ASteamrollBall* OtherBall, const FVector& PushVector, float DepenetrationSpeed, float DeltaSeconds);
 	void RotateBall(FVector& Velocity, float Speed, float DeltaSeconds);
+	void DrawTimedSlots(float CurrentTime, const FVector& Velocity);
 
 private:
 	void AddLocation(const FVector& Location);
-
+	void ReduceVerticalVelocity(FVector& Velocity, bool bTouchingFloor, float DeltaSeconds);
 };

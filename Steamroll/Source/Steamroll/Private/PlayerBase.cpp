@@ -40,9 +40,9 @@ APlayerBase::APlayerBase(const class FPostConstructInitializeProperties& PCIP)
 
 	// Create a camera and attach to boom	
 	Camera->AttachTo(SpringArm, USpringArmComponent::SocketName);
-	Camera->bUseControllerViewRotation = false; // We don't want the controller rotating the camera
+	Camera->bUsePawnControlRotation = false; // We don't want the controller rotating the camera
 	Camera2->AttachTo(RootComponent);
-	Camera2->bUseControllerViewRotation = false;
+	Camera2->bUsePawnControlRotation = false;
 
 	// Create explosion particle system
 	Explosion = PCIP.CreateDefaultSubobject<UParticleSystemComponent>(this, TEXT("Explosion0"));
@@ -116,6 +116,12 @@ void APlayerBase::Tick(float DeltaSeconds)
 
 		if (!UKismetSystemLibrary::SphereOverlapActors_NEW(GetWorld(), LaunchLocation, 100.f, ObjectTypes, nullptr, ActorsToIgnore, OverlappingActors))
 		{
+			auto PlayerController = GetLocalPlayerController();
+			if (PlayerController)
+			{
+				SimulatedBall->SlotsConfig = PlayerController->SlotsConfig;
+			}
+
 			SimulatedBall->SetActorLocation(LaunchLocation);
 			SimulatedBall->SetVelocity(GetLaunchVelocity(Charge));
 

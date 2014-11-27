@@ -31,14 +31,24 @@ ASteamrollBall::ASteamrollBall(const class FPostConstructInitializeProperties& P
 	bExplosionBlockedByContactSlot = false;
 
 	TimeForNextPaint = 1.f;
+	CurrentTime = 0.f;
+	RemainingTime = 0.f;
 
 	Velocity = FVector(0.f);
 	NumFramesCollidingWithBall = 0;
 	bSimulationBall = false;
 
-	for (uint32 i = 1; i < 5; ++i)
+	// If there are timer slots, start timers
+	for (int32 i = 1; i < 5; i++)
 	{
-		bIsTimerRunning[i] = false;
+		bIsTimerRunning[i] = SlotsConfig.GetSlotType(i) == ESlotTypeEnum::SE_TIME;
+		//switch (i)
+		//{
+		//case 1: GetWorldTimerManager().SetTimer(this, &ASteamrollBall::Timeout1, Timeout, false); break;
+		//case 2: GetWorldTimerManager().SetTimer(this, &ASteamrollBall::Timeout2, Timeout, false); break;
+		//case 3: GetWorldTimerManager().SetTimer(this, &ASteamrollBall::Timeout3, Timeout, false); break;
+		//case 4: GetWorldTimerManager().SetTimer(this, &ASteamrollBall::Timeout4, Timeout, false); break;
+		//}
 	}
 }
 
@@ -50,12 +60,28 @@ void ASteamrollBall::Tick(float DeltaSeconds)
 		return;
 	}
 
+	CurrentTime += DeltaSeconds;
+
 	Super::Tick(DeltaSeconds);
 
 	bool bTouchingFloor = IsTouchingFloor();
-	UpdateBallPhysics(DeltaSeconds);
+	RemainingTime = UpdateBallPhysics(DeltaSeconds + RemainingTime);
 
 	float SpeedSquared = GetVelocity().SizeSquared();
+
+	for (uint32 i = 1; i < 5; ++i)
+	{
+		if (SlotsConfig.GetSlotType(i) == ESlotTypeEnum::SE_TIME && !SlotsConfig.IsSlotUsed(i))
+		{
+			if (SlotsConfig.GetSlotParam(i, 0) * 10.f < CurrentTime)
+			{
+				SlotsConfig.SetSlotUsed(i);
+				ActivateTimerTrigger(i);
+				bIsTimerRunning[i] = false;
+				//Velocity = FVector::ZeroVector;
+			}
+		}
+	}
 
 	if (HasSlotState(ESlotTypeEnum::SE_PAINT))
 	{
@@ -183,35 +209,59 @@ FTransform ASteamrollBall::GetBallAdjustedTransform() const
 }
 
 
-bool ASteamrollBall::IsTouchingFloor() const
+bool ASteamrollBall::IsTouchingFloor(bool bSphereTrace) const
 {
-	FCollisionQueryParams RV_TraceParams = FCollisionQueryParams(FName(TEXT("RV_Trace")), true, this);
-	RV_TraceParams.bTraceComplex = false;
-	RV_TraceParams.bTraceAsyncScene = false;
-	RV_TraceParams.bReturnPhysicalMaterial = false;
-	//Re-initialize hit info
-	FHitResult RV_Hit(ForceInit);
-
-	bool bHit = GetWorld()->LineTraceSingle(
-		                               RV_Hit, //result
-		                               GetActorLocation(), //start
-		                               GetActorLocation() + FVector(0.f, 0.f, -2.f * Sphere->GetScaledSphereRadius()), //end at twice the radius
-		                               ECC_PhysicsBody, //collision channel
-		                               RV_TraceParams
-		                               );
-
-	// If hit is at half or less the ray length (twice the radius) the ball is touching the floor
-	if (bHit && RV_Hit.Time < 0.51f)
+	if (!bSphereTrace)
 	{
-		float HitDotProduct = RV_Hit.ImpactNormal | FVector(1.f, 0.f, 0.f); // Dot product with horizontal vector
+		FCollisionQueryParams RV_TraceParams = FCollisionQueryParams(FName(TEXT("RV_Trace")), true, this);
+		RV_TraceParams.bTraceComplex = false;
+		RV_TraceParams.bTraceAsyncScene = false;
+		RV_TraceParams.bReturnPhysicalMaterial = false;
+		//Re-initialize hit info
+		FHitResult RV_Hit(ForceInit);
 
-		if (FMath::Abs(HitDotProduct) < 0.1f) 
+		bool bHit = GetWorld()->LineTraceSingle(
+			RV_Hit, //result
+			GetActorLocation(), //start
+			GetActorLocation() + FVector(0.f, 0.f, -2.f * Sphere->GetScaledSphereRadius()), //end at twice the radius
+			ECC_PhysicsBody, //collision channel
+			RV_TraceParams
+			);
+
+		// If hit is at half or less the ray length (twice the radius) the ball is touching the floor
+		if (bHit && RV_Hit.Time < 0.51f)
 		{
-			return true; // Only return true if the hit surface is more or less horizontal
-		}
-	}
+			float HitDotProduct = RV_Hit.ImpactNormal | FVector(1.f, 0.f, 0.f); // Dot product with horizontal vector
 
-	return false;
+			if (FMath::Abs(HitDotProduct) < 0.1f)
+			{
+				return true; // Only return true if the hit surface is more or less horizontal
+			}
+		}
+
+		return false;
+	}
+	else
+	{
+		TArray<AActor*> ActorsToIgnore;
+		ActorsToIgnore.Add((AActor*)this);
+		FHitResult OutHit;
+
+		if (UKismetSystemLibrary::SphereTraceSingle_NEW(GetWorld(), GetActorLocation(), GetActorLocation() + FVector(0.f, 0.f, -1.5f), Sphere->GetScaledSphereRadius() + 10.5f, UEngineTypes::ConvertToTraceType(ECollisionChannel::ECC_PhysicsBody), true, ActorsToIgnore, EDrawDebugTrace::None, OutHit, true))
+		{
+			/*if (OutHit.Time < 0.05f)
+			{
+				return true;
+			}*/
+			//DrawDebugSphere(GetWorld(), GetActorLocation(), Sphere->GetScaledSphereRadius() + 0.1f, 15, FColor::Red, false, 0.0f);
+			
+			return true;
+		}
+		
+		//DrawDebugSphere(GetWorld(), GetActorLocation(), Sphere->GetScaledSphereRadius() + 0.1f, 15, FColor::Green, false, 0.0f);
+		
+		return false;
+	}
 }
 
 
@@ -277,24 +327,6 @@ void ASteamrollBall::BeginPlay()
 	}
 
 	Super::BeginPlay();	
-
-	// If there are timer slots, start timers
-	for (int32 i = 1; i < 5; i++)
-	{
-		if (SlotsConfig.GetSlotType(i) == ESlotTypeEnum::SE_TIME)
-		{
-			float Timeout = SlotsConfig.GetSlotParam(i, 1) * 10.f;
-			bIsTimerRunning[i] = true;
-
-			switch (i)
-			{
-			case 1: GetWorldTimerManager().SetTimer(this, &ASteamrollBall::Timeout1, Timeout, false); break;
-			case 2: GetWorldTimerManager().SetTimer(this, &ASteamrollBall::Timeout2, Timeout, false); break;
-			case 3: GetWorldTimerManager().SetTimer(this, &ASteamrollBall::Timeout3, Timeout, false); break;
-			case 4: GetWorldTimerManager().SetTimer(this, &ASteamrollBall::Timeout4, Timeout, false); break;
-			}
-		}
-	}
 }
 
 
@@ -318,6 +350,7 @@ void ASteamrollBall::ExplosionEvent_Implementation()
 
 void ASteamrollBall::ActivateTimerTrigger(int32 SlotIndex)
 {
+	DrawDebugString(GetWorld(), GetActorLocation(), FString::Printf(TEXT("%f"), CurrentTime), nullptr, FColor::Blue, 2.f);
 	ActivateConnectedSlots(SlotIndex);
 }
 
@@ -348,17 +381,20 @@ void ASteamrollBall::ActivateStopTriggers()
 
 void ASteamrollBall::ActivateConnectedSlots(int32 SlotIndex)
 {
-	if (IsTouchingFloor())
-	{
+	//if (IsTouchingFloor())
+	//{
 		for (uint32 i = 1; i < 5; i++)
 		{
 			if (SlotsConfig.GetSlotConnection(SlotIndex, i))
 			{
 				// Only activate the first available slot
-				if (ActivateSlot(i)) break;
+				if (ActivateSlot(i)) 
+				{
+					break;
+				}
 			}
 		}
-	}
+	//}
 }
 
 
@@ -367,7 +403,7 @@ bool ASteamrollBall::ActivateSlot(int32 SlotIndex)
 	TEnumAsByte<ESlotTypeEnum::SlotType> Type = GetSlotState(SlotIndex);
 	bool bIsTrigger = Type == ESlotTypeEnum::SE_TIME || Type == ESlotTypeEnum::SE_CONTACT || Type == ESlotTypeEnum::SE_REMOTE || Type == ESlotTypeEnum::SE_STOP;
 
-	if (!SlotsConfig.IsSlotUsed(SlotIndex) && !bIsTrigger && Type != ESlotTypeEnum::SE_RAMP) // Ramps snap when hit a wall
+	if (!SlotsConfig.IsSlotUsed(SlotIndex) && !bIsTrigger && Type != ESlotTypeEnum::SE_RAMP) // Ramps snap when hit a wall, they aren't directly activated with triggers
 	{
 		SlotsConfig.SetSlotUsed(SlotIndex);
 		ActivateSlotEvent(SlotsConfig.GetSlotType(SlotIndex), SlotsConfig.GetSlotParam(SlotIndex, 1), SlotsConfig.GetSlotParam(SlotIndex, 2));
@@ -391,9 +427,9 @@ void ASteamrollBall::SetVelocity(const FVector& NewVelocity)
 }
 
 
-void ASteamrollBall::UpdateBallPhysics(float DeltaSeconds)
+float ASteamrollBall::UpdateBallPhysics(float DeltaSeconds)
 {
-	UpdateBallPhysics(*this, DeltaSeconds);
+	return UpdateBallPhysics(*this, DeltaSeconds);
 }
 
 
@@ -406,7 +442,30 @@ void ASteamrollBall::AddLocation(const FVector& Location)
 }
 
 
-void ASteamrollBall::UpdateBallPhysics(ASteamrollBall& Ball, float DeltaSecondsUnsubdivided)
+void ASteamrollBall::ReduceVerticalVelocity(FVector& Velocity, bool bTouchingFloor, float DeltaSeconds)
+{
+	bTouchingFloor = IsTouchingFloor(true);
+
+	if (!bTouchingFloor && Velocity.Z > 0.f)
+	{
+		float Len = Velocity.Size();
+		
+		if (Len != 0.f)
+		{
+			float AngleWithVertical = FMath::Acos((Velocity / Len) | FVector::UpVector);
+
+			if (AngleWithVertical > FMath::DegreesToRadians(20.f))
+			{
+				Velocity.Z = 0.f;// Velocity.Z - 10.f * Velocity.Z * DeltaSeconds;
+				Velocity.Normalize();
+				Velocity *= Len;
+			}
+		}
+	}
+}
+
+
+float ASteamrollBall::UpdateBallPhysics(ASteamrollBall& Ball, float DeltaSecondsUnsubdivided)
 {
 	/** How many collision tests are going to be made per subtick */
 	const static uint32 NumIterations = 10;
@@ -418,16 +477,18 @@ void ASteamrollBall::UpdateBallPhysics(ASteamrollBall& Ball, float DeltaSecondsU
 	
 	float DeltaSeconds = DeltaSecondsUnsubdivided;
 
-	if (DeltaSecondsUnsubdivided > MaxDeltaSeconds)
-	{
+	//if (DeltaSecondsUnsubdivided > MaxDeltaSeconds)
+	//{
 		DeltaSeconds = MaxDeltaSeconds;
-	}
+	//}
 
 	float CurrentTime = 0.f;
 
 	while (CurrentTime <= DeltaSecondsUnsubdivided)
 	{
 		bool bTouchingFloor = Ball.IsTouchingFloor();
+
+		Ball.DrawTimedSlots(CurrentTime, Velocity);
 
 		if (!bTouchingFloor)
 		{
@@ -447,6 +508,7 @@ void ASteamrollBall::UpdateBallPhysics(ASteamrollBall& Ball, float DeltaSecondsU
 		float Speed = Velocity.Size();
 		FVector CurrentLocation = Ball.GetActorLocation();
 		Ball.AddLocation(CurrentLocation);
+		Ball.ReduceVerticalVelocity(Velocity, bTouchingFloor, DeltaSeconds);
 		FVector NewLocation = CurrentLocation + Velocity * DeltaSeconds;
 
 		TArray<AActor*> ActorsToIgnore;
@@ -582,6 +644,7 @@ void ASteamrollBall::UpdateBallPhysics(ASteamrollBall& Ball, float DeltaSecondsU
 					Speed = Velocity.Size();
 				}
 
+				Ball.ReduceVerticalVelocity(Velocity, bTouchingFloor, DeltaSeconds);
 				NewLocation = CurrentLocation + Velocity * RemainingTime;
 			}
 			else
@@ -624,7 +687,7 @@ void ASteamrollBall::UpdateBallPhysics(ASteamrollBall& Ball, float DeltaSecondsU
 
 			if (Ball.bSimulationBall && FMath::Abs(Velocity.Y) < 0.1f)
 			{
-				return; // Stop simulation if we are stopped
+				return DeltaSecondsUnsubdivided - CurrentTime; // Stop simulation if we are stopped
 			}
 		}
 
@@ -653,13 +716,15 @@ void ASteamrollBall::UpdateBallPhysics(ASteamrollBall& Ball, float DeltaSecondsU
 		}
 
 		//GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, FString::Printf(TEXT("Velocity=%s"), *(Velocity).ToString()));
-		//UE_LOG(LogTemp, Warning, TEXT("Velocity=%s"), *(Velocity).ToString());
+		//UE_LOG(LogTemp, Warning, TEXT("Velocity=%s"), *(Velocity).ToString());		
 
-		DeltaSeconds = FMath::Min(DeltaSeconds, DeltaSecondsUnsubdivided - CurrentTime + 0.01f);
 		CurrentTime += DeltaSeconds;
+		//DeltaSeconds = FMath::Min(DeltaSeconds, DeltaSecondsUnsubdivided - CurrentTime + 0.00001f);		
 	}
 
 	//if (SimulationLocations) DrawDebugString(Ball.GetWorld(), Ball.GetActorLocation(), FString::Printf(TEXT("Simulation end!")), nullptr, FColor::Red, 0.f);
+
+	return DeltaSecondsUnsubdivided - CurrentTime;
 }
 
 
@@ -758,6 +823,38 @@ void ASteamrollBall::ActivateSnapRamp(const FVector& Location, const FVector& No
 			SlotsConfig.SetSlotUsed(i);
 			SnapRampEvent(Location, Normal);
 			break;
+		}
+	}
+}
+
+
+void ASteamrollBall::DrawTimedSlots(float CurrentTime, const FVector& Velocity)
+{
+	if (bSimulationBall)
+	{
+		for (uint32 i = 1; i < 5; ++i)
+		{
+			if (this->GetSlotState(i) == ESlotTypeEnum::SE_TIME && !SlotsConfig.IsSlotUsed(i))
+			{
+				if (SlotsConfig.GetSlotParam(i, 0) * 10.f < CurrentTime)
+				{
+					for (uint32 j = 1; j < 5; ++j)
+					{
+						if (i != j && SlotsConfig.GetSlotType(j) == ESlotTypeEnum::SE_WALL && SlotsConfig.GetSlotConnection(i, j) && !SlotsConfig.IsSlotUsed(j))
+						{							
+							float Angle = Velocity.Rotation().Yaw + (SlotsConfig.GetSlotParam(j, 0) - 0.5f) * 180.f + 90.f;
+							FQuat Quat = FQuat(FVector::UpVector, FMath::DegreesToRadians(Angle));
+							DrawDebugBox(GetWorld(), GetActorLocation(), FVector(300.f, 15.f, 175.f), Quat, FColor::Blue);
+							SlotsConfig.SetSlotUsed(j);
+							break;
+						}
+					}
+
+					SlotsConfig.SetSlotUsed(i);
+					DrawDebugSphere(GetWorld(), GetActorLocation(), Sphere->GetScaledSphereRadius(), 10, FColor::Blue);
+					DrawDebugString(GetWorld(), GetActorLocation() + FVector(-50.f, -50.f, -50.f), FString::Printf(TEXT("%f"), CurrentTime), nullptr, FColor::Red, 0.f);
+				}
+			}
 		}
 	}
 }
