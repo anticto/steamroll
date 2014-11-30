@@ -446,19 +446,21 @@ void ASteamrollBall::ReduceVerticalVelocity(FVector& Velocity, bool bTouchingFlo
 {
 	bTouchingFloor = IsTouchingFloor(true);
 
-	if (!bTouchingFloor && Velocity.Z > 0.f)
+	if (!bTouchingFloor && Velocity.Z > 10.f)
 	{
 		float Len = Velocity.Size();
 		
 		if (Len != 0.f)
 		{
-			float AngleWithVertical = FMath::Acos((Velocity / Len) | FVector::UpVector);
+			float AngleWithVertical = FMath::RadiansToDegrees(FMath::Acos((Velocity / Len) | FVector::UpVector));
 
-			if (AngleWithVertical > FMath::DegreesToRadians(20.f))
+			if (AngleWithVertical > 5.f)
 			{
 				Velocity.Z = 0.f;// Velocity.Z - 10.f * Velocity.Z * DeltaSeconds;
 				Velocity.Normalize();
 				Velocity *= Len;
+				//float RotationAngle = 90.f - AngleWithVertical;
+				//Velocity = Velocity.RotateAngleAxis(RotationAngle, FVector::CrossProduct(FVector::UpVector, Velocity));
 			}
 		}
 	}
@@ -640,7 +642,17 @@ float ASteamrollBall::UpdateBallPhysics(ASteamrollBall& Ball, float DeltaSeconds
 					Velocity = ReflectedVector * Speed;
 					FVector VelocityN = OutHit.ImpactNormal * (Velocity | OutHit.ImpactNormal);
 					FVector VelocityT = Velocity - VelocityN;
-					Velocity = VelocityT + VelocityN * OutHit.PhysMaterial->Restitution;
+					
+					// If impact normal is not flat or vertical, that is, we hit a ramp, set restitution to 0 to cancel normal velocity and snap ball to the ramp to prevent it from rebounding hard and flying away
+					float Restitution = OutHit.PhysMaterial->Restitution;
+					
+					if (FMath::IsWithin(OutHit.ImpactNormal | FVector::UpVector, 0.1f, 0.9f))
+					{
+						VelocityT = VelocityT.SafeNormal() * Speed;
+						Restitution = 0.f;
+					}
+
+					Velocity = VelocityT + VelocityN * Restitution;
 					Speed = Velocity.Size();
 				}
 
