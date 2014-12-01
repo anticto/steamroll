@@ -4,6 +4,7 @@
 #include "PlayerBase.h"
 #include "SteamrollPlayerController.h"
 #include "SteamrollBall.h"
+#include "SteamrollSphereComponent.h"
 #include "TrajectoryComponent.h"
 
 #include "EngineUtils.h"
@@ -70,8 +71,8 @@ ASteamrollBall* APlayerBase::CreateSimulatedBall()
 
 	if (SimulatedBall)
 	{
-		SimulatedBall->bHidden = false;
-		SimulatedBall->bSimulationBall = true;
+		//SimulatedBall->bHidden = false;
+		SimulatedBall->Sphere->bSimulationBall = true;
 		SimulatedBall->SetActorEnableCollision(false);
 		SimulatedBall->Sphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		SimulatedBall->Sphere->SetSimulatePhysics(false);
@@ -125,9 +126,9 @@ void APlayerBase::Tick(float DeltaSeconds)
 			SimulatedBall->SetActorLocation(LaunchLocation);
 			SimulatedBall->SetVelocity(GetLaunchVelocity(Charge));
 
-			SimulatedBall->TrajectoryComponent->SimulatedLocations.Empty();
+			SimulatedBall->Sphere->TrajectoryComponent->SimulatedLocations.Empty();
 			
-			ASteamrollBall::UpdateBallPhysics(*SimulatedBall, 10.f);
+			SimulatedBall->Sphere->UpdateBallPhysics(10.f);
 			
 			//SimulatedBall->DrawPhysicalSimulation();
 

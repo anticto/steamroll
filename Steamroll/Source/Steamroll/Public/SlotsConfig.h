@@ -141,9 +141,9 @@ struct FSlotsConfigStruct
 	}
 	
 	
-	void SetSlotUsed(int32 SlotIndex)
+	void SetSlotUsed(int32 SlotIndex, bool bUsed = true)
 	{
-		Slots[SlotIndex - 1].Used = true;
+		Slots[SlotIndex - 1].Used = bUsed;
 	}
 	
 	

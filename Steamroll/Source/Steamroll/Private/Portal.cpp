@@ -24,15 +24,15 @@ void APortal::OnBeginOverlap(class AActor* OtherActor, class UPrimitiveComponent
 		FTransform Inverse = GetTransform().Inverse();
 
 		FVector LocalLocation = Inverse.TransformPosition(SteamrollBall->GetActorLocation());
-		FVector LocalVelocity = Inverse.TransformVector(SteamrollBall->Sphere->GetPhysicsLinearVelocity());
-		FVector LocalAngularVelocity = Inverse.TransformVector(SteamrollBall->Sphere->GetPhysicsAngularVelocity());
+		FVector LocalVelocity = Inverse.TransformVector(SteamrollBall->GetVelocity());
+		//FVector LocalAngularVelocity = Inverse.TransformVector(SteamrollBall->Sphere->GetPhysicsAngularVelocity());
 
 		FVector WorldTransformedLocation = LinkedPortal->GetTransform().TransformPosition(LocalLocation);
 		FVector WorldTransformedVelocity = LinkedPortal->GetTransform().TransformVector(LocalVelocity);
-		FVector WorldTransformedAngularVelocity = LinkedPortal->GetTransform().TransformVector(LocalAngularVelocity);
+		//FVector WorldTransformedAngularVelocity = LinkedPortal->GetTransform().TransformVector(LocalAngularVelocity);
 
-		SteamrollBall->Sphere->SetPhysicsLinearVelocity(WorldTransformedVelocity);
-		SteamrollBall->Sphere->SetPhysicsAngularVelocity(WorldTransformedAngularVelocity);
+		SteamrollBall->SetVelocity(WorldTransformedVelocity);
+		//SteamrollBall->Sphere->SetPhysicsAngularVelocity(WorldTransformedAngularVelocity);
 		SteamrollBall->TeleportTo(WorldTransformedLocation, SteamrollBall->GetActorRotation());
 	}
 }

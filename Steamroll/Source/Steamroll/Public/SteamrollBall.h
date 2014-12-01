@@ -4,21 +4,17 @@
 #include "GameFramework/Pawn.h"
 #include "SlotsConfig.h"
 #include "ExplosionDestructibleInterface.h"
-#include "DraggingBall.h"
 #include "SteamrollBall.generated.h"
 
 
 UCLASS(config=Game)
-class ASteamrollBall : public AActor, public IExplosionDestructibleInterface, public DraggingBall
+class ASteamrollBall : public AActor, public IExplosionDestructibleInterface
 {
 	GENERATED_UCLASS_BODY()
 
 	/** Capsule used for the ball collison and physics */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Ball)
-	TSubobjectPtr<class USphereComponent> Sphere;
-
-	UPROPERTY()
-	TSubobjectPtr<class UTrajectoryComponent> TrajectoryComponent;
+	TSubobjectPtr<class USteamrollSphereComponent> Sphere;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Ball)
 	bool Activated;
@@ -73,7 +69,7 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface, pu
 
 	/** Returns true if the ball is touching the floor */
 	UFUNCTION(BlueprintCallable, Category = Ball)
-	bool IsTouchingFloor(bool bSphereTrace = false) const;
+	bool IsTouchingFloor() const;
 
 	/** Returns true if the ball is touching the floor */
 	UFUNCTION(BlueprintCallable, Category = Ball)
@@ -96,31 +92,16 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface, pu
 	virtual void ActivateSlotEvent(const TEnumAsByte<ESlotTypeEnum::SlotType>& SlotType, float Param1, float Param2);
 
 	void ActivateRemoteTriggers();
-
-	// Physical Simulation
-	bool bSimulationBall;
+	void ActivateSnapRamp(const FVector& Location, const FVector& Normal);
 
 	FVector GetVelocity() const;
 	void SetVelocity(const FVector& NewVelocity);
-	void DrawPhysicalSimulation();
-	static float UpdateBallPhysics(ASteamrollBall& Ball, float DeltaSeconds);
-	static FVector DragPhysics(const FVector& Velocity, float TravelTime, float DragCoefficient);
 
 protected:
-
-	float TimeForNextPaint;
 	float CurrentTime;
-	float RemainingTime;
-	
-	bool IsActivated();
-	void DraggingBallActivate();
-	void DraggingBallStop();
+	float TimeForNextPaint;
 
 	/** Timer slot timeout */
-	void Timeout1();
-	void Timeout2();
-	void Timeout3();
-	void Timeout4();
 	bool bIsTimerRunning[5];
 
 	virtual void BeginPlay() override;
@@ -130,25 +111,5 @@ protected:
 	void ActivateStopTriggers();
 	void ActivateConnectedSlots(int32 SlotIndex);
 	bool ActivateSlot(int32 SlotIndex);
-	void ActivateSnapRamp(const FVector& Location, const FVector& Normal);
 
-	/** Collision/Physics system */	
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Physics)
-	FVector Velocity;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Physics)
-	AActor* LastCollidedActor;
-
-	/** How many consecutive frames the ball has been colliding with a ball, used to stop the ball velocity if it has become stuck */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Physics)
-	uint32 NumFramesCollidingWithBall;
-
-	float UpdateBallPhysics(float DeltaSeconds);	
-	void SeparateBalls(ASteamrollBall* OtherBall, const FVector& PushVector, float DepenetrationSpeed, float DeltaSeconds);
-	void RotateBall(FVector& Velocity, float Speed, float DeltaSeconds);
-	void DrawTimedSlots(float CurrentTime, const FVector& Velocity);
-
-private:
-	void AddLocation(const FVector& Location);
-	void ReduceVerticalVelocity(FVector& Velocity, bool bTouchingFloor, float DeltaSeconds);
 };

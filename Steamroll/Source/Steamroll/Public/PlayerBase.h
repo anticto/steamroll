@@ -37,7 +37,7 @@ class STEAMROLL_API APlayerBase : public ASteamrollPawn
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Collect)
 	float CollectedQuantity;
 
-	/** Base's collected resource quantity */
+	/** Simulated ball for trajectory display */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = SimulatedBall)
 	ASteamrollBall* SimulatedBall;
 
