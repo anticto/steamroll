@@ -236,7 +236,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 					ReflectedVector.Normalize();
 					Speed = Velocity.Size();
 
-					if (!Ball.bSimulationBall && Speed > 0.f && ((ReflectedVector | (Velocity / Speed)) < 0.f) && (FMath::Abs(OutHit.ImpactNormal | FVector::UpVector) < 0.1f))
+					if (BallActor && !Ball.bSimulationBall && Speed > 0.f && ((ReflectedVector | (Velocity / Speed)) < 0.f) && (FMath::Abs(OutHit.ImpactNormal | FVector::UpVector) < 0.1f))
 					{
 						BallActor->ActivateSnapRamp(OutHit.ImpactPoint, OutHit.ImpactNormal);
 					}

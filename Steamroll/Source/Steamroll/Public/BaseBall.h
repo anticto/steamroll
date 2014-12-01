@@ -3,14 +3,13 @@
 #pragma once
 
 #include "SteamrollPawn.h"
-#include "DraggingBall.h"
 #include "BaseBall.generated.h"
 
 /**
  * The undeployed player base
  */
 UCLASS()
-class STEAMROLL_API ABaseBall : public ASteamrollPawn, public DraggingBall
+class STEAMROLL_API ABaseBall : public ASteamrollPawn
 {
 	GENERATED_UCLASS_BODY()
 
@@ -19,7 +18,7 @@ class STEAMROLL_API ABaseBall : public ASteamrollPawn, public DraggingBall
 
 	/** Capsule used for the ball collison and physics */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Base)
-	TSubobjectPtr<class USphereComponent> Sphere;
+	TSubobjectPtr<class USteamrollSphereComponent> Sphere;
 
 	/** Mesh used for the ball */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Base)
@@ -33,8 +32,6 @@ class STEAMROLL_API ABaseBall : public ASteamrollPawn, public DraggingBall
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Base)
 	TSubobjectPtr<class USpringArmComponent> SpringArm;
 
-	bool IsTouchingFloor() const;
-
 protected:
 
 	virtual void Tick(float DeltaSeconds);
@@ -44,10 +41,5 @@ protected:
 
 	/** Actual Explosion procedure */
 	virtual void Explode() override;
-
-	// DraggingBall overrides
-	bool IsActivated();
-	void DraggingBallActivate();
-	void DraggingBallStop();
 	
 };

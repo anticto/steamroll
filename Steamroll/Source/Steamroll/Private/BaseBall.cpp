@@ -2,6 +2,7 @@
 
 #include "Steamroll.h"
 #include "BaseBall.h"
+#include "SteamrollSphereComponent.h"
 
 
 ABaseBall::ABaseBall(const class FPostConstructInitializeProperties& PCIP)
@@ -9,7 +10,7 @@ ABaseBall::ABaseBall(const class FPostConstructInitializeProperties& PCIP)
 {
 	Activated = true;
 
-	Sphere = PCIP.CreateDefaultSubobject<USphereComponent>(this, TEXT("Sphere"));
+	Sphere = PCIP.CreateDefaultSubobject<USteamrollSphereComponent>(this, TEXT("Sphere"));
 	SphereMesh = PCIP.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("SphereMesh"));
 	GyroMesh = PCIP.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("GyroMesh"));	
 	SpringArm = PCIP.CreateDefaultSubobject<USpringArmComponent>(this, TEXT("BaseSpringArm0"));
@@ -21,20 +22,24 @@ ABaseBall::ABaseBall(const class FPostConstructInitializeProperties& PCIP)
 	SpringArm->AttachTo(AimTransform);
 	Camera->AttachTo(SpringArm);
 
-	DraggingBallSetSphere(Sphere);
-
 	PrimaryActorTick.bCanEverTick = true;
 }
 
 
 void ABaseBall::Tick(float DeltaSeconds)
 {
+	static const float StoppingSpeed = 10.f;
+
 	Super::Tick(DeltaSeconds);
+	Sphere->SteamrollTick(DeltaSeconds);
 
-	bool bTouchingFloor = IsTouchingFloor();
-	float SpeedSquared = GetVelocity().SizeSquared();
+	bool bTouchingFloor = Sphere->IsTouchingFloor();
 
-	DraggingBallTick(DeltaSeconds, bTouchingFloor, SpeedSquared);
+	if (!Activated && bTouchingFloor && Sphere->Velocity.SizeSquared() < FMath::Square(StoppingSpeed))
+	{
+		Activated = true;
+		Sphere->Velocity = FVector::ZeroVector;
+	}
 }
 
 
@@ -42,7 +47,6 @@ void ABaseBall::Fire(float ChargeTime)
 {
 	if (Activated)
 	{
-		DraggingBallReset();
 		Activated = false;
 
 		// Firing direction
@@ -52,7 +56,7 @@ void ABaseBall::Fire(float ChargeTime)
 		// Firing power
 		float LaunchPower = ChargeTime / FiringTimeout;
 		float LaunchSpeed = FMath::Lerp(MinLaunchSpeed, MaxLaunchSpeed, LaunchPower);
-		Sphere->SetPhysicsLinearVelocity(Direction * LaunchSpeed);
+		Sphere->Velocity = Direction * LaunchSpeed;
 
 		ExplosionClient();
 	}
@@ -70,44 +74,5 @@ void ABaseBall::Explode()
 	//Emitter->AddActorLocalOffset(FVector(400.f, 0.f, 0.f));
 	//Emitter->SetActorScale3D(FVector(4.f, 4.f, 4.f));
 	//Emitter->SetLifeSpan(4.f);
-}
-
-
-bool ABaseBall::IsActivated()
-{
-	return Activated;
-}
-
-
-void ABaseBall::DraggingBallActivate()
-{
-	Activated = true;
-}
-
-
-void ABaseBall::DraggingBallStop()
-{
-	Sphere->PutRigidBodyToSleep();
-	Sphere->SetAllPhysicsLinearVelocity(FVector(0.f, 0.f, 0.f));
-	Sphere->SetAllPhysicsAngularVelocity(FVector(0.f, 0.f, 0.f));
-}
-
-
-bool ABaseBall::IsTouchingFloor() const
-{
-	FCollisionQueryParams RV_TraceParams = FCollisionQueryParams(FName(TEXT("RV_Trace")), true, this);
-	RV_TraceParams.bTraceComplex = true;
-	RV_TraceParams.bTraceAsyncScene = true;
-	RV_TraceParams.bReturnPhysicalMaterial = false;
-	//Re-initialize hit info
-	FHitResult RV_Hit(ForceInit);
-
-	return GetWorld()->LineTraceSingle(
-		RV_Hit, //result
-		GetActorLocation(), //start
-		GetActorLocation() + FVector(0.f, 0.f, -Sphere->GetScaledSphereRadius() - 1.f), //end
-		ECC_PhysicsBody, //collision channel
-		RV_TraceParams
-		);
 }
 

@@ -36,7 +36,7 @@ ASteamrollBall::ASteamrollBall(const class FPostConstructInitializeProperties& P
 
 void ASteamrollBall::Tick(float DeltaSeconds)
 {
-	static const float StoppingSpeed = 10.f;;
+	static const float StoppingSpeed = 10.f;
 
 	Super::Tick(DeltaSeconds);
 	Sphere->SteamrollTick(DeltaSeconds);
@@ -46,7 +46,7 @@ void ASteamrollBall::Tick(float DeltaSeconds)
 
 	float SpeedSquared = GetVelocity().SizeSquared();
 
-	if (!Activated && SpeedSquared < StoppingSpeed)
+	if (!Activated && bTouchingFloor && SpeedSquared < StoppingSpeed)
 	{
 		ActivateBall();
 	}
@@ -88,7 +88,6 @@ void ASteamrollBall::Tick(float DeltaSeconds)
 		ActorsToIgnore.Add(this);
 		TArray<TEnumAsByte<EObjectTypeQuery> > ObjectTypes;
 		
-		//UKismetSystemLibrary::SphereOverlapActors_NEW(GetWorld(), this->GetActorLocation(), Sphere->GetUnscaledSphereRadius() + 50.f, ObjectTypes, nullptr, ActorsToIgnore, Actors);
 		Sphere->GetOverlappingActors(Actors);
 
 		for (auto Actor : Actors)
@@ -116,7 +115,6 @@ void ASteamrollBall::Tick(float DeltaSeconds)
 void ASteamrollBall::ActivateBall_Implementation()
 {
 	Activated = true;
-	//GetWorldTimerManager().ClearTimer(this, &ASteamrollBall::Timeout1);  // In case the timer slot was set and somehow the ball was activated before it fired (remote activation for example)
 	StopBall();
 }
 
@@ -209,7 +207,7 @@ void ASteamrollBall::BeginPlay()
 
 void ASteamrollBall::WakeBall()
 {
-	//DraggingBallReset();
+	// Do nothing with the custom physics systems, leave it in case it is called from blueprint
 }
 
 
