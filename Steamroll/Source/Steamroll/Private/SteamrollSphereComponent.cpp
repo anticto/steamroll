@@ -21,6 +21,14 @@ USteamrollSphereComponent::USteamrollSphereComponent(const class FPostConstructI
 	NumFramesCollidingWithBall = 0;
 	bSimulationBall = false;
 	RemainingTime = 0.f;
+
+	NumIterations = 10;
+	MaxDeltaSeconds = 1.f / 30.f;
+	DepenetrationSpeed = 1000.f;
+	DragCoefficient = 0.2f;
+	DragCoefficientSlow = 0.8f;
+	DragCoefficientSlowSpeed = 100.f;
+	DragConstantSlowSpeed = 10.f;
 }
 
 
@@ -68,12 +76,6 @@ void USteamrollSphereComponent::DrawPhysicalSimulation()
 
 float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivided)
 {
-	/** How many collision tests are going to be made per subtick */
-	const static uint32 NumIterations = 10;
-	const static float MaxDeltaSeconds = 1.f / 30.f;
-	const static float DepenetrationSpeed = 1000.f;
-	const static float DragCoefficient = 0.4f;
-
 	USteamrollSphereComponent& Ball = *this;
 	FVector& Velocity = Ball.Velocity;
 	ASteamrollBall* BallActor = Cast<ASteamrollBall>(GetAttachmentRootActor());
@@ -158,7 +160,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 				Ball.LastCollidedActor = &*OutHit.Actor;
 
 				float TravelTime = OutHit.Time * RemainingTime;
-				Velocity = DragPhysics(Velocity, TravelTime, DragCoefficient);
+				Velocity = DragPhysics(Velocity, TravelTime);
 
 				if (!Ball.bSimulationBall)
 				{
@@ -274,7 +276,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 					Ball.RotateBall(Velocity, Speed, RemainingTime);
 				}
 
-				Velocity = DragPhysics(Velocity, RemainingTime, DragCoefficient);
+				Velocity = DragPhysics(Velocity, RemainingTime);
 				Ball.SetActorLocation(NewLocation); // No collision, so the ball can travel all the way
 				Ball.AddLocation(NewLocation);
 
@@ -345,9 +347,22 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 }
 
 
-FVector USteamrollSphereComponent::DragPhysics(const FVector& Velocity, float TravelTime, float DragCoefficient)
+FVector USteamrollSphereComponent::DragPhysics(const FVector& Velocity, float TravelTime)
 {
-	return Velocity - Velocity * DragCoefficient * TravelTime;
+	float SelectedCoefficient;
+
+	if (Velocity.SizeSquared() > FMath::Square(DragCoefficientSlowSpeed))
+	{
+		SelectedCoefficient = DragCoefficient;
+	}
+	else
+	{
+		SelectedCoefficient = DragCoefficientSlow;
+	}
+
+	float ActualCoefficient = FMath::Min(SelectedCoefficient * TravelTime, 1.f);
+
+	return Velocity - Velocity * ActualCoefficient;
 }
 
 
@@ -421,7 +436,7 @@ void USteamrollSphereComponent::DrawTimedSlots(float CurrentTime, const FVector&
 
 					BallActor->SlotsConfig.SetSlotUsed(i);
 					DrawDebugSphere(GetWorld(), GetActorLocation(), GetScaledSphereRadius(), 10, FColor::Blue);
-					DrawDebugString(GetWorld(), GetActorLocation() + FVector(-50.f, -50.f, -50.f), FString::Printf(TEXT("%f"), CurrentTime), nullptr, FColor::Red, 0.f);
+					//DrawDebugString(GetWorld(), GetActorLocation() + FVector(-50.f, -50.f, -50.f), FString::Printf(TEXT("%f"), CurrentTime), nullptr, FColor::Red, 0.f);
 				}
 			}
 		}
@@ -452,9 +467,15 @@ void USteamrollSphereComponent::ReduceVerticalVelocity(FVector& Velocity, bool b
 
 			if (AngleWithVertical > 5.f)
 			{
-				Velocity.Z = 0.f;// Velocity.Z - 10.f * Velocity.Z * DeltaSeconds;
+				//float InitialLen = Velocity.Size();
+				//float Drag = FMath::Min(10.f * Velocity.Z * DeltaSeconds, Velocity.Z);
+				//Velocity.Z = Velocity.Z - Drag;
+				//Velocity = Velocity.SafeNormal() * InitialLen;
+
+				Velocity.Z = 0.f;
 				Velocity.Normalize();
 				Velocity *= Len;
+
 				//float RotationAngle = 90.f - AngleWithVertical;
 				//Velocity = Velocity.RotateAngleAxis(RotationAngle, FVector::CrossProduct(FVector::UpVector, Velocity));
 			}

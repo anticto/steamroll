@@ -23,6 +23,8 @@ ABaseBall::ABaseBall(const class FPostConstructInitializeProperties& PCIP)
 	Camera->AttachTo(SpringArm);
 
 	PrimaryActorTick.bCanEverTick = true;
+
+	Sphere->DragCoefficientSlow = 10.f;
 }
 
 

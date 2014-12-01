@@ -225,7 +225,7 @@ void ASteamrollBall::ExplosionEvent_Implementation()
 
 void ASteamrollBall::ActivateTimerTrigger(int32 SlotIndex)
 {
-	DrawDebugString(GetWorld(), GetActorLocation(), FString::Printf(TEXT("%f"), CurrentTime), nullptr, FColor::Blue, 2.f);
+	//DrawDebugString(GetWorld(), GetActorLocation(), FString::Printf(TEXT("%f"), CurrentTime), nullptr, FColor::Blue, 2.f);
 	ActivateConnectedSlots(SlotIndex);
 }
 

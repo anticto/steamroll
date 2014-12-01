@@ -26,7 +26,7 @@ ASteamrollPawn::ASteamrollPawn(const class FPostConstructInitializeProperties& P
 
 	FiringTimeout = 6.f;
 	MinLaunchSpeed = 50.f;
-	MaxLaunchSpeed = 8000.f;
+	MaxLaunchSpeed = 4000.f;
 	bFiring = false;
 	bFireSimulation = false;
 

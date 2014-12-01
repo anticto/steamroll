@@ -23,6 +23,18 @@ class STEAMROLL_API USteamrollSphereComponent : public USphereComponent
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Physics)
 	AActor* LastCollidedActor;
 
+	// Physics constants
+
+	/** How many collision tests are going to be made per subtick */
+	uint32 NumIterations;
+	/** Timestep length */
+	float MaxDeltaSeconds;
+	float DepenetrationSpeed;
+	float DragCoefficient;
+	float DragCoefficientSlow;
+	float DragCoefficientSlowSpeed;
+	float DragConstantSlowSpeed;
+
 	// Physical Simulation of trajectory or actual player gameplay?
 	bool bSimulationBall;
 
@@ -34,7 +46,7 @@ class STEAMROLL_API USteamrollSphereComponent : public USphereComponent
 	void SteamrollTick(float DeltaSeconds);
 	void DrawPhysicalSimulation();
 	//static float UpdateBallPhysics(ASteamrollBall& Ball, float DeltaSeconds);
-	static FVector DragPhysics(const FVector& Velocity, float TravelTime, float DragCoefficient);
+	FVector DragPhysics(const FVector& Velocity, float TravelTime);
 	
 	float UpdateBallPhysics(float DeltaSeconds);
 	void SeparateBalls(class ASteamrollBall* OtherBall, const FVector& PushVector, float DepenetrationSpeed, float DeltaSeconds);
