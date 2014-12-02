@@ -31,9 +31,29 @@ ABaseBall::ABaseBall(const class FPostConstructInitializeProperties& PCIP)
 void ABaseBall::Tick(float DeltaSeconds)
 {
 	static const float StoppingSpeed = 10.f;
+	static const float MaxSpeed = 5000.f;
 
 	Super::Tick(DeltaSeconds);
 	Sphere->SteamrollTick(DeltaSeconds);
+
+	if (bFiring)
+	{
+		// Firing direction
+		FVector Direction = AimTransform->GetComponentToWorld().TransformVector(FVector(1.f, 0.f, 0.f));
+		Direction.Z = 0.f;
+
+		// Firing power
+		float LaunchPower = DeltaSeconds / FiringTimeout;
+		float LaunchSpeed = FMath::Lerp(MinLaunchSpeed, MaxLaunchSpeed, LaunchPower);
+		Sphere->Velocity += Direction * LaunchSpeed;
+
+		float Speed = Sphere->Velocity.Size();
+
+		if (Speed > MaxSpeed)
+		{
+			Sphere->Velocity = Sphere->Velocity / Speed * MaxSpeed;
+		}
+	}
 
 	bool bTouchingFloor = Sphere->IsTouchingFloor();
 
@@ -50,17 +70,6 @@ void ABaseBall::Fire(float ChargeTime)
 	if (Activated)
 	{
 		Activated = false;
-
-		// Firing direction
-		FVector Direction = AimTransform->GetComponentToWorld().TransformVector(FVector(1.f, 0.f, 0.f));
-		Direction.Z = 0.f;
-
-		// Firing power
-		float LaunchPower = ChargeTime / FiringTimeout;
-		float LaunchSpeed = FMath::Lerp(MinLaunchSpeed, MaxLaunchSpeed, LaunchPower);
-		Sphere->Velocity = Direction * LaunchSpeed;
-
-		ExplosionClient();
 	}
 }
 

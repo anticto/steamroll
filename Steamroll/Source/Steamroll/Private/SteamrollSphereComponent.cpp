@@ -23,7 +23,7 @@ USteamrollSphereComponent::USteamrollSphereComponent(const class FPostConstructI
 	RemainingTime = 0.f;
 
 	NumIterations = 10;
-	MaxDeltaSeconds = 1.f / 30.f;
+	MaxDeltaSeconds = 1.f / 60.f;
 	DepenetrationSpeed = 1000.f;
 	DragCoefficient = 0.2f;
 	DragCoefficientSlow = 0.8f;
@@ -467,14 +467,14 @@ void USteamrollSphereComponent::ReduceVerticalVelocity(FVector& Velocity, bool b
 
 			if (AngleWithVertical > 5.f)
 			{
-				//float InitialLen = Velocity.Size();
-				//float Drag = FMath::Min(10.f * Velocity.Z * DeltaSeconds, Velocity.Z);
-				//Velocity.Z = Velocity.Z - Drag;
-				//Velocity = Velocity.SafeNormal() * InitialLen;
+				float InitialLen = Velocity.Size();
+				float Drag = FMath::Min(10.f * Velocity.Z * DeltaSeconds, Velocity.Z);
+				Velocity.Z = Velocity.Z - Drag;
+				Velocity = Velocity.SafeNormal() * InitialLen;
 
-				Velocity.Z = 0.f;
-				Velocity.Normalize();
-				Velocity *= Len;
+				//Velocity.Z = 0.f;
+				//Velocity.Normalize();
+				//Velocity *= Len;
 
 				//float RotationAngle = 90.f - AngleWithVertical;
 				//Velocity = Velocity.RotateAngleAxis(RotationAngle, FVector::CrossProduct(FVector::UpVector, Velocity));
