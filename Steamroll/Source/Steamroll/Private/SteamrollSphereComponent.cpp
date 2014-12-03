@@ -234,6 +234,15 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 					//ActorsToIgnore.Push(Ball.LastCollidedActor);
 					CollidedWithBallThisFrame = nullptr;
 
+					FVector ImpactRadiusVector = (OutHit.Location - OutHit.ImpactPoint).SafeNormal(); // In fact this is the ball's normal
+
+					if (FMath::Abs(OutHit.ImpactNormal | ImpactRadiusVector) < 0.99f)
+					{
+						// Impacted against corner, use and interpolated "corner" normal
+						OutHit.ImpactNormal = ImpactRadiusVector;
+						//DrawDebugSphere(Ball.GetWorld(), Ball.GetActorLocation(), Ball.GetScaledSphereRadius() + 0.1f, 20, FColor::Green, false, 0.f);
+					}
+
 					FVector ReflectedVector = Velocity.MirrorByVector(OutHit.ImpactNormal);
 					ReflectedVector.Normalize();
 					Speed = Velocity.Size();
