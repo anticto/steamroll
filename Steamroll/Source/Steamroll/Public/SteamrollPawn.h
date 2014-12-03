@@ -75,6 +75,9 @@ class STEAMROLL_API ASteamrollPawn : public APawn
 	UFUNCTION(BlueprintCallable, Category = Base)
 	void InitCameraAnim();
 
+	/** Firing timer timeout callback */
+	virtual void Timeout();
+
 protected:
 
 	virtual void BeginPlay() override;
@@ -88,25 +91,22 @@ protected:
 	virtual void MoveRight(float Val);
 
 	/** Called to charge the cannon */
-	void FireCharge();
+	virtual void FireCharge();
 
 	/** Called to fire the cannon */
-	void FireRelease();
-
-	/** Firing timer timeout callback */
-	void Timeout();
+	virtual void FireRelease();
 
 	/** Similar to FireRelease but with controlled power for debugging purposes */
-	void FireDebug1();
-	void FireDebug2();
-	void FireDebug3();
-	void FireDebug4();
-	void FireDebug5();
-	void FireDebug6();
-	void FireDebug7();
-	void FireDebug8();
-	void FireDebug9();
-	void FireDebug10();
+	virtual void FireDebug1();
+	virtual void FireDebug2();
+	virtual void FireDebug3();
+	virtual void FireDebug4();
+	virtual void FireDebug5();
+	virtual void FireDebug6();
+	virtual void FireDebug7();
+	virtual void FireDebug8();
+	virtual void FireDebug9();
+	virtual void FireDebug10();
 
 	/** Actual Firing procedure */
 	virtual void Fire(float ChargeTime);
@@ -115,7 +115,7 @@ protected:
 	virtual void Explode();
 
 	/** Destroys all the balls in the scene */
-	void DestroyBalls();
+	virtual void DestroyBalls();
 
 	void ToggleFireSimulation();
 

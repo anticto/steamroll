@@ -41,5 +41,4 @@ protected:
 
 	/** Actual Explosion procedure */
 	virtual void Explode() override;
-	
 };

@@ -41,6 +41,10 @@ class STEAMROLL_API APlayerBase : public ASteamrollPawn
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = SimulatedBall)
 	ASteamrollBall* SimulatedBall;
 
+	/** Cannon charge level */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Base)
+	float ChargeTime;
+
 
 protected:
 
@@ -52,6 +56,9 @@ protected:
 
 	virtual void Tick(float DeltaSeconds) override;
 
+	void FireCharge() override;
+	void FireRelease() override;
+
 	/** Called to angle the cannon */
 	void MoveForward(float Val);
 
@@ -60,6 +67,19 @@ protected:
 
 	/** Actual Explosion procedure */
 	virtual void Explode() override;
+
+	virtual void DestroyBalls() override;
+
+	virtual void FireDebug1() override;
+	virtual void FireDebug2() override;
+	virtual void FireDebug3() override;
+	virtual void FireDebug4() override;
+	virtual void FireDebug5() override;
+	virtual void FireDebug6() override;
+	virtual void FireDebug7() override;
+	virtual void FireDebug8() override;
+	virtual void FireDebug9() override;
+	virtual void FireDebug10() override;
 
 	/** Deletes last deployed actor */
 	void Undo();
