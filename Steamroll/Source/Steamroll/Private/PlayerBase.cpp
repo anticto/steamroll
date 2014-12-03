@@ -258,6 +258,14 @@ void APlayerBase::Undo()
 
 	if (SteamrollPlayerController && SteamrollPlayerController->LastDeployedActor)
 	{
+		TArray<AActor*> AttachedActors;
+		SteamrollPlayerController->LastDeployedActor->GetAttachedActors(AttachedActors);
+
+		for (auto Child : AttachedActors)
+		{
+			Child->Destroy();
+		}
+
 		SteamrollPlayerController->LastDeployedActor->Destroy();
 		SteamrollPlayerController->LastDeployedActor = nullptr;
 	}
