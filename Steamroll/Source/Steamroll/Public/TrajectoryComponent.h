@@ -2,27 +2,30 @@
 
 #pragma once
 
-#include "Components/PrimitiveComponent.h"
+#include "ProceduralMeshComponent.h"
 #include "TrajectoryComponent.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class STEAMROLL_API UTrajectoryComponent : public UPrimitiveComponent
+class STEAMROLL_API UTrajectoryComponent : public UProceduralMeshComponent
 {
 	GENERATED_UCLASS_BODY()
 
-	// Begin UPrimitiveComponent interface.
-	virtual FPrimitiveSceneProxy* CreateSceneProxy() override;
-	virtual bool IsZeroExtent() const override;
-	virtual struct FCollisionShape GetCollisionShape(float Inflation = 0.0f) const override;
-	virtual bool AreSymmetricRotations(const FQuat& A, const FQuat& B, const FVector& Scale3D) const override;
-	virtual FBoxSphereBounds CalcBounds(const FTransform & LocalToWorld) const override;
-	// End UPrimitiveComponent interface.
+	void AddLocation(const FVector& Location, bool bOverrideMinDistBetweenLocations = false);
+	void DeleteLocations();
+	void SendData();
 
-	TArray<FVector> SimulatedLocations;
+protected:
+	FVector LastLocation;
+	FVector LastXAxis;
+	FVector LastP0;
+	FVector LastP1;
+	bool bAddedFirstLocation;
+	bool bLastPValid;
 	float Radius;
+	float CumulativeV;
 
 	UPROPERTY()
 	UMaterial* TrajectoryMat;

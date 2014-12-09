@@ -238,7 +238,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 
 					if (FMath::Abs(OutHit.ImpactNormal | ImpactRadiusVector) < 0.99f)
 					{
-						// Impacted against corner, use and interpolated "corner" normal
+						// Impacted against corner, use an interpolated "corner" normal
 						OutHit.ImpactNormal = ImpactRadiusVector;
 						//DrawDebugSphere(Ball.GetWorld(), Ball.GetActorLocation(), Ball.GetScaledSphereRadius() + 0.1f, 20, FColor::Green, false, 0.f);
 					}
@@ -457,7 +457,7 @@ void USteamrollSphereComponent::AddLocation(const FVector& Location)
 {
 	if (bSimulationBall)
 	{
-		TrajectoryComponent->SimulatedLocations.Add(Location);
+		TrajectoryComponent->AddLocation(Location);
 	}
 }
 

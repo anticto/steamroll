@@ -152,9 +152,10 @@ void APlayerBase::Tick(float DeltaSeconds)
 			SimulatedBall->SetActorLocation(LaunchLocation);
 			SimulatedBall->SetVelocity(GetLaunchVelocity(ChargeTime));
 
-			SimulatedBall->Sphere->TrajectoryComponent->SimulatedLocations.Empty();
+			SimulatedBall->Sphere->TrajectoryComponent->DeleteLocations();
 			
 			SimulatedBall->Sphere->UpdateBallPhysics(10.f);
+			SimulatedBall->Sphere->TrajectoryComponent->SendData();
 			
 			//SimulatedBall->DrawPhysicalSimulation();
 
