@@ -40,37 +40,37 @@ void ASteamrollHUD::BeginPlay()
 void ASteamrollHUD::DrawHUD()
 {
 	Super::DrawHUD();
-	//Reticle.SetupReticle(8.0f, 2.0f);
+	////Reticle.SetupReticle(8.0f, 2.0f);
 
-	UFont* Font = GEngine->GetSmallFont();
-	// net mode
-	FString NetModeDesc =
-		(GetNetMode() == NM_Client) ? TEXT("Client") :
-		(GetNetMode() == NM_Standalone) ? TEXT("No network") : TEXT("Server");
-	DrawWithBackground(Font, NetModeDesc, FColor::Black, EAlignHorizontal::Right, 20, EAlignVertical::Top, 20);
+	//UFont* Font = GEngine->GetSmallFont();
+	//// net mode
+	//FString NetModeDesc =
+	//	(GetNetMode() == NM_Client) ? TEXT("Client") :
+	//	(GetNetMode() == NM_Standalone) ? TEXT("No network") : TEXT("Server");
+	//DrawWithBackground(Font, NetModeDesc, FColor::Black, EAlignHorizontal::Right, 20, EAlignVertical::Top, 20);
 
-	//AQAPawn* MyPawn = Cast<AQAPawn>(GetOwningPawn());
-	//if (MyPawn && MyPawn->IsAlive())
-	//{
-	//	// health
-	//	FString HealthDesc = FString::Printf(TEXT("Health: %d%%"), FMath::Trunc(100.0f * MyPawn->GetHealth() / MyPawn->GetMaxHealth()));
-	//	FColor HealthColor(38, 128, 0);
-	//	DrawWithBackground(Font, HealthDesc, HealthColor, EAlignHorizontal::Left, 20, EAlignVertical::Bottom, 20);
+	////AQAPawn* MyPawn = Cast<AQAPawn>(GetOwningPawn());
+	////if (MyPawn && MyPawn->IsAlive())
+	////{
+	////	// health
+	////	FString HealthDesc = FString::Printf(TEXT("Health: %d%%"), FMath::Trunc(100.0f * MyPawn->GetHealth() / MyPawn->GetMaxHealth()));
+	////	FColor HealthColor(38, 128, 0);
+	////	DrawWithBackground(Font, HealthDesc, HealthColor, EAlignHorizontal::Left, 20, EAlignVertical::Bottom, 20);
 
-	//	// weapon
-	//	DrawWeaponInfo();
-	//}
-	//else
-	//{
-	//	// respawn
-	//	FString RespawnDesc = TEXT("Waiting for respawn");
-	//	FColor RespawnColor(38, 128, 0);
-	//	DrawWithBackground(Font, RespawnDesc, RespawnColor, EAlignHorizontal::Left, 20, EAlignVertical::Bottom, 20);
-	//}
+	////	// weapon
+	////	DrawWeaponInfo();
+	////}
+	////else
+	////{
+	////	// respawn
+	////	FString RespawnDesc = TEXT("Waiting for respawn");
+	////	FColor RespawnColor(38, 128, 0);
+	////	DrawWithBackground(Font, RespawnDesc, RespawnColor, EAlignHorizontal::Left, 20, EAlignVertical::Bottom, 20);
+	////}
 
-	// engine version
-	FString VersionDesc = GEngineVersion.ToString();
-	DrawWithBackground(Font, VersionDesc, FColor::Black, EAlignHorizontal::Right, 20, EAlignVertical::Bottom, 20);
+	//// engine version
+	//FString VersionDesc = GEngineVersion.ToString();
+	//DrawWithBackground(Font, VersionDesc, FColor::Black, EAlignHorizontal::Right, 20, EAlignVertical::Bottom, 20);
 
 }
 
