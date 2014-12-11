@@ -9,6 +9,7 @@
 #include "SteamrollBall.h"
 #include "SlotsConfig.h"
 #include "Engine.h"
+#include "PlayerBase.h"
 
 
 USteamrollSphereComponent::USteamrollSphereComponent(const class FPostConstructInitializeProperties& PCIP)
@@ -29,6 +30,11 @@ USteamrollSphereComponent::USteamrollSphereComponent(const class FPostConstructI
 	DragCoefficientSlow = 0.8f;
 	DragCoefficientSlowSpeed = 100.f;
 	DragConstantSlowSpeed = 10.f;
+	
+	OnComponentHit.AddDynamic(this, &USteamrollSphereComponent::OnHit);
+	this->bGenerateOverlapEvents = true;
+	this->SetNotifyRigidBodyCollision(true);
+	
 }
 
 
@@ -43,35 +49,35 @@ void USteamrollSphereComponent::SteamrollTick(float DeltaSeconds)
 }
 
 
-void USteamrollSphereComponent::DrawPhysicalSimulation()
-{
-	float Radius = GetScaledSphereRadius();
-	TArray<FVector>* SimulatedLocations = &TrajectoryComponent->SimulatedLocations;
-
-	if (!SimulatedLocations || SimulatedLocations->Num() == 0)
-	{
-		return;
-	}
-	else if (SimulatedLocations->Num() == 1)
-	{
-		DrawDebugSphere(GetWorld(), SimulatedLocations->operator[](0), Radius, 10, FColor::Yellow, false, -1.f);
-		return;
-	}
-
-	DrawDebugSphere(GetWorld(), SimulatedLocations->operator[](0), Radius, 10, FColor::Yellow, false, -1.f);
-
-	uint32 Step = 4;
-
-	for (int32 Itr = Step; Itr < SimulatedLocations->Num() - 1; Itr += Step)
-	{
-		//DrawDebugCylinder(GetWorld(), SimulatedLocations->operator[](Itr - Step), SimulatedLocations->operator[](Itr), Sphere->GetScaledSphereRadius(), 10, FColor::Blue, false, -1.f);
-		DrawDebugLine(GetWorld(), SimulatedLocations->operator[](Itr - Step), SimulatedLocations->operator[](Itr), FColor::Blue, false, -1.f, 0, 2.f * GetScaledSphereRadius());
-
-		//DrawDebugSphere(GetWorld(), SimulatedLocations->operator[](Itr), Radius, 10, FColor::Red, false, -1.f);
-	}
-
-	DrawDebugSphere(GetWorld(), SimulatedLocations->operator[](SimulatedLocations->Num() - 1), Radius, 10, FColor::Yellow, false, -1.f);
-}
+//void USteamrollSphereComponent::DrawPhysicalSimulation()
+//{
+//	float Radius = GetScaledSphereRadius();
+//	TArray<FVector>* SimulatedLocations = &TrajectoryComponent->SimulatedLocations;
+//
+//	if (!SimulatedLocations || SimulatedLocations->Num() == 0)
+//	{
+//		return;
+//	}
+//	else if (SimulatedLocations->Num() == 1)
+//	{
+//		DrawDebugSphere(GetWorld(), SimulatedLocations->operator[](0), Radius, 10, FColor::Yellow, false, -1.f);
+//		return;
+//	}
+//
+//	DrawDebugSphere(GetWorld(), SimulatedLocations->operator[](0), Radius, 10, FColor::Yellow, false, -1.f);
+//
+//	uint32 Step = 4;
+//
+//	for (int32 Itr = Step; Itr < SimulatedLocations->Num() - 1; Itr += Step)
+//	{
+//		//DrawDebugCylinder(GetWorld(), SimulatedLocations->operator[](Itr - Step), SimulatedLocations->operator[](Itr), Sphere->GetScaledSphereRadius(), 10, FColor::Blue, false, -1.f);
+//		DrawDebugLine(GetWorld(), SimulatedLocations->operator[](Itr - Step), SimulatedLocations->operator[](Itr), FColor::Blue, false, -1.f, 0, 2.f * GetScaledSphereRadius());
+//
+//		//DrawDebugSphere(GetWorld(), SimulatedLocations->operator[](Itr), Radius, 10, FColor::Red, false, -1.f);
+//	}
+//
+//	DrawDebugSphere(GetWorld(), SimulatedLocations->operator[](SimulatedLocations->Num() - 1), Radius, 10, FColor::Yellow, false, -1.f);
+//}
 
 
 float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivided)
@@ -154,6 +160,11 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 					Ball.SetActorLocation(CurrentLocation);
 					Ball.AddLocation(CurrentLocation);
 
+					//if (OutHit.Actor->IsRootComponentMovable())
+					//{
+					//	OnHit(&*OutHit.Actor, &*OutHit.Component, OutHit.ImpactNormal, OutHit);
+					//}
+
 					continue;
 				}
 
@@ -172,6 +183,8 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 
 				Ball.SetActorLocation(CurrentLocation);
 				Ball.AddLocation(CurrentLocation);
+
+				DrawImpactSlots(Ball.LastCollidedActor, Velocity);
 
 				// Activate steamball by contact trigger
 				if (BallActor && BallActor->HasSlotState(ESlotTypeEnum::SE_EXPL) && BallActor->HasSlotState(ESlotTypeEnum::SE_CONTACT)
@@ -235,7 +248,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 					CollidedWithBallThisFrame = nullptr;
 
 					FVector ImpactRadiusVector = (OutHit.Location - OutHit.ImpactPoint).SafeNormal(); // In fact this is the ball's normal
-
+					
 					if (FMath::Abs(OutHit.ImpactNormal | ImpactRadiusVector) < 0.99f)
 					{
 						// Impacted against corner, use an interpolated "corner" normal
@@ -247,9 +260,9 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 					ReflectedVector.Normalize();
 					Speed = Velocity.Size();
 
-					if (BallActor && !Ball.bSimulationBall && Speed > 0.f && ((ReflectedVector | (Velocity / Speed)) < 0.f) && (FMath::Abs(OutHit.ImpactNormal | FVector::UpVector) < 0.1f))
+					if (BallActor && Speed > 0.f && ((ReflectedVector | (Velocity / Speed)) < 0.f) && (FMath::Abs(OutHit.ImpactNormal | FVector::UpVector) < 0.1f))
 					{
-						BallActor->ActivateSnapRamp(OutHit.ImpactPoint, OutHit.ImpactNormal);
+						ActivateSnapRamp(BallActor, OutHit.ImpactPoint, OutHit.ImpactNormal);
 					}
 
 					//DrawDebugDirectionalArrow(Ball.GetWorld(), OutHit.ImpactPoint, OutHit.ImpactPoint + OutHit.ImpactNormal * 100.f, 3.f, FColor::Yellow);
@@ -301,7 +314,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 
 				if (Ball.bSimulationBall)
 				{
-					DrawDebugSphere(Ball.GetWorld(), Ball.GetActorLocation(), Ball.GetScaledSphereRadius() + 0.1f, 20, FColor::Magenta, false, 0.f);
+					//DrawDebugSphere(Ball.GetWorld(), Ball.GetActorLocation(), Ball.GetScaledSphereRadius() + 0.1f, 20, FColor::Magenta, false, 0.f);
 					//DrawDebugString(Ball.GetWorld(), OutHit.ImpactPoint, FString::Printf(TEXT("Iteration Limit!")), nullptr, FColor::Red, 0.f);
 				}
 
@@ -433,12 +446,19 @@ void USteamrollSphereComponent::DrawTimedSlots(float CurrentTime, const FVector&
 				{
 					for (uint32 j = 1; j < 5; ++j)
 					{
-						if (i != j && BallActor->SlotsConfig.GetSlotType(j) == ESlotTypeEnum::SE_WALL && BallActor->SlotsConfig.GetSlotConnection(i, j) && !BallActor->SlotsConfig.IsSlotUsed(j))
+						if (i != j && BallActor->SlotsConfig.GetSlotConnection(i, j) && !BallActor->SlotsConfig.IsSlotUsed(j))
 						{
-							float Angle = Velocity.Rotation().Yaw + (BallActor->SlotsConfig.GetSlotParam(j, 0) - 0.5f) * 180.f + 90.f;
-							FQuat Quat = FQuat(FVector::UpVector, FMath::DegreesToRadians(Angle));
-							DrawDebugBox(GetWorld(), GetActorLocation(), FVector(300.f, 15.f, 175.f), Quat, FColor::Blue);
-							BallActor->SlotsConfig.SetSlotUsed(j);
+							if (BallActor->SlotsConfig.GetSlotType(j) == ESlotTypeEnum::SE_WALL)
+							{
+								DrawSimulationWall(BallActor, j);
+								BallActor->SlotsConfig.SetSlotUsed(j);
+							}
+							else if (BallActor->SlotsConfig.GetSlotType(j) == ESlotTypeEnum::SE_EXPL)
+							{
+								DrawSimulationExplosion(BallActor);
+								BallActor->SlotsConfig.SetSlotUsed(j);
+							}
+
 							break;
 						}
 					}
@@ -450,6 +470,69 @@ void USteamrollSphereComponent::DrawTimedSlots(float CurrentTime, const FVector&
 			}
 		}
 	}
+}
+
+
+void USteamrollSphereComponent::DrawImpactSlots(AActor* HitActor, const FVector& Velocity)
+{
+	ASteamrollBall* BallActor = Cast<ASteamrollBall>(GetAttachmentRootActor());
+
+	if (bSimulationBall && BallActor)
+	{
+		for (uint32 i = 1; i < 5; ++i)
+		{
+			if (BallActor->GetSlotState(i) == ESlotTypeEnum::SE_CONTACT && !BallActor->SlotsConfig.IsSlotUsed(i))
+			{
+				if (HitActor->GetClass()->ImplementsInterface(UExplosionDestructibleInterface::StaticClass()))
+				{
+					for (uint32 j = 1; j < 5; ++j)
+					{
+						if (i != j && BallActor->SlotsConfig.GetSlotConnection(i, j) && !BallActor->SlotsConfig.IsSlotUsed(j))
+						{
+							if (BallActor->SlotsConfig.GetSlotType(j) == ESlotTypeEnum::SE_WALL)
+							{
+								DrawSimulationWall(BallActor, j);
+								BallActor->SlotsConfig.SetSlotUsed(j);
+							}
+							else if (BallActor->SlotsConfig.GetSlotType(j) == ESlotTypeEnum::SE_EXPL)
+							{
+								DrawSimulationExplosion(BallActor);
+								BallActor->SlotsConfig.SetSlotUsed(j);
+							}
+
+							break;
+						}
+					}
+
+					BallActor->SlotsConfig.SetSlotUsed(i);
+					DrawDebugSphere(GetWorld(), GetActorLocation(), GetScaledSphereRadius(), 10, FColor::Blue);
+					//DrawDebugString(GetWorld(), GetActorLocation() + FVector(-50.f, -50.f, -50.f), FString::Printf(TEXT("%f"), CurrentTime), nullptr, FColor::Red, 0.f);
+				}
+			}
+		}
+	}
+}
+
+
+void USteamrollSphereComponent::DrawSimulationWall(ASteamrollBall* BallActor, uint32 SlotIndex)
+{
+	float Angle = Velocity.Rotation().Yaw + (BallActor->SlotsConfig.GetSlotParam(SlotIndex, 0) - 0.5f) * 180.f + 90.f;
+	FQuat Quat = FQuat(FVector::UpVector, FMath::DegreesToRadians(Angle));
+	DrawDebugBox(GetWorld(), GetActorLocation(), FVector(300.f, 15.f, 175.f), Quat, FColor::Blue);
+}
+
+
+void USteamrollSphereComponent::DrawSimulationExplosion(ASteamrollBall* BallActor)
+{
+	float Radius = 1000.f * FMath::Pow(BallActor->SlotsConfig.CountSlotType(ESlotTypeEnum::SE_EXPL), 2);
+	DrawDebugSphere(GetWorld(), GetActorLocation(), Radius, 10, FColor::Red);
+}
+
+
+void USteamrollSphereComponent::DrawSimulationRamp(const FVector& Location, const FVector& Normal)
+{
+	float Size = 150.f;
+	DrawDebugBox(GetWorld(), Location + Normal * Size * 0.5f, FVector(Size), Normal.Rotation().Quaternion(), FColor::Blue);
 }
 
 
@@ -558,5 +641,61 @@ FVector USteamrollSphereComponent::GetActorLocation() const
 void USteamrollSphereComponent::SetActorLocation(const FVector& Location)
 {
 	this->SetWorldLocation(Location);
+}
+
+
+void USteamrollSphereComponent::OnHit(AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+	this->PutRigidBodyToSleep();
+
+	if (Cast<USteamrollSphereComponent>(OtherComp))
+	{
+		return; // Collisions with other balls are handled by the balls themselves in the UpdatePhysics method
+	}
+	
+	if (OtherActor->IsRootComponentMovable() && !Cast<APlayerBase>(OtherActor))
+	{
+		DrawDebugSphere(GetWorld(), GetActorLocation(), GetScaledSphereRadius() + 0.1f, 15, FColor::Magenta, false, 0.f);
+		//Velocity = NormalImpulse.SafeNormal() * 100.f;
+		//Velocity = Velocity.MirrorByVector(Hit.ImpactNormal);
+		Velocity = Hit.ImpactNormal * 2500.f;
+	}
+}
+
+
+void USteamrollSphereComponent::ActivateSnapRamp(ASteamrollBall* BallActor, const FVector& Location, const FVector& Normal)
+{
+	for (int32 i = 1; i < 5; i++)
+	{
+		bool bConnectedToTrigger = false;
+
+		for (uint32 j = 1; j < 5; j++)
+		{
+			TEnumAsByte<ESlotTypeEnum::SlotType> Type = BallActor->GetSlotState(j);
+			bool bIsTrigger = Type == ESlotTypeEnum::SE_TIME;
+
+			if (i != j && bIsTrigger && BallActor->SlotsConfig.GetSlotConnection(j, i))
+			{
+				bConnectedToTrigger = true;
+				break;
+			}
+		}
+
+		if (!bConnectedToTrigger && BallActor->SlotsConfig.GetSlotType(i) == ESlotTypeEnum::SE_RAMP && !BallActor->SlotsConfig.IsSlotUsed(i))
+		{
+			BallActor->SlotsConfig.SetSlotUsed(i);
+
+			if (bSimulationBall)
+			{
+				DrawSimulationRamp(Location, Normal);
+			}
+			else
+			{
+				BallActor->SnapRampEvent(Location, Normal);
+			}
+
+			break;
+		}
+	}
 }
 

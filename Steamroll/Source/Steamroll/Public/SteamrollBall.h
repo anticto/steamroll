@@ -92,7 +92,6 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface
 	virtual void ActivateSlotEvent(const TEnumAsByte<ESlotTypeEnum::SlotType>& SlotType, float Param1, float Param2);
 
 	void ActivateRemoteTriggers();
-	void ActivateSnapRamp(const FVector& Location, const FVector& Normal);
 
 	FVector GetVelocity() const;
 	void SetVelocity(const FVector& NewVelocity);

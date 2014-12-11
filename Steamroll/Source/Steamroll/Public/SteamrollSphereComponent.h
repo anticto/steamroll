@@ -44,8 +44,6 @@ class STEAMROLL_API USteamrollSphereComponent : public USphereComponent
 	float RemainingTime;
 
 	void SteamrollTick(float DeltaSeconds);
-	void DrawPhysicalSimulation();
-	//static float UpdateBallPhysics(ASteamrollBall& Ball, float DeltaSeconds);
 	FVector DragPhysics(const FVector& Velocity, float TravelTime);
 	
 	float UpdateBallPhysics(float DeltaSeconds);
@@ -53,12 +51,20 @@ class STEAMROLL_API USteamrollSphereComponent : public USphereComponent
 	void RotateBall(FVector& Velocity, float Speed, float DeltaSeconds);
 	void ResetTimedSlots(ASteamrollBall* BallActor);
 	void DrawTimedSlots(float CurrentTime, const FVector& Velocity);
+	void DrawImpactSlots(AActor* HitActor, const FVector& Velocity);
 	bool IsTouchingFloor(bool bSphereTrace = false) const;
 	FVector GetActorLocation() const;
 	void SetActorLocation(const FVector& Location);
 
+	UFUNCTION()
+	virtual void OnHit(AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+	
+
 private:
 	void AddLocation(const FVector& Location);
 	void ReduceVerticalVelocity(FVector& Velocity, bool bTouchingFloor, float DeltaSeconds);
-	
+	void DrawSimulationWall(ASteamrollBall* BallActor, uint32 SlotIndex);
+	void DrawSimulationExplosion(ASteamrollBall* BallActor);
+	void DrawSimulationRamp(const FVector& Location, const FVector& Normal);
+	void ActivateSnapRamp(ASteamrollBall* BallActor, const FVector& Location, const FVector& Normal);
 };

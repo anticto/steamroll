@@ -301,34 +301,3 @@ void ASteamrollBall::SetVelocity(const FVector& NewVelocity)
 	Sphere->Velocity = NewVelocity;
 }
 
-
-void ASteamrollBall::ActivateSnapRamp(const FVector& Location, const FVector& Normal)
-{
-	for (int32 i = 1; i < 5; i++)
-	{
-		bool bConnectedToTrigger = false;
-
-		for (uint32 j = 1; j < 5; j++)
-		{
-			TEnumAsByte<ESlotTypeEnum::SlotType> Type = GetSlotState(j);
-			bool bIsTrigger = Type == ESlotTypeEnum::SE_TIME;
-
-			if (i != j && bIsTrigger && SlotsConfig.GetSlotConnection(j, i))
-			{
-				if (bIsTimerRunning[j])
-				{
-					bConnectedToTrigger = true;
-					break;
-				}
-			}
-		}
-
-		if (!bConnectedToTrigger && SlotsConfig.GetSlotType(i) == ESlotTypeEnum::SE_RAMP && !SlotsConfig.IsSlotUsed(i))
-		{
-			SlotsConfig.SetSlotUsed(i);
-			SnapRampEvent(Location, Normal);
-			break;
-		}
-	}
-}
-
