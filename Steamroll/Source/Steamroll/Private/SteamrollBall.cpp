@@ -301,3 +301,9 @@ void ASteamrollBall::SetVelocity(const FVector& NewVelocity)
 	Sphere->Velocity = NewVelocity;
 }
 
+
+void ASteamrollBall::SnapRampEvent_Implementation(const FVector& Location, const FVector& Normal)
+{
+
+}
+

@@ -464,7 +464,7 @@ void USteamrollSphereComponent::DrawTimedSlots(float CurrentTime, const FVector&
 					}
 
 					BallActor->SlotsConfig.SetSlotUsed(i);
-					DrawDebugSphere(GetWorld(), GetActorLocation(), GetScaledSphereRadius(), 10, FColor::Blue);
+					DrawDebugSphere(GetWorld(), GetActorLocation(), GetScaledSphereRadius(), 10, FColor::White);
 					//DrawDebugString(GetWorld(), GetActorLocation() + FVector(-50.f, -50.f, -50.f), FString::Printf(TEXT("%f"), CurrentTime), nullptr, FColor::Red, 0.f);
 				}
 			}
@@ -505,7 +505,7 @@ void USteamrollSphereComponent::DrawImpactSlots(AActor* HitActor, const FVector&
 					}
 
 					BallActor->SlotsConfig.SetSlotUsed(i);
-					DrawDebugSphere(GetWorld(), GetActorLocation(), GetScaledSphereRadius(), 10, FColor::Blue);
+					DrawDebugSphere(GetWorld(), GetActorLocation(), GetScaledSphereRadius(), 10, FColor::White);
 					//DrawDebugString(GetWorld(), GetActorLocation() + FVector(-50.f, -50.f, -50.f), FString::Printf(TEXT("%f"), CurrentTime), nullptr, FColor::Red, 0.f);
 				}
 			}
@@ -518,21 +518,21 @@ void USteamrollSphereComponent::DrawSimulationWall(ASteamrollBall* BallActor, ui
 {
 	float Angle = Velocity.Rotation().Yaw + (BallActor->SlotsConfig.GetSlotParam(SlotIndex, 0) - 0.5f) * 180.f + 90.f;
 	FQuat Quat = FQuat(FVector::UpVector, FMath::DegreesToRadians(Angle));
-	DrawDebugBox(GetWorld(), GetActorLocation(), FVector(300.f, 15.f, 175.f), Quat, FColor::Blue);
+	DrawDebugBox(GetWorld(), GetActorLocation(), FVector(300.f, 15.f, 175.f), Quat, FColor::White);
 }
 
 
 void USteamrollSphereComponent::DrawSimulationExplosion(ASteamrollBall* BallActor)
 {
 	float Radius = 1000.f * FMath::Pow(BallActor->SlotsConfig.CountSlotType(ESlotTypeEnum::SE_EXPL), 2);
-	DrawDebugSphere(GetWorld(), GetActorLocation(), Radius, 10, FColor::Red);
+	DrawDebugSphere(GetWorld(), GetActorLocation(), Radius, 10, FColor::Green);
 }
 
 
 void USteamrollSphereComponent::DrawSimulationRamp(const FVector& Location, const FVector& Normal)
 {
 	float Size = 150.f;
-	DrawDebugBox(GetWorld(), Location + Normal * Size * 0.5f, FVector(Size), Normal.Rotation().Quaternion(), FColor::Blue);
+	DrawDebugBox(GetWorld(), Location + Normal * Size * 0.5f, FVector(Size), Normal.Rotation().Quaternion(), FColor::White);
 }
 
 

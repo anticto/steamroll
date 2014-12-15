@@ -85,8 +85,8 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = Slots)
 	void ExplosionEvent();
 
-	UFUNCTION(BlueprintImplementableEvent, Category = Slots)
-	virtual void SnapRampEvent(const FVector& Location, const FVector& Normal);
+	UFUNCTION(BlueprintNativeEvent, Category = Slots)
+	void SnapRampEvent(const FVector& Location, const FVector& Normal);
 
 	UFUNCTION(BlueprintImplementableEvent, Category = Slots)
 	virtual void ActivateSlotEvent(const TEnumAsByte<ESlotTypeEnum::SlotType>& SlotType, float Param1, float Param2);
