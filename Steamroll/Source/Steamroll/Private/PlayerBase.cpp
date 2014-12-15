@@ -140,6 +140,7 @@ void APlayerBase::Tick(float DeltaSeconds)
 		TArray<AActor*> OverlappingActors, ActorsToIgnore;
 		TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
 		FVector LaunchLocation = GetLaunchLocation();
+		ActorsToIgnore.Add(this);
 
 		if (!UKismetSystemLibrary::SphereOverlapActors_NEW(GetWorld(), LaunchLocation, 100.f, ObjectTypes, nullptr, ActorsToIgnore, OverlappingActors))
 		{
@@ -223,6 +224,7 @@ void APlayerBase::Fire(float ChargeTime)
 
 	TArray<AActor*> OverlappingActors, ActorsToIgnore;
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+	ActorsToIgnore.Add(this);
 
 	if (!UKismetSystemLibrary::SphereOverlapActors_NEW(GetWorld(), LaunchLocation, 100.f, ObjectTypes, nullptr, ActorsToIgnore, OverlappingActors))
 	{
