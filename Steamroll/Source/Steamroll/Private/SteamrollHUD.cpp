@@ -71,7 +71,6 @@ void ASteamrollHUD::DrawHUD()
 	//// engine version
 	//FString VersionDesc = GEngineVersion.ToString();
 	//DrawWithBackground(Font, VersionDesc, FColor::Black, EAlignHorizontal::Right, 20, EAlignVertical::Bottom, 20);
-
 }
 
 void ASteamrollHUD::DrawWithBackground(UFont* InFont, const FString& Text, const FColor& TextColor, EAlignHorizontal::Type HAlign, float OffsetX, EAlignVertical::Type VAlign, float OffsetY, float Alpha)

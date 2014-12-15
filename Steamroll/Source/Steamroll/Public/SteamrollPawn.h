@@ -128,6 +128,7 @@ protected:
 	float FiringTimeout;
 	float MinLaunchSpeed;
 	float MaxLaunchSpeed;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Base)
 	bool bFiring;
 	bool bFireSimulation;
 
