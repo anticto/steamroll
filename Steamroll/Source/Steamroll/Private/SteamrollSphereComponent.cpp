@@ -452,14 +452,16 @@ void USteamrollSphereComponent::DrawTimedSlots(float CurrentTime, const FVector&
 							{
 								DrawSimulationWall(BallActor, j);
 								BallActor->SlotsConfig.SetSlotUsed(j);
+
+								break;
 							}
 							else if (BallActor->SlotsConfig.GetSlotType(j) == ESlotTypeEnum::SE_EXPL)
 							{
 								DrawSimulationExplosion(BallActor);
 								BallActor->SlotsConfig.SetSlotUsed(j);
-							}
 
-							break;
+								break;
+							}
 						}
 					}
 

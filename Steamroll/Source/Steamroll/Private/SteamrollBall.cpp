@@ -278,7 +278,7 @@ bool ASteamrollBall::ActivateSlot(int32 SlotIndex)
 	TEnumAsByte<ESlotTypeEnum::SlotType> Type = GetSlotState(SlotIndex);
 	bool bIsTrigger = Type == ESlotTypeEnum::SE_TIME || Type == ESlotTypeEnum::SE_CONTACT || Type == ESlotTypeEnum::SE_REMOTE || Type == ESlotTypeEnum::SE_STOP;
 
-	if (!SlotsConfig.IsSlotUsed(SlotIndex) && !bIsTrigger && Type != ESlotTypeEnum::SE_RAMP) // Ramps snap when hit a wall, they aren't directly activated with triggers
+	if (!SlotsConfig.IsSlotUsed(SlotIndex) && !bIsTrigger && Type != ESlotTypeEnum::SE_EMPTY && Type != ESlotTypeEnum::SE_RAMP) // Ramps snap when hit a wall, they aren't directly activated with triggers
 	{
 		SlotsConfig.SetSlotUsed(SlotIndex);
 		ActivateSlotEvent(SlotsConfig.GetSlotType(SlotIndex), SlotsConfig.GetSlotParam(SlotIndex, 1), SlotsConfig.GetSlotParam(SlotIndex, 2));
