@@ -85,6 +85,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 	USteamrollSphereComponent& Ball = *this;
 	FVector& Velocity = Ball.Velocity;
 	ASteamrollBall* BallActor = Cast<ASteamrollBall>(GetAttachmentRootActor());
+	float BallRadius = Ball.GetScaledSphereRadius();
 	
 	if (BallActor && bSimulationBall)
 	{
@@ -137,7 +138,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 
 		for (uint32 Iteration = 0; Iteration < NumIterations && RemainingTime > 0.f; ++Iteration)
 		{
-			if (UKismetSystemLibrary::SphereTraceSingle_NEW(Ball.GetWorld(), CurrentLocation, NewLocation, Ball.GetScaledSphereRadius(), UEngineTypes::ConvertToTraceType(ECollisionChannel::ECC_PhysicsBody), true, ActorsToIgnore, EDrawDebugTrace::None, OutHit, true))
+			if (UKismetSystemLibrary::SphereTraceSingle_NEW(Ball.GetWorld(), CurrentLocation, NewLocation, BallRadius, UEngineTypes::ConvertToTraceType(ECollisionChannel::ECC_PhysicsBody), true, ActorsToIgnore, EDrawDebugTrace::None, OutHit, true))
 			{
 				if (OutHit.Time == 0.f && OutHit.Location == OutHit.ImpactPoint)
 				{
@@ -205,7 +206,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 					FVector PushVector = CurrentLocation - OtherBall->GetActorLocation();
 					float Dist = PushVector.Size();
 
-					if (Dist < Ball.GetScaledSphereRadius() + OtherBall->Sphere->GetScaledSphereRadius())
+					if (Dist < BallRadius + OtherBall->Sphere->GetScaledSphereRadius())
 					{
 						PushVector = Dist > 0.f ? PushVector / Dist : FVector::UpVector;
 						Ball.SeparateBalls(OtherBall, PushVector, DepenetrationSpeed, DeltaSeconds);
@@ -249,7 +250,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 
 					FVector ImpactRadiusVector = (OutHit.Location - OutHit.ImpactPoint).SafeNormal(); // In fact this is the ball's normal
 					
-					if (FMath::Abs(OutHit.ImpactNormal | ImpactRadiusVector) < 0.99f)
+					if (FMath::Abs(OutHit.ImpactNormal | ImpactRadiusVector) < 0.99f && FMath::Abs(OutHit.ImpactPoint.Z - OutHit.Location.Z) > BallRadius / 2.f)
 					{
 						// Impacted against corner, use an interpolated "corner" normal
 						OutHit.ImpactNormal = ImpactRadiusVector;
