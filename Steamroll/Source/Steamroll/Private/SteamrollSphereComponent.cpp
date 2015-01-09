@@ -18,7 +18,8 @@ USteamrollSphereComponent::USteamrollSphereComponent(const class FPostConstructI
 	TrajectoryComponent = PCIP.CreateDefaultSubobject<UTrajectoryComponent>(this, TEXT("TrajectoryComponent"));
 	TrajectoryComponent->AttachTo(this);
 
-	Velocity = FVector(0.f);
+	Velocity = FVector::ZeroVector;
+	RotationAxis = FVector::ZeroVector;
 	NumFramesCollidingWithBall = 0;
 	bSimulationBall = false;
 	RemainingTime = 0.f;
@@ -406,15 +407,19 @@ void USteamrollSphereComponent::RotateBall(FVector& Velocity, float Speed, float
 {
 	// Make ball rotate in the movement direction only if there's significat horizontal movement
 	float HorizontalSpeed = FVector2D(Velocity.X, Velocity.Y).Size();
-
+	
 	if (HorizontalSpeed > 0.1f)
 	{
 		FVector RotationVector = FVector::CrossProduct(Velocity / Speed, FVector(0.f, 0.f, 1.f)); // Compute rotation axis
 		RotationVector.Normalize();
+
+		float ChangeRotationTime = 0.35f;
+		RotationAxis = FMath::Lerp(RotationAxis, RotationVector, DeltaSeconds / ChangeRotationTime);
+
 		float NumRotations = HorizontalSpeed * DeltaSeconds / (2.f * PI * GetScaledSphereRadius()); // Distance travelled / Sphere circumference
 		float RotationAngle = -360.f * NumRotations; // Convert Rotations to degrees
-
-		FVector RotatedForwardVector = FVector(0.f, 0.f, 1.f).RotateAngleAxis(RotationAngle, RotationVector);
+		
+		FVector RotatedForwardVector = FVector(0.f, 0.f, 1.f).RotateAngleAxis(RotationAngle, RotationAxis);
 		FQuat Quat = FQuat::FindBetween(FVector(0.f, 0.f, 1.f), RotatedForwardVector);
 		AddWorldRotation(Quat.Rotator());
 	}
