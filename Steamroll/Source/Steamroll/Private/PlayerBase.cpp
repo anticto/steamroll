@@ -64,6 +64,9 @@ void APlayerBase::SetupPlayerInputComponent(class UInputComponent* InputComponen
 
 	InputComponent->BindAction("Undo", IE_Pressed, this, &APlayerBase::Undo);
 	InputComponent->BindAction("RemoteTrigger", IE_Pressed, this, &APlayerBase::ActivateBall);
+
+	InputComponent->BindAction("ChargeUp", IE_Pressed, this, &APlayerBase::SetChargeUp);
+	InputComponent->BindAction("ChargeDown", IE_Pressed, this, &APlayerBase::SetChargeDown);
 }
 
 
@@ -323,4 +326,18 @@ void APlayerBase::FireDebug7() { ChargeTime = 0.7f * FiringTimeout; }
 void APlayerBase::FireDebug8() { ChargeTime = 0.8f * FiringTimeout; }
 void APlayerBase::FireDebug9() { ChargeTime = 0.9f * FiringTimeout; }
 void APlayerBase::FireDebug10() { ChargeTime = 1.0f * FiringTimeout; }
+
+
+void APlayerBase::SetChargeUp()
+{
+	ChargeTime += 0.1f * FiringTimeout;
+	ChargeTime = FMath::Min(ChargeTime, FiringTimeout);
+}
+
+
+void APlayerBase::SetChargeDown()
+{
+	ChargeTime -= 0.1f * FiringTimeout;
+	ChargeTime = FMath::Max(ChargeTime, 0.f);
+}
 
