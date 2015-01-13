@@ -10,6 +10,7 @@
 #include "SlotsConfig.h"
 #include "Engine.h"
 #include "PlayerBase.h"
+#include "BallTunnel.h"
 
 
 USteamrollSphereComponent::USteamrollSphereComponent(const class FPostConstructInitializeProperties& PCIP)
@@ -19,6 +20,7 @@ USteamrollSphereComponent::USteamrollSphereComponent(const class FPostConstructI
 	TrajectoryComponent->AttachTo(this);
 
 	Velocity = FVector::ZeroVector;
+	bPhysicsEnabled = true;
 	RotationAxis = FVector::ZeroVector;
 	NumFramesCollidingWithBall = 0;
 	bSimulationBall = false;
@@ -83,6 +85,11 @@ void USteamrollSphereComponent::SteamrollTick(float DeltaSeconds)
 
 float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivided)
 {
+	if (!bPhysicsEnabled)
+	{
+		return 0.f;
+	}
+
 	USteamrollSphereComponent& Ball = *this;
 	FVector& Velocity = Ball.Velocity;
 	ASteamrollBall* BallActor = Cast<ASteamrollBall>(GetAttachmentRootActor());
@@ -140,7 +147,40 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 		for (uint32 Iteration = 0; Iteration < NumIterations && RemainingTime > 0.f; ++Iteration)
 		{
 			if (UKismetSystemLibrary::SphereTraceSingle_NEW(Ball.GetWorld(), CurrentLocation, NewLocation, BallRadius, UEngineTypes::ConvertToTraceType(ECollisionChannel::ECC_PhysicsBody), true, ActorsToIgnore, EDrawDebugTrace::None, OutHit, true))
-			{
+			{				
+				// Check for tunnels
+				auto BallTunnel = Cast<ABallTunnel>(&*OutHit.Actor);
+					
+				if (BallTunnel && BallTunnel->ConnectedTunnel)
+				{						
+					if ((BallTunnel->TriggerVolume->GetComponentLocation() - OutHit.Location).Size() < BallRadius + BallTunnel->TriggerVolume->GetScaledSphereRadius())
+					{
+						if (Ball.bSimulationBall)
+						{
+							if (!BallTunnel->bDiscovered)
+							{
+								DrawDebugString(Ball.GetWorld(), OutHit.ImpactPoint, FString::Printf(TEXT("?")), nullptr, FColor::Red, 0.f);
+								return DeltaSecondsUnsubdivided - CurrentTime; // Stop simulation if we hit an undiscovered tunnel
+							}
+
+							CurrentLocation = BallTunnel->ConnectedTunnel->GetActorLocation();
+							Speed = Velocity.Size() * BallTunnel->ConnectedTunnel->SpeedMultiplier;
+							Velocity = BallTunnel->ConnectedTunnel->Mesh->GetUpVector() * Speed;
+							Ball.SetActorLocation(CurrentLocation);
+
+							float TravelTime = OutHit.Time * RemainingTime;
+							RemainingTime -= TravelTime;
+							NewLocation = CurrentLocation + Velocity * TravelTime;
+							continue;
+						}
+						else
+						{
+							BallTunnel->TransportToOtherTunnelEnd(BallActor);
+							return DeltaSeconds - CurrentTime;
+						}
+					}
+				}
+				
 				if (OutHit.Time == 0.f && OutHit.Location == OutHit.ImpactPoint)
 				{
 					if (Iteration == NumIterations - 3)

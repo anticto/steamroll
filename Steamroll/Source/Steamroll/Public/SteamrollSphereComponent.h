@@ -21,6 +21,9 @@ class STEAMROLL_API USteamrollSphereComponent : public USphereComponent
 	FVector Velocity;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Physics)
+	bool bPhysicsEnabled;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Physics)
 	FVector RotationAxis;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Physics)

@@ -93,6 +93,9 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface
 
 	void ActivateRemoteTriggers();
 
+	UFUNCTION(BlueprintCallable, Category = Tunnel)
+	void ExecuteTransport(class ABallTunnel* Tunnel, float Speed);
+
 	FVector GetVelocity() const;
 	void SetVelocity(const FVector& NewVelocity);
 

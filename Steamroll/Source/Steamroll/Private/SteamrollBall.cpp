@@ -6,6 +6,7 @@
 #include "SteamrollPlayerController.h"
 #include "UnrealMathUtility.h"
 #include "SteamrollSphereComponent.h"
+#include "BallTunnel.h"
 
 
 ASteamrollBall::ASteamrollBall(const class FPostConstructInitializeProperties& PCIP)
@@ -305,5 +306,21 @@ void ASteamrollBall::SetVelocity(const FVector& NewVelocity)
 void ASteamrollBall::SnapRampEvent_Implementation(const FVector& Location, const FVector& Normal)
 {
 
+}
+
+
+void ASteamrollBall::ExecuteTransport(ABallTunnel* ConnectedTunnel, float Speed)
+{
+	ConnectedTunnel->bDiscovered = true;
+
+	ASteamrollBall* Ball = this;
+
+	Ball->TeleportTo(ConnectedTunnel->GetActorLocation(), Ball->GetActorRotation(), false, true);
+	Ball->SetVelocity(ConnectedTunnel->Mesh->GetUpVector() * (Speed * ConnectedTunnel->SpeedMultiplier));
+	Ball->Sphere->bPhysicsEnabled = true;
+	Ball->SetActorHiddenInGame(false);
+	Ball->SetActorEnableCollision(true);
+	Ball->Sphere->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	Ball->Sphere->SetCollisionProfileName(FName("BlockAll"));
 }
 
