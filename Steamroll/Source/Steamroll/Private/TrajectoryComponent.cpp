@@ -188,3 +188,10 @@ void UTrajectoryComponent::SendData()
 	MarkRenderStateDirty();
 }
 
+
+void UTrajectoryComponent::CutTrajectory()
+{
+	bAddedFirstLocation = false;
+	bLastPValid = false;
+}
+

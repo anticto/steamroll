@@ -16,6 +16,7 @@ class STEAMROLL_API UTrajectoryComponent : public UProceduralMeshComponent
 	void AddLocation(const FVector& Location, bool bOverrideMinDistBetweenLocations = false);
 	void DeleteLocations();
 	void SendData();
+	void CutTrajectory();
 
 protected:
 	FVector LastLocation;

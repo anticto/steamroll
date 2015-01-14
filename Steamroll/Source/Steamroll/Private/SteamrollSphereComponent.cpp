@@ -167,6 +167,8 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 							Speed = Velocity.Size() * BallTunnel->ConnectedTunnel->SpeedMultiplier;
 							Velocity = BallTunnel->ConnectedTunnel->Mesh->GetUpVector() * Speed;
 							Ball.SetActorLocation(CurrentLocation);
+							TrajectoryComponent->CutTrajectory();
+							Ball.AddLocation(CurrentLocation);
 
 							float TravelTime = OutHit.Time * RemainingTime;
 							RemainingTime -= TravelTime;
