@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright Anticto Estudi Binari, SL. All rights reserved.
 
 #include "Steamroll.h"
 #include "TrajectoryComponent.h"

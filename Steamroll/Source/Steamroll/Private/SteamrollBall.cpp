@@ -1,4 +1,4 @@
-// Copyright 1998-2014 Epic Games, Inc. All Rights Reserved.
+// Copyright Anticto Estudi Binari, SL. All rights reserved.
 
 #include "Steamroll.h"
 #include "SteamrollBall.h"

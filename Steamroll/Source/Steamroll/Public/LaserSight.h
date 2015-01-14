@@ -1,4 +1,4 @@
-
+// Copyright Anticto Estudi Binari, SL. All rights reserved.
 
 #pragma once
 
