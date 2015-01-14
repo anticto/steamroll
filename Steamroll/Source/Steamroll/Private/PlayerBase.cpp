@@ -241,6 +241,13 @@ void APlayerBase::Fire(float ChargeTime)
 	}
 
 	ExplosionClient();
+
+	ASteamrollPlayerController* SteamrollPlayerController = Cast<ASteamrollPlayerController>(this->GetController());
+
+	if (SteamrollPlayerController)
+	{
+		SteamrollPlayerController->SpendItemsInSlots();
+	}
 }
 
 

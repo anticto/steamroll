@@ -73,5 +73,8 @@ class STEAMROLL_API ASteamrollPlayerController : public APlayerController
 
 	UFUNCTION(BlueprintCallable, Category = Game)
 	void DoGameOver();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = Slots)
+	void SpendItemsInSlots();
 	
 };

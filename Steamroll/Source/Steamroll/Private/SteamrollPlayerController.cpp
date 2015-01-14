@@ -122,3 +122,8 @@ void ASteamrollPlayerController::DoGameOver()
 }
 
 
+void ASteamrollPlayerController::SpendItemsInSlots_Implementation()
+{
+
+}
+
