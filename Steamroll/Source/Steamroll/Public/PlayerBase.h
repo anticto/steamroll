@@ -94,4 +94,9 @@ protected:
 	FVector GetLaunchVelocity(float ChargeTime) const;
 	ASteamrollBall* CreateSimulatedBall();
 
+	/** The value ChargeTime should be smoothly moved to to avoid abrupt trajectory changes */
+	float TargetChargeTime;
+	/** The speed at which the ChargeTime changes second */
+	float ChargeTimeSpeed;
+
 };

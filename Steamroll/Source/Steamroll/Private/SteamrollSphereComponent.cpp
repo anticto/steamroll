@@ -455,7 +455,7 @@ void USteamrollSphereComponent::RotateBall(FVector& Velocity, float Speed, float
 		FVector RotationVector = FVector::CrossProduct(Velocity / Speed, FVector(0.f, 0.f, 1.f)); // Compute rotation axis
 		RotationVector.Normalize();
 
-		float ChangeRotationTime = 0.35f;
+		float ChangeRotationTime = 0.25f;
 		RotationAxis = FMath::Lerp(RotationAxis, RotationVector, DeltaSeconds / ChangeRotationTime);
 
 		float NumRotations = HorizontalSpeed * DeltaSeconds / (2.f * PI * GetScaledSphereRadius()); // Distance travelled / Sphere circumference

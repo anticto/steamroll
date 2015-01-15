@@ -49,7 +49,9 @@ APlayerBase::APlayerBase(const class FPostConstructInitializeProperties& PCIP)
 	Explosion = PCIP.CreateDefaultSubobject<UParticleSystemComponent>(this, TEXT("Explosion0"));
 	Explosion->bAutoActivate = false;
 
+	TargetChargeTime = 0.f;
 	ChargeTime = 0.f;
+	ChargeTimeSpeed = 2.f;
 
 	PrimaryActorTick.bCanEverTick = true;
 }
@@ -79,6 +81,7 @@ void APlayerBase::FireCharge()
 	else
 	{
 		FireServer(ChargeTime, AimTransform->RelativeRotation);
+		TargetChargeTime = 0.f;
 		ChargeTime = 0.f;
 	}
 }
@@ -125,6 +128,16 @@ void APlayerBase::Tick(float DeltaSeconds)
 	{
 		ChargeTime += DeltaSeconds;
 		ChargeTime = FMath::Min(ChargeTime, FiringTimeout);
+		TargetChargeTime = ChargeTime;
+	}
+
+	if (TargetChargeTime > ChargeTime)
+	{
+		ChargeTime = FMath::Min(TargetChargeTime, ChargeTime + ChargeTimeSpeed * DeltaSeconds);
+	}
+	else if (TargetChargeTime < ChargeTime)
+	{
+		ChargeTime = FMath::Max(TargetChargeTime, ChargeTime - ChargeTimeSpeed * DeltaSeconds);
 	}
 
 	if (SimulatedBall)
@@ -319,32 +332,32 @@ void APlayerBase::DestroyBalls()
 {
 	Super::DestroyBalls();
 
-	ChargeTime = 0.f;
+	TargetChargeTime = 0.f;
 }
 
 
-void APlayerBase::FireDebug1() { ChargeTime = 0.1f * FiringTimeout; }
-void APlayerBase::FireDebug2() { ChargeTime = 0.2f * FiringTimeout; }
-void APlayerBase::FireDebug3() { ChargeTime = 0.3f * FiringTimeout; }
-void APlayerBase::FireDebug4() { ChargeTime = 0.4f * FiringTimeout; }
-void APlayerBase::FireDebug5() { ChargeTime = 0.5f * FiringTimeout; }
-void APlayerBase::FireDebug6() { ChargeTime = 0.6f * FiringTimeout; }
-void APlayerBase::FireDebug7() { ChargeTime = 0.7f * FiringTimeout; }
-void APlayerBase::FireDebug8() { ChargeTime = 0.8f * FiringTimeout; }
-void APlayerBase::FireDebug9() { ChargeTime = 0.9f * FiringTimeout; }
-void APlayerBase::FireDebug10() { ChargeTime = 1.0f * FiringTimeout; }
+void APlayerBase::FireDebug1() { TargetChargeTime = 0.1f * FiringTimeout; }
+void APlayerBase::FireDebug2() { TargetChargeTime = 0.2f * FiringTimeout; }
+void APlayerBase::FireDebug3() { TargetChargeTime = 0.3f * FiringTimeout; }
+void APlayerBase::FireDebug4() { TargetChargeTime = 0.4f * FiringTimeout; }
+void APlayerBase::FireDebug5() { TargetChargeTime = 0.5f * FiringTimeout; }
+void APlayerBase::FireDebug6() { TargetChargeTime = 0.6f * FiringTimeout; }
+void APlayerBase::FireDebug7() { TargetChargeTime = 0.7f * FiringTimeout; }
+void APlayerBase::FireDebug8() { TargetChargeTime = 0.8f * FiringTimeout; }
+void APlayerBase::FireDebug9() { TargetChargeTime = 0.9f * FiringTimeout; }
+void APlayerBase::FireDebug10() { TargetChargeTime = 1.0f * FiringTimeout; }
 
 
 void APlayerBase::SetChargeUp()
 {
-	ChargeTime += 0.1f * FiringTimeout;
-	ChargeTime = FMath::Min(ChargeTime, FiringTimeout);
+	TargetChargeTime += 0.1f * FiringTimeout;
+	TargetChargeTime = FMath::Min(TargetChargeTime, FiringTimeout);
 }
 
 
 void APlayerBase::SetChargeDown()
 {
-	ChargeTime -= 0.1f * FiringTimeout;
-	ChargeTime = FMath::Max(ChargeTime, 0.f);
+	TargetChargeTime -= 0.1f * FiringTimeout;
+	TargetChargeTime = FMath::Max(TargetChargeTime, 0.f);
 }
 
