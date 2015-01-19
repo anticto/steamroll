@@ -7,6 +7,7 @@
 #include "UnrealMathUtility.h"
 #include "SteamrollSphereComponent.h"
 #include "BallTunnel.h"
+#include "PhysicsVirtualSphereComponent.h"
 
 
 ASteamrollBall::ASteamrollBall(const class FPostConstructInitializeProperties& PCIP)
@@ -14,6 +15,10 @@ ASteamrollBall::ASteamrollBall(const class FPostConstructInitializeProperties& P
 {
 	Sphere = PCIP.CreateDefaultSubobject<USteamrollSphereComponent>(this, TEXT("Sphere"));
 	RootComponent = Sphere;
+
+	VirtualSphere = PCIP.CreateDefaultSubobject<UPhysicsVirtualSphereComponent>(this, TEXT("VirtualSphere"));
+	VirtualSphere->AttachTo(RootComponent);
+	//VirtualSphere->OnComponentHit.AddDynamic(UPhysicsVirtualSphereComponent::, &UPhysicsVirtualSphereComponent::OnHit);
 
 	Activated = false;
 
@@ -41,6 +46,8 @@ void ASteamrollBall::Tick(float DeltaSeconds)
 
 	Super::Tick(DeltaSeconds);
 	Sphere->SteamrollTick(DeltaSeconds);
+
+	VirtualSphere->SteamrollTick(DeltaSeconds, Sphere);
 
 	CurrentTime += DeltaSeconds;
 	bool bTouchingFloor = IsTouchingFloor();
@@ -203,6 +210,9 @@ void ASteamrollBall::BeginPlay()
 	}
 
 	Super::BeginPlay();	
+
+	//VirtualSphere->SetWorldLocation(Sphere->GetComponentLocation());
+	//VirtualSphere->SetPhysicsLinearVelocity(Sphere->Velocity);
 }
 
 
@@ -315,12 +325,31 @@ void ASteamrollBall::ExecuteTransport(ABallTunnel* ConnectedTunnel, float Speed)
 
 	ASteamrollBall* Ball = this;
 
-	Ball->TeleportTo(ConnectedTunnel->GetActorLocation(), Ball->GetActorRotation(), false, true);
-	Ball->SetVelocity(ConnectedTunnel->Mesh->GetUpVector() * (Speed * ConnectedTunnel->SpeedMultiplier));
+	FVector NewLocation = ConnectedTunnel->GetActorLocation();
+	FVector NewVelocity = ConnectedTunnel->Mesh->GetUpVector() * (Speed * ConnectedTunnel->SpeedMultiplier);
+	Ball->TeleportTo(NewLocation, Ball->GetActorRotation(), false, true);
+	Ball->SetVelocity(NewVelocity);
+
+	Ball->VirtualSphere->SetWorldLocation(NewLocation);
+	Ball->VirtualSphere->SetPhysicsLinearVelocity(NewVelocity);
+
 	Ball->Sphere->bPhysicsEnabled = true;
 	Ball->SetActorHiddenInGame(false);
 	Ball->SetActorEnableCollision(true);
 	Ball->Sphere->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	Ball->Sphere->SetCollisionProfileName(FName("BlockAll"));
+	//Ball->Sphere->SetCollisionProfileName(FName("BlockAll"));
+
+	Ball->VirtualSphere->SetSimulatePhysics(true);
+}
+
+
+void ASteamrollBall::ReceiveHit(class UPrimitiveComponent* MyComp, AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
+{
+	Super::ReceiveHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
+	
+	if (MyComp == VirtualSphere && Other->IsRootComponentMovable() && !Cast<ASteamrollBall>(Other))
+	{
+		VirtualSphere->ReceiveHit(Sphere, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
+	}
 }
 

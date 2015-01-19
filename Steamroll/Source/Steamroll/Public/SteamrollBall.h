@@ -13,9 +13,13 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface
 {
 	GENERATED_UCLASS_BODY()
 
-	/** Capsule used for the ball collison and physics */
+	/** Capsule used for ball collison and physics */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Ball)
 	TSubobjectPtr<class USteamrollSphereComponent> Sphere;
+
+	/** Shadow physics capsule used to get collision events from physx */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = VirtualBall)
+	TSubobjectPtr<class UPhysicsVirtualSphereComponent> VirtualSphere;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Ball)
 	bool Activated;
@@ -99,6 +103,8 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface
 
 	FVector GetVelocity() const;
 	void SetVelocity(const FVector& NewVelocity);
+
+	virtual void ReceiveHit(class UPrimitiveComponent* MyComp, AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) override;
 
 protected:
 	float CurrentTime;

@@ -146,11 +146,17 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 
 		for (uint32 Iteration = 0; Iteration < NumIterations && RemainingTime > 0.f; ++Iteration)
 		{
-			if (UKismetSystemLibrary::SphereTraceSingle_NEW(Ball.GetWorld(), CurrentLocation, NewLocation, BallRadius, UEngineTypes::ConvertToTraceType(ECollisionChannel::ECC_PhysicsBody), true, ActorsToIgnore, EDrawDebugTrace::None, OutHit, true))
+			bool bCollision = UKismetSystemLibrary::SphereTraceSingle_NEW(Ball.GetWorld(), CurrentLocation, NewLocation, BallRadius, UEngineTypes::ConvertToTraceType(ECollisionChannel::ECC_PhysicsBody), true, ActorsToIgnore, EDrawDebugTrace::None, OutHit, true);
+			ASteamrollBall* OtherBall;
+				
+			OtherBall = bCollision ? Cast<ASteamrollBall>(&*OutHit.Actor) : nullptr;
+			bool bMovable = OutHit.Actor != nullptr && OutHit.Actor->IsRootComponentMovable(); // Movable objects will be collided by the virtualball except for steamballs chich are handled here
+
+			if (bCollision && (!bMovable || OtherBall || Ball.bSimulationBall))
 			{				
 				// Check for tunnels
 				auto BallTunnel = Cast<ABallTunnel>(&*OutHit.Actor);
-					
+				
 				if (BallTunnel && BallTunnel->ConnectedTunnel)
 				{						
 					if ((BallTunnel->TriggerVolume->GetComponentLocation() - OutHit.Location).Size() < BallRadius + BallTunnel->TriggerVolume->GetScaledSphereRadius())
@@ -240,7 +246,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 					}
 				}
 
-				ASteamrollBall* OtherBall = Cast<ASteamrollBall>(Ball.LastCollidedActor);
+				//ASteamrollBall* OtherBall = Cast<ASteamrollBall>(Ball.LastCollidedActor);
 
 				if (OtherBall) // Collided with another ball
 				{

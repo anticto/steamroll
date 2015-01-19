@@ -5,6 +5,7 @@
 #include "SteamrollBall.h"
 #include "TimerManager.h"
 #include "SteamrollSphereComponent.h"
+#include "PhysicsVirtualSphereComponent.h"
 
 
 ABallTunnel::ABallTunnel(const class FPostConstructInitializeProperties& PCIP)
@@ -39,14 +40,15 @@ void ABallTunnel::TransportToOtherTunnelEnd(AActor* OtherActor)
 			Ball->SetActorHiddenInGame(true);
 			Ball->SetActorEnableCollision(false);
 			Ball->Sphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-			Ball->Sphere->SetCollisionProfileName(FName("NoCollision"));
+			//Ball->Sphere->SetCollisionProfileName(FName("NoCollision"));
 
 			float Speed = Ball->GetVelocity().Size();
 			Ball->Sphere->bPhysicsEnabled = false;
+			Ball->VirtualSphere->SetSimulatePhysics(false);
 
 			auto Delegate = FTimerDelegate::CreateUFunction(Ball, FName("ExecuteTransport"), ConnectedTunnel, Speed);
 			GetWorldTimerManager().SetTimer(Delegate, TransportDelaySeconds, false);
-	}
+		}
 	}
 }
 

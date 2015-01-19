@@ -6,6 +6,7 @@
 #include "SteamrollBall.h"
 #include "SteamrollSphereComponent.h"
 #include "TrajectoryComponent.h"
+#include "PhysicsVirtualSphereComponent.h"
 
 #include "EngineUtils.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -106,6 +107,10 @@ ASteamrollBall* APlayerBase::CreateSimulatedBall()
 		SimulatedBall->Sphere->SetSimulatePhysics(false);
 		SimulatedBall->SetActorLocation(GetActorLocation());
 		SimulatedBall->Sphere->SetSphereRadius(99.442101f);
+
+		SimulatedBall->VirtualSphere->SetSimulatePhysics(false);
+		SimulatedBall->VirtualSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		//SimulatedBall->VirtualSphere->DestroyComponent();
 	}
 
 	return SimulatedBall;
@@ -249,7 +254,10 @@ void APlayerBase::Fire(float ChargeTime)
 		if (Ball)
 		{
 			SetLastDeployedActor(Ball);
-			Ball->SetVelocity(GetLaunchVelocity(ChargeTime));
+			FVector LaunchVelocity = GetLaunchVelocity(ChargeTime);
+			Ball->SetVelocity(LaunchVelocity);
+			Ball->VirtualSphere->SetWorldLocation(LaunchLocation);
+			Ball->VirtualSphere->SetPhysicsLinearVelocity(LaunchVelocity);
 		}
 	}
 
