@@ -18,7 +18,6 @@ ASteamrollBall::ASteamrollBall(const class FPostConstructInitializeProperties& P
 
 	VirtualSphere = PCIP.CreateDefaultSubobject<UPhysicsVirtualSphereComponent>(this, TEXT("VirtualSphere"));
 	VirtualSphere->AttachTo(RootComponent);
-	//VirtualSphere->OnComponentHit.AddDynamic(UPhysicsVirtualSphereComponent::, &UPhysicsVirtualSphereComponent::OnHit);
 
 	Activated = false;
 

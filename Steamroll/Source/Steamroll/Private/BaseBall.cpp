@@ -3,6 +3,8 @@
 #include "Steamroll.h"
 #include "BaseBall.h"
 #include "SteamrollSphereComponent.h"
+#include "PhysicsVirtualSphereComponent.h"
+#include "SteamrollBall.h"
 
 
 ABaseBall::ABaseBall(const class FPostConstructInitializeProperties& PCIP)
@@ -14,6 +16,9 @@ ABaseBall::ABaseBall(const class FPostConstructInitializeProperties& PCIP)
 	SphereMesh = PCIP.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("SphereMesh"));
 	GyroMesh = PCIP.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("GyroMesh"));	
 	SpringArm = PCIP.CreateDefaultSubobject<USpringArmComponent>(this, TEXT("BaseSpringArm0"));
+
+	VirtualSphere = PCIP.CreateDefaultSubobject<UPhysicsVirtualSphereComponent>(this, TEXT("VirtualSphere"));
+	VirtualSphere->AttachTo(RootComponent);
 
 	RootComponent = Sphere;
 	AimTransform->AttachTo(RootComponent);
@@ -35,6 +40,7 @@ void ABaseBall::Tick(float DeltaSeconds)
 
 	Super::Tick(DeltaSeconds);
 	Sphere->SteamrollTick(DeltaSeconds);
+	VirtualSphere->SteamrollTick(DeltaSeconds, Sphere);
 
 	if (bFiring)
 	{
@@ -85,5 +91,16 @@ void ABaseBall::Explode()
 	//Emitter->AddActorLocalOffset(FVector(400.f, 0.f, 0.f));
 	//Emitter->SetActorScale3D(FVector(4.f, 4.f, 4.f));
 	//Emitter->SetLifeSpan(4.f);
+}
+
+
+void ABaseBall::ReceiveHit(class UPrimitiveComponent* MyComp, AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
+{
+	Super::ReceiveHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
+
+	if (MyComp == VirtualSphere && Other->IsRootComponentMovable() && !Cast<ASteamrollBall>(Other) && !(OtherComp->GetCollisionProfileName() == FName("OnlyDynamicPhysics")))
+	{
+		VirtualSphere->ReceiveHit(Sphere, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
+	}
 }
 

@@ -20,6 +20,10 @@ class STEAMROLL_API ABaseBall : public ASteamrollPawn
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Base)
 	TSubobjectPtr<class USteamrollSphereComponent> Sphere;
 
+	/** Shadow physics capsule used to get collision events from physx */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = VirtualBall)
+	TSubobjectPtr<class UPhysicsVirtualSphereComponent> VirtualSphere;
+
 	/** Mesh used for the ball */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Base)
 	TSubobjectPtr<class UStaticMeshComponent> GyroMesh;
@@ -31,6 +35,8 @@ class STEAMROLL_API ABaseBall : public ASteamrollPawn
 	/** Spring arm for positioning the camera above the base */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Base)
 	TSubobjectPtr<class USpringArmComponent> SpringArm;
+
+	virtual void ReceiveHit(class UPrimitiveComponent* MyComp, AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) override;
 
 protected:
 
