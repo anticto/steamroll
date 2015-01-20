@@ -52,37 +52,6 @@ void USteamrollSphereComponent::SteamrollTick(float DeltaSeconds)
 }
 
 
-//void USteamrollSphereComponent::DrawPhysicalSimulation()
-//{
-//	float Radius = GetScaledSphereRadius();
-//	TArray<FVector>* SimulatedLocations = &TrajectoryComponent->SimulatedLocations;
-//
-//	if (!SimulatedLocations || SimulatedLocations->Num() == 0)
-//	{
-//		return;
-//	}
-//	else if (SimulatedLocations->Num() == 1)
-//	{
-//		DrawDebugSphere(GetWorld(), SimulatedLocations->operator[](0), Radius, 10, FColor::Yellow, false, -1.f);
-//		return;
-//	}
-//
-//	DrawDebugSphere(GetWorld(), SimulatedLocations->operator[](0), Radius, 10, FColor::Yellow, false, -1.f);
-//
-//	uint32 Step = 4;
-//
-//	for (int32 Itr = Step; Itr < SimulatedLocations->Num() - 1; Itr += Step)
-//	{
-//		//DrawDebugCylinder(GetWorld(), SimulatedLocations->operator[](Itr - Step), SimulatedLocations->operator[](Itr), Sphere->GetScaledSphereRadius(), 10, FColor::Blue, false, -1.f);
-//		DrawDebugLine(GetWorld(), SimulatedLocations->operator[](Itr - Step), SimulatedLocations->operator[](Itr), FColor::Blue, false, -1.f, 0, 2.f * GetScaledSphereRadius());
-//
-//		//DrawDebugSphere(GetWorld(), SimulatedLocations->operator[](Itr), Radius, 10, FColor::Red, false, -1.f);
-//	}
-//
-//	DrawDebugSphere(GetWorld(), SimulatedLocations->operator[](SimulatedLocations->Num() - 1), Radius, 10, FColor::Yellow, false, -1.f);
-//}
-
-
 float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivided)
 {
 	if (!bPhysicsEnabled)
@@ -144,15 +113,23 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 
 		float RemainingTime = DeltaSeconds;
 
+		ETraceTypeQuery TraceTypeQuery = Ball.bSimulationBall ? 
+			UEngineTypes::ConvertToTraceType(ECollisionChannel::ECC_GameTraceChannel4) : // RealBallTraceChannel
+			UEngineTypes::ConvertToTraceType(ECollisionChannel::ECC_GameTraceChannel1); // RealBall
+		
 		for (uint32 Iteration = 0; Iteration < NumIterations && RemainingTime > 0.f; ++Iteration)
 		{
-			bool bCollision = UKismetSystemLibrary::SphereTraceSingle_NEW(Ball.GetWorld(), CurrentLocation, NewLocation, BallRadius, UEngineTypes::ConvertToTraceType(ECollisionChannel::ECC_PhysicsBody), true, ActorsToIgnore, EDrawDebugTrace::None, OutHit, true);
+			bool bCollision = UKismetSystemLibrary::SphereTraceSingle_NEW(Ball.GetWorld(), CurrentLocation, NewLocation, BallRadius, TraceTypeQuery, true, ActorsToIgnore, EDrawDebugTrace::None, OutHit, true);
 			ASteamrollBall* OtherBall;
 				
 			OtherBall = bCollision ? Cast<ASteamrollBall>(&*OutHit.Actor) : nullptr;
-			bool bMovable = OutHit.Actor != nullptr && OutHit.Actor->IsRootComponentMovable(); // Movable objects will be collided by the virtualball except for steamballs chich are handled here
 
-			if (bCollision && (!bMovable || OtherBall || Ball.bSimulationBall))
+			if (OutHit.Actor != nullptr && OutHit.GetComponent()->GetCollisionProfileName() == FName("DynamicPhysics"))
+			{
+				DrawDebugString(Ball.GetWorld(), OutHit.ImpactPoint, FString::Printf(TEXT("?")), nullptr, FColor::Red, 0.f);
+			}		
+			
+			if (bCollision)
 			{				
 				// Check for tunnels
 				auto BallTunnel = Cast<ABallTunnel>(&*OutHit.Actor);
@@ -210,11 +187,6 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 					Ball.SetActorLocation(CurrentLocation);
 					Ball.AddLocation(CurrentLocation);
 
-					//if (OutHit.Actor->IsRootComponentMovable())
-					//{
-					//	OnHit(&*OutHit.Actor, &*OutHit.Component, OutHit.ImpactNormal, OutHit);
-					//}
-
 					continue;
 				}
 
@@ -245,8 +217,6 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 						BallActor->ExplosionEvent();
 					}
 				}
-
-				//ASteamrollBall* OtherBall = Cast<ASteamrollBall>(Ball.LastCollidedActor);
 
 				if (OtherBall) // Collided with another ball
 				{

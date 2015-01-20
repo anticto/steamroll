@@ -337,7 +337,6 @@ void ASteamrollBall::ExecuteTransport(ABallTunnel* ConnectedTunnel, float Speed)
 	Ball->SetActorHiddenInGame(false);
 	Ball->SetActorEnableCollision(true);
 	Ball->Sphere->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	//Ball->Sphere->SetCollisionProfileName(FName("BlockAll"));
 
 	Ball->VirtualSphere->SetSimulatePhysics(true);
 }
@@ -347,7 +346,7 @@ void ASteamrollBall::ReceiveHit(class UPrimitiveComponent* MyComp, AActor* Other
 {
 	Super::ReceiveHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
 	
-	if (MyComp == VirtualSphere && Other->IsRootComponentMovable() && !Cast<ASteamrollBall>(Other))
+	if (MyComp == VirtualSphere && Other->IsRootComponentMovable() && !Cast<ASteamrollBall>(Other) && !(OtherComp->GetCollisionProfileName() == FName("OnlyDynamicPhysics")))
 	{
 		VirtualSphere->ReceiveHit(Sphere, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
 	}

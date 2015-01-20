@@ -39,14 +39,10 @@ void UPhysicsVirtualSphereComponent::ReceiveHit(USteamrollSphereComponent* RealS
 	FVector VelocityN = HitNormal * (Velocity | HitNormal);
 	FVector VelocityT = Velocity - VelocityN;
 		
-	FVector NewLocation = Hit.Location;
 	FVector NewVelocity = VelocityT + (NormalImpulse / GetMass()) * Hit.PhysMaterial->Restitution;// -VelocityN;
 	//FVector NewVelocity = Sphere->Velocity + (NormalImpulse / VirtualSphere->GetMass());
 
-	//Sphere->SetWorldLocation(NewLocation);
 	RealSphere->Velocity = NewVelocity;
-
-	//VirtualSphere->SetWorldLocation(NewLocation);
 	SetPhysicsLinearVelocity(RealSphere->Velocity);
 }
 
