@@ -3,6 +3,9 @@
 #include "Steamroll.h"
 #include "SteamRollTestGameMode.h"
 #include "PlayerBase.h"
+#include "SteamrollPlayerStart.h"
+#include "DeploymentSpot.h"
+#include "BaseBall.h"
 
 #include "Engine.h"
 
@@ -11,6 +14,16 @@ ASteamRollTestGameMode::ASteamRollTestGameMode(const class FPostConstructInitial
 {
 	// set default pawn class to our ball
 	DefaultPawnClass = APlayerBase::StaticClass();
+
+	static ConstructorHelpers::FObjectFinder<UBlueprint> ItemBlueprint(TEXT("Blueprint'/Game/Base/Blueprint_PlayerBase.Blueprint_PlayerBase'"));
+	if (ItemBlueprint.Object){
+		PlayerBaseClass = (UClass*)ItemBlueprint.Object->GeneratedClass;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UBlueprint> ItemBlueprint2(TEXT("Blueprint'/Game/Base/Blueprint_BaseBall.Blueprint_BaseBall'"));
+	if (ItemBlueprint2.Object){
+		BaseBallClass = (UClass*)ItemBlueprint2.Object->GeneratedClass;
+	}
 
 	if (GEngine && GEngine->GameViewport)
 	{
@@ -53,3 +66,46 @@ AActor* ASteamRollTestGameMode::ChoosePlayerStart(AController* Player)
 
 	return FoundPlayerStart;
 }
+
+
+APawn* ASteamRollTestGameMode::SpawnDefaultPawnFor(AController* NewPlayer, class AActor* StartSpot)
+{
+	//choose the player start location based on player start's PlayerStartTag
+	FRotator StartRotation(ForceInit);
+	FVector StartLocation;
+
+	FActorSpawnParameters SpawnInfo;
+	SpawnInfo.Instigator = Instigator;
+	SpawnInfo.bNoCollisionFail = true;
+
+	APawn* ResultPawn;
+	UClass* PawnClass;
+
+	ASteamrollPlayerStart* PlayerStart = Cast<ASteamrollPlayerStart>(StartSpot);
+
+	if (PlayerStart && PlayerStart->DeploymentSpot)
+	{
+		PawnClass = PlayerBaseClass;
+		StartRotation.Yaw = PlayerStart->DeploymentSpot->GetActorRotation().Yaw;
+		StartLocation = PlayerStart->DeploymentSpot->GetActorLocation();
+		PlayerStart->DeploymentSpot->Destroy();
+	}
+	else
+	{
+		StartSpot = PlayerStart ? PlayerStart : StartSpot;
+
+		PawnClass = BaseBallClass;
+		StartRotation.Yaw = StartSpot->GetActorRotation().Yaw;
+		StartLocation = StartSpot->GetActorLocation();
+	}
+
+	ResultPawn = GetWorld()->SpawnActor<APawn>(PawnClass, StartLocation, StartRotation, SpawnInfo);
+
+	if (ResultPawn && PawnClass == BaseBallClass)
+	{
+		Cast<ABaseBall>(ResultPawn)->UndeployInstantly();
+	}
+
+	return ResultPawn;
+}
+

@@ -36,6 +36,9 @@ class STEAMROLL_API ABaseBall : public ASteamrollPawn
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Base)
 	TSubobjectPtr<class USpringArmComponent> SpringArm;
 
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = Base)
+	void UndeployInstantly();
+
 	virtual void ReceiveHit(class UPrimitiveComponent* MyComp, AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) override;
 
 protected:

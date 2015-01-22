@@ -9,7 +9,13 @@ class ASteamRollTestGameMode : public AGameMode
 {
 	GENERATED_UCLASS_BODY()
 
+	TSubclassOf<class APawn> PlayerBaseClass;
+	TSubclassOf<class APawn> BaseBallClass;
+
 	virtual AActor* ChoosePlayerStart(AController* Player) override;
+
+	/** spawns default pawn for player*/
+	virtual APawn* SpawnDefaultPawnFor(AController* NewPlayer, class AActor* StartSpot) override;
 
 };
 

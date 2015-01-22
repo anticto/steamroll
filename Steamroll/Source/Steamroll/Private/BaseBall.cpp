@@ -104,3 +104,9 @@ void ABaseBall::ReceiveHit(class UPrimitiveComponent* MyComp, AActor* Other, cla
 	}
 }
 
+
+void ABaseBall::UndeployInstantly_Implementation()
+{
+
+}
+
