@@ -127,3 +127,16 @@ void ASteamrollPlayerController::SpendItemsInSlots_Implementation()
 
 }
 
+
+void ASteamrollPlayerController::SpendSlotItem(TEnumAsByte<ESlotTypeEnum::SlotType> SlotTypeEnum)
+{
+	for (auto& Slot : SlotContent)
+	{
+		if (Slot.SlotType == SlotTypeEnum && Slot.Quantity > 0)
+		{
+			Slot.Quantity--;
+			break;
+		}
+	}
+}
+

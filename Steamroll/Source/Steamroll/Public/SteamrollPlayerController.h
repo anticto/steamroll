@@ -5,6 +5,7 @@
 #include "GameFramework/PlayerController.h"
 #include "SlotsConfig.h"
 #include "Engine.h"
+#include "SlotContentConfig.h"
 
 #include "SteamrollPlayerController.generated.h"
 
@@ -62,6 +63,9 @@ class STEAMROLL_API ASteamrollPlayerController : public APlayerController
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Radar)
 	int32 CurrentCamera;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Slots)
+	TArray<FSlotContentConfigStruct> SlotContent;
+
 	UFUNCTION(BlueprintCallable, Category = Radar)
 	void AddBallCamera(AActor* BallCamera);
 
@@ -76,5 +80,8 @@ class STEAMROLL_API ASteamrollPlayerController : public APlayerController
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = Slots)
 	void SpendItemsInSlots();
+
+	UFUNCTION(BlueprintCallable, Category = Slots)
+	void SpendSlotItem(TEnumAsByte<ESlotTypeEnum::SlotType> SlotTypeEnum);
 	
 };

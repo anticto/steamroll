@@ -24,16 +24,3 @@ struct FSlotContentConfigStruct
 	}
 };
 
-
-/**
- * Actor placed in a level to define what kind of slots and how many of them are available to the player
- */
-UCLASS()
-class STEAMROLL_API ASlotContentConfig : public AActor
-{
-	GENERATED_UCLASS_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Slots)
-	TArray<FSlotContentConfigStruct> SlotContent;
-	
-};

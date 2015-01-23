@@ -6,6 +6,7 @@
 #include "SteamrollPlayerStart.h"
 #include "DeploymentSpot.h"
 #include "BaseBall.h"
+#include "SteamrollPlayerController.h"
 
 #include "Engine.h"
 
@@ -88,6 +89,14 @@ APawn* ASteamRollTestGameMode::SpawnDefaultPawnFor(AController* NewPlayer, class
 		PawnClass = PlayerBaseClass;
 		StartRotation.Yaw = PlayerStart->DeploymentSpot->GetActorRotation().Yaw;
 		StartLocation = PlayerStart->DeploymentSpot->GetActorLocation();
+
+		ASteamrollPlayerController* PlayerController = Cast<ASteamrollPlayerController>(NewPlayer);
+
+		if (PlayerController)
+		{
+			PlayerController->SlotContent = PlayerStart->DeploymentSpot->SlotContent;
+		}
+
 		PlayerStart->DeploymentSpot->Destroy();
 	}
 	else
