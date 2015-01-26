@@ -163,7 +163,25 @@ void APlayerBase::Tick(float DeltaSeconds)
 		FVector LaunchLocation = GetLaunchLocation();
 		ActorsToIgnore.Add(this);
 
-		if (!UKismetSystemLibrary::SphereOverlapActors_NEW(GetWorld(), LaunchLocation, 100.f, ObjectTypes, nullptr, ActorsToIgnore, OverlappingActors))
+		bool bOverlap = UKismetSystemLibrary::SphereOverlapActors_NEW(GetWorld(), LaunchLocation, 100.f, ObjectTypes, nullptr, ActorsToIgnore, OverlappingActors);
+
+		if (bOverlap)
+		{
+			bOverlap = false;
+
+			for (auto Actor : OverlappingActors)
+			{
+				UStaticMeshComponent* Component = Cast<UStaticMeshComponent>(Actor->GetRootComponent());
+				if (Component && Component->GetCollisionProfileName() != FName("DynamicPhysicsExceptBall"))
+				{
+					//FName Name = Component->GetCollisionProfileName();
+					bOverlap = true;
+					break;
+				}
+			}
+		}
+
+		if (!bOverlap)
 		{
 			auto PlayerController = GetLocalPlayerController();
 			if (PlayerController)
@@ -247,7 +265,25 @@ void APlayerBase::Fire(float ChargeTime)
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
 	ActorsToIgnore.Add(this);
 
-	if (!UKismetSystemLibrary::SphereOverlapActors_NEW(GetWorld(), LaunchLocation, 100.f, ObjectTypes, nullptr, ActorsToIgnore, OverlappingActors))
+	bool bOverlap = UKismetSystemLibrary::SphereOverlapActors_NEW(GetWorld(), LaunchLocation, 100.f, ObjectTypes, nullptr, ActorsToIgnore, OverlappingActors);
+
+	if (bOverlap)
+	{
+		bOverlap = false;
+
+		for (auto Actor : OverlappingActors)
+		{
+			UStaticMeshComponent* Component = Cast<UStaticMeshComponent>(Actor->GetRootComponent());
+			if (Component && Component->GetCollisionProfileName() != FName("DynamicPhysicsExceptBall"))
+			{
+				//FName Name = Component->GetCollisionProfileName();
+				bOverlap = true;
+				break;
+			}
+		}
+	}
+
+	if (!bOverlap)
 	{
 		ASteamrollBall* Ball = GetWorld()->SpawnActor<ASteamrollBall>(WhatToSpawn, LaunchLocation, AimTransform->GetComponentRotation(), SpawnParams);
 

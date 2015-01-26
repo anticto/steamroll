@@ -113,10 +113,17 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 
 		float RemainingTime = DeltaSeconds;
 
-		ETraceTypeQuery TraceTypeQuery = Ball.bSimulationBall ? 
-			UEngineTypes::ConvertToTraceType(ECollisionChannel::ECC_GameTraceChannel4) : // RealBallTraceChannel
-			UEngineTypes::ConvertToTraceType(ECollisionChannel::ECC_GameTraceChannel1); // RealBall
+		ETraceTypeQuery TraceTypeQuery;
 		
+		if (Ball.bSimulationBall)
+		{
+			TraceTypeQuery = UEngineTypes::ConvertToTraceType(ECollisionChannel::ECC_GameTraceChannel4); // PredictionTraceChannel	
+		}
+		else
+		{
+			TraceTypeQuery = UEngineTypes::ConvertToTraceType(ECollisionChannel::ECC_GameTraceChannel7); // RealBallTraceChannel
+		}
+
 		for (uint32 Iteration = 0; Iteration < NumIterations && RemainingTime > 0.f; ++Iteration)
 		{
 			bool bCollision = UKismetSystemLibrary::SphereTraceSingle_NEW(Ball.GetWorld(), CurrentLocation, NewLocation, BallRadius, TraceTypeQuery, true, ActorsToIgnore, EDrawDebugTrace::None, OutHit, true);

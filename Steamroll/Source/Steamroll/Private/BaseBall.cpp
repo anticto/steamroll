@@ -98,7 +98,8 @@ void ABaseBall::ReceiveHit(class UPrimitiveComponent* MyComp, AActor* Other, cla
 {
 	Super::ReceiveHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
 
-	if (MyComp == VirtualSphere && Other->IsRootComponentMovable() && !Cast<ASteamrollBall>(Other) && !(OtherComp->GetCollisionProfileName() == FName("OnlyDynamicPhysics")))
+	if (MyComp == VirtualSphere && Other->IsRootComponentMovable() && !Cast<ASteamrollBall>(Other) 
+		&& !(OtherComp->GetCollisionProfileName() == FName("OnlyDynamicPhysics")) && !(OtherComp->GetCollisionProfileName() == FName("DynamicPhysicsExceptBall")))
 	{
 		VirtualSphere->ReceiveHit(Sphere, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
 	}
