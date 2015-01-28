@@ -101,7 +101,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 
 		float Speed = Velocity.Size();
 		FVector CurrentLocation = Ball.GetActorLocation();
-		Ball.AddLocation(CurrentLocation);
+		Ball.AddLocation(CurrentLocation, CurrentTime);
 		Ball.ReduceVerticalVelocity(Velocity, bTouchingFloor, DeltaSeconds);
 		FVector NewLocation = CurrentLocation + Velocity * DeltaSeconds;
 
@@ -158,7 +158,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 							Velocity = BallTunnel->ConnectedTunnel->Mesh->GetUpVector() * Speed;
 							Ball.SetActorLocation(CurrentLocation);
 							TrajectoryComponent->CutTrajectory();
-							Ball.AddLocation(CurrentLocation);
+							Ball.AddLocation(CurrentLocation, CurrentTime);
 
 							float TravelTime = OutHit.Time * RemainingTime;
 							RemainingTime -= TravelTime;
@@ -192,7 +192,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 					}
 
 					Ball.SetActorLocation(CurrentLocation);
-					Ball.AddLocation(CurrentLocation);
+					Ball.AddLocation(CurrentLocation, CurrentTime);
 
 					continue;
 				}
@@ -211,7 +211,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 				CurrentLocation = OutHit.Location + OutHit.ImpactNormal * 0.1f;
 
 				Ball.SetActorLocation(CurrentLocation);
-				Ball.AddLocation(CurrentLocation);
+				Ball.AddLocation(CurrentLocation, CurrentTime);
 
 				DrawImpactSlots(Ball.LastCollidedActor, Velocity);
 
@@ -235,7 +235,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 					if (Dist < BallRadius + OtherBall->Sphere->GetScaledSphereRadius())
 					{
 						PushVector = Dist > 0.f ? PushVector / Dist : FVector::UpVector;
-						Ball.SeparateBalls(OtherBall, PushVector, DepenetrationSpeed, DeltaSeconds);
+						Ball.SeparateBalls(OtherBall, PushVector, DepenetrationSpeed, DeltaSeconds, CurrentTime);
 					}
 
 					FVector& V1 = Velocity;
@@ -327,7 +327,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 
 				Velocity = DragPhysics(Velocity, RemainingTime);
 				Ball.SetActorLocation(NewLocation); // No collision, so the ball can travel all the way
-				Ball.AddLocation(NewLocation);
+				Ball.AddLocation(NewLocation, CurrentTime);
 
 				//if(SimulationLocations) DrawDebugString(Ball.GetWorld(), OutHit.ImpactPoint, FString::Printf(TEXT("Full Itr=%d, Speed=%f"), Iteration, Velocity.Size()), nullptr, FColor::White, 0.f);
 
@@ -378,7 +378,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 
 				FVector PushVector = Ball.GetActorLocation() - CollidedWithBallThisFrame->GetActorLocation();
 				PushVector.Normalize();
-				Ball.SeparateBalls(CollidedWithBallThisFrame, PushVector, DepenetrationSpeed, DeltaSeconds);
+				Ball.SeparateBalls(CollidedWithBallThisFrame, PushVector, DepenetrationSpeed, DeltaSeconds, CurrentTime);
 
 				CollidedWithBallThisFrame = nullptr;
 			}
@@ -415,11 +415,11 @@ FVector USteamrollSphereComponent::DragPhysics(const FVector& Velocity, float Tr
 }
 
 
-void USteamrollSphereComponent::SeparateBalls(ASteamrollBall* OtherBall, const FVector& PushVector, float DepenetrationSpeed, float DeltaSeconds)
+void USteamrollSphereComponent::SeparateBalls(ASteamrollBall* OtherBall, const FVector& PushVector, float DepenetrationSpeed, float DeltaSeconds, float CurrentTime)
 {
 	DeltaSeconds = 0.001f;
 	GetAttachmentRootActor()->SetActorLocation(GetActorLocation() + PushVector * DepenetrationSpeed * DeltaSeconds, true);
-	AddLocation(GetActorLocation());
+	AddLocation(GetActorLocation(), CurrentTime);
 
 	if (!bSimulationBall)
 	{
@@ -569,11 +569,11 @@ void USteamrollSphereComponent::DrawSimulationRamp(const FVector& Location, cons
 }
 
 
-void USteamrollSphereComponent::AddLocation(const FVector& Location)
+void USteamrollSphereComponent::AddLocation(const FVector& Location, float CurrentTime)
 {
 	if (bSimulationBall)
 	{
-		TrajectoryComponent->AddLocation(Location);
+		TrajectoryComponent->AddLocation(Location, CurrentTime);
 	}
 }
 

@@ -194,10 +194,11 @@ void APlayerBase::Tick(float DeltaSeconds)
 
 			SimulatedBall->Sphere->TrajectoryComponent->DeleteLocations();
 			
-			SimulatedBall->Sphere->UpdateBallPhysics(10.f);
+			float TotalTime = SimulatedBall->Sphere->UpdateBallPhysics(10.f);
+			auto MaterialInstance = SimulatedBall->Sphere->TrajectoryComponent->CreateAndSetMaterialInstanceDynamicFromMaterial(0, SimulatedBall->Sphere->TrajectoryComponent->GetMaterial(0));
+			MaterialInstance->SetScalarParameterValue("Charging", ChargeTime != TargetChargeTime ? 1.f : 0.f);
+
 			SimulatedBall->Sphere->TrajectoryComponent->SendData();
-			
-			//SimulatedBall->DrawPhysicalSimulation();
 
 			SimulatedBall->SetActorEnableCollision(false);
 			SimulatedBall->Sphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);

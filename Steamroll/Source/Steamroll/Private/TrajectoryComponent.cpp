@@ -73,7 +73,7 @@ void DrawDynamicElements(FPrimitiveDrawInterface* PDI, const FSceneView* View, T
 }
 
 
-void UTrajectoryComponent::AddLocation(const FVector& Location, bool bOverrideMinDistBetweenLocations)
+void UTrajectoryComponent::AddLocation(const FVector& Location, float CurrentTime, bool bOverrideMinDistBetweenLocations)
 {
 	const static float MinDistBetweenLocations = 50.f;
 	const static float VStretchFactor = 0.01f;
@@ -81,6 +81,7 @@ void UTrajectoryComponent::AddLocation(const FVector& Location, bool bOverrideMi
 	if (!bAddedFirstLocation)
 	{
 		LastLocation = Location;
+		LastTime = 0.f;
 		bAddedFirstLocation = true;
 	}
 	else
@@ -141,6 +142,12 @@ void UTrajectoryComponent::AddLocation(const FVector& Location, bool bOverrideMi
 		v0.U = 0.f; v0.V = CumulativeV;
 		v1.U = 1.f; v1.V = CumulativeV;
 
+		v2.Color.R = LastTime / 10.f * 255; // Divide by 10 as it is the maximum sim time to map to [0, 1] and multiply by 255 to encode in the uint8
+		v3.Color.R = LastTime / 10.f * 255;
+
+		v0.Color.R = CurrentTime / 10.f * 255;
+		v1.Color.R = CurrentTime / 10.f * 255;
+
 		FProceduralMeshTriangle t1;
 		FProceduralMeshTriangle t2;
 		v0.Position = p0;
@@ -163,6 +170,7 @@ void UTrajectoryComponent::AddLocation(const FVector& Location, bool bOverrideMi
 		//DrawDebugLine(GetWorld(), p3, p0, FColor::Red);
 
 		LastLocation = Location;
+		LastTime = CurrentTime;
 		LastP0 = p0;
 		LastP1 = p1;
 		LastXAxis = XAxis;
