@@ -33,11 +33,6 @@ USteamrollSphereComponent::USteamrollSphereComponent(const class FPostConstructI
 	DragCoefficientSlow = 0.8f;
 	DragCoefficientSlowSpeed = 100.f;
 	DragConstantSlowSpeed = 10.f;
-	
-	OnComponentHit.AddDynamic(this, &USteamrollSphereComponent::OnHit);
-	this->bGenerateOverlapEvents = true;
-	this->SetNotifyRigidBodyCollision(true);
-	
 }
 
 
@@ -497,7 +492,7 @@ void USteamrollSphereComponent::DrawTimedSlots(float CurrentTime, const FVector&
 					}
 
 					BallActor->SlotsConfig.SetSlotUsed(i);
-					DrawDebugSphere(GetWorld(), GetActorLocation(), GetScaledSphereRadius(), 10, FColor::White);
+					//DrawDebugSphere(GetWorld(), GetActorLocation(), GetScaledSphereRadius(), 10, FColor::White);
 					//DrawDebugString(GetWorld(), GetActorLocation() + FVector(-50.f, -50.f, -50.f), FString::Printf(TEXT("%f"), CurrentTime), nullptr, FColor::Red, 0.f);
 				}
 			}
@@ -538,7 +533,7 @@ void USteamrollSphereComponent::DrawImpactSlots(AActor* HitActor, const FVector&
 					}
 
 					BallActor->SlotsConfig.SetSlotUsed(i);
-					DrawDebugSphere(GetWorld(), GetActorLocation(), GetScaledSphereRadius(), 10, FColor::White);
+					//DrawDebugSphere(GetWorld(), GetActorLocation(), GetScaledSphereRadius(), 10, FColor::White);
 					//DrawDebugString(GetWorld(), GetActorLocation() + FVector(-50.f, -50.f, -50.f), FString::Printf(TEXT("%f"), CurrentTime), nullptr, FColor::Red, 0.f);
 				}
 			}
@@ -551,7 +546,12 @@ void USteamrollSphereComponent::DrawSimulationWall(ASteamrollBall* BallActor, ui
 {
 	float Angle = Velocity.Rotation().Yaw + (BallActor->SlotsConfig.GetSlotParam(SlotIndex, 0) - 0.5f) * 180.f + 90.f;
 	FQuat Quat = FQuat(FVector::UpVector, FMath::DegreesToRadians(Angle));
-	DrawDebugBox(GetWorld(), GetActorLocation(), FVector(300.f, 15.f, 175.f), Quat, FColor::White);
+	//DrawDebugBox(GetWorld(), GetActorLocation(), FVector(300.f, 15.f, 175.f), Quat, FColor::White);
+
+	if (PlayerBase)
+	{
+		PlayerBase->DrawSimulatedWall(GetActorLocation() - FVector(0.f, 0.f, 95.f), FRotator(0.f, Angle, 0.f));
+	}
 }
 
 
@@ -565,7 +565,15 @@ void USteamrollSphereComponent::DrawSimulationExplosion(ASteamrollBall* BallActo
 void USteamrollSphereComponent::DrawSimulationRamp(const FVector& Location, const FVector& Normal)
 {
 	float Size = 150.f;
-	DrawDebugBox(GetWorld(), Location + Normal * Size * 0.5f, FVector(Size), Normal.Rotation().Quaternion(), FColor::White);
+	FRotator Rotation = Normal.Rotation();
+	//DrawDebugBox(GetWorld(), Location + Normal * Size * 0.5f, FVector(Size), Rotation.Quaternion(), FColor::White);
+
+	Rotation.Yaw -= 90.f;
+
+	if (PlayerBase)
+	{
+		PlayerBase->DrawSimulatedRamp(Location + Normal * Size * 2.62f - FVector(0.f, 0.f, 95.f), Rotation);
+	}
 }
 
 
@@ -674,25 +682,6 @@ FVector USteamrollSphereComponent::GetActorLocation() const
 void USteamrollSphereComponent::SetActorLocation(const FVector& Location)
 {
 	this->SetWorldLocation(Location);
-}
-
-
-void USteamrollSphereComponent::OnHit(AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
-{
-	this->PutRigidBodyToSleep();
-
-	if (Cast<USteamrollSphereComponent>(OtherComp))
-	{
-		return; // Collisions with other balls are handled by the balls themselves in the UpdatePhysics method
-	}
-	
-	if (OtherActor->IsRootComponentMovable() && !Cast<APlayerBase>(OtherActor))
-	{
-		DrawDebugSphere(GetWorld(), GetActorLocation(), GetScaledSphereRadius() + 0.1f, 15, FColor::Magenta, false, 0.f);
-		//Velocity = NormalImpulse.SafeNormal() * 100.f;
-		//Velocity = Velocity.MirrorByVector(Hit.ImpactNormal);
-		Velocity = Hit.ImpactNormal * 2500.f;
-	}
 }
 
 

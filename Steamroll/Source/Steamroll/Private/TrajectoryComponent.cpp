@@ -10,7 +10,6 @@ UTrajectoryComponent::UTrajectoryComponent(const class FPostConstructInitializeP
 	: Super(PCIP)
 {
 	static ConstructorHelpers::FObjectFinder<UMaterial> Object0(TEXT("Material'/Game/Ball/TrajectoryMat.TrajectoryMat'"));
-	//static ConstructorHelpers::FObjectFinder<UMaterial> Object0(TEXT("Material'/Game/Base/M_StatueGlass.M_StatueGlass'"));
 	TrajectoryMat = Object0.Object;
 
 	SetMaterial(0, TrajectoryMat);

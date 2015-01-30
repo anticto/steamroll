@@ -54,6 +54,38 @@ APlayerBase::APlayerBase(const class FPostConstructInitializeProperties& PCIP)
 	ChargeTime = 0.f;
 	ChargeTimeSpeed = 2.f;
 
+	// Simulated walls for ball trajectory prediction
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> Object0(TEXT("StaticMesh'/Game/Ball/Prediction/paretStatic.paretStatic'"));
+
+	for (int32 i = 0; i < 4; ++i)
+	{
+		SimulatedWalls[i] = PCIP.CreateAbstractDefaultSubobject<UStaticMeshComponent>(this, *FString::Printf(TEXT("SimulatedWall%i"), i));
+
+		SimulatedWalls[i]->SetStaticMesh(Object0.Object);
+		SimulatedWalls[i]->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		SimulatedWalls[i]->SetVisibility(false);
+		SimulatedWalls[i]->SetAbsolute(true, true);
+		SimulatedWalls[i]->SetRelativeTransform(FTransform::Identity);		
+	}
+
+	NumUsedSimulatedWalls = 0;
+
+	// Simulated ramps for ball trajectory prediction
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> Object1(TEXT("StaticMesh'/Game/Ball/Prediction/rampaStatic.rampaStatic'"));
+
+	for (int32 i = 0; i < 4; ++i)
+	{
+		SimulatedRamps[i] = PCIP.CreateAbstractDefaultSubobject<UStaticMeshComponent>(this, *FString::Printf(TEXT("SimulatedRamp%i"), i));
+				 
+		SimulatedRamps[i]->SetStaticMesh(Object1.Object);
+		SimulatedRamps[i]->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		SimulatedRamps[i]->SetVisibility(false);
+		SimulatedRamps[i]->SetAbsolute(true, true);
+		SimulatedRamps[i]->SetRelativeTransform(FTransform::Identity);
+	}
+
+	NumUsedSimulatedRamps = 0;
+
 	PrimaryActorTick.bCanEverTick = true;
 }
 
@@ -100,17 +132,16 @@ ASteamrollBall* APlayerBase::CreateSimulatedBall()
 
 	if (SimulatedBall)
 	{
-		//SimulatedBall->bHidden = false;
 		SimulatedBall->Sphere->bSimulationBall = true;
 		SimulatedBall->SetActorEnableCollision(false);
 		SimulatedBall->Sphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		SimulatedBall->Sphere->SetSimulatePhysics(false);
 		SimulatedBall->SetActorLocation(GetActorLocation());
 		SimulatedBall->Sphere->SetSphereRadius(99.442101f);
+		SimulatedBall->Sphere->PlayerBase = this;
 
 		SimulatedBall->VirtualSphere->SetSimulatePhysics(false);
 		SimulatedBall->VirtualSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		//SimulatedBall->VirtualSphere->DestroyComponent();
 	}
 
 	return SimulatedBall;
@@ -151,6 +182,8 @@ void APlayerBase::Tick(float DeltaSeconds)
 		SimulatedBall = nullptr;
 	}
 
+	ClearSimulatedItems();
+
 	if (ChargeTime > 0.f)
 	{
 		if (!SimulatedBall)
@@ -174,7 +207,6 @@ void APlayerBase::Tick(float DeltaSeconds)
 				UStaticMeshComponent* Component = Cast<UStaticMeshComponent>(Actor->GetRootComponent());
 				if (Component && Component->GetCollisionProfileName() != FName("DynamicPhysicsExceptBall"))
 				{
-					//FName Name = Component->GetCollisionProfileName();
 					bOverlap = true;
 					break;
 				}
@@ -277,7 +309,6 @@ void APlayerBase::Fire(float ChargeTime)
 			UStaticMeshComponent* Component = Cast<UStaticMeshComponent>(Actor->GetRootComponent());
 			if (Component && Component->GetCollisionProfileName() != FName("DynamicPhysicsExceptBall"))
 			{
-				//FName Name = Component->GetCollisionProfileName();
 				bOverlap = true;
 				break;
 			}
@@ -301,6 +332,8 @@ void APlayerBase::Fire(float ChargeTime)
 	ExplosionClient();
 
 	ASteamrollPlayerController* SteamrollPlayerController = Cast<ASteamrollPlayerController>(this->GetController());
+
+	ClearSimulatedItems();
 
 	if (SteamrollPlayerController)
 	{
@@ -404,5 +437,42 @@ void APlayerBase::SetChargeDown()
 {
 	TargetChargeTime -= 0.1f * FiringTimeout;
 	TargetChargeTime = FMath::Max(TargetChargeTime, 0.f);
+}
+
+
+void APlayerBase::ClearSimulatedItems()
+{
+	for (int32 i = 0; i < 4; ++i)
+	{
+		SimulatedWalls[i]->SetVisibility(false);
+		SimulatedRamps[i]->SetVisibility(false);
+	}
+
+	NumUsedSimulatedWalls = 0;
+	NumUsedSimulatedRamps = 0;
+}
+
+
+void APlayerBase::DrawSimulatedWall(const FVector &Location, const FRotator& Rotation)
+{
+	if (NumUsedSimulatedWalls < 4)
+	{
+		SimulatedWalls[NumUsedSimulatedWalls]->SetRelativeLocation(Location);
+		SimulatedWalls[NumUsedSimulatedWalls]->SetRelativeRotation(Rotation);
+		SimulatedWalls[NumUsedSimulatedWalls]->SetVisibility(true);
+		NumUsedSimulatedWalls++;
+	}
+}
+
+
+void APlayerBase::DrawSimulatedRamp(const FVector &Location, const FRotator& Rotation)
+{
+	if (NumUsedSimulatedRamps < 4)
+	{
+		SimulatedRamps[NumUsedSimulatedRamps]->SetRelativeLocation(Location);
+		SimulatedRamps[NumUsedSimulatedRamps]->SetRelativeRotation(Rotation);
+		SimulatedRamps[NumUsedSimulatedRamps]->SetVisibility(true);
+		NumUsedSimulatedRamps++;
+	}
 }
 

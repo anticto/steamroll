@@ -45,6 +45,20 @@ class STEAMROLL_API APlayerBase : public ASteamrollPawn
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Base)
 	float ChargeTime;
 
+	/** Subcomponents for rendering the wall deployment predictions on simulated ball trajectory */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = SimulatedBall)
+	TSubobjectPtr<UStaticMeshComponent> SimulatedWalls[4];
+
+	uint32 NumUsedSimulatedWalls;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = SimulatedBall)
+	TSubobjectPtr<UStaticMeshComponent> SimulatedRamps[4];
+
+	uint32 NumUsedSimulatedRamps;
+
+	void ClearSimulatedItems();
+	void DrawSimulatedWall(const FVector &Location, const FRotator& Rotation);
+	void DrawSimulatedRamp(const FVector &Location, const FRotator& Rotation);
 
 protected:
 

@@ -29,6 +29,10 @@ class STEAMROLL_API USteamrollSphereComponent : public USphereComponent
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Physics)
 	AActor* LastCollidedActor;
 
+	/** The PlayerBase that shot this sphere component if it is actually a steamball, used to be able to draw simulated walls and ramps */
+	UPROPERTY()
+	class APlayerBase* PlayerBase;
+
 	// Physics constants
 
 	/** How many collision tests are going to be made per subtick */
@@ -61,10 +65,6 @@ class STEAMROLL_API USteamrollSphereComponent : public USphereComponent
 	bool IsTouchingFloor(bool bSphereTrace = false) const;
 	FVector GetActorLocation() const;
 	void SetActorLocation(const FVector& Location);
-
-	UFUNCTION()
-	virtual void OnHit(AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
-	
 
 private:
 	void AddLocation(const FVector& Location, float CurrentTime);
