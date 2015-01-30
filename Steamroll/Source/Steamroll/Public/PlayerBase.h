@@ -56,9 +56,13 @@ class STEAMROLL_API APlayerBase : public ASteamrollPawn
 
 	uint32 NumUsedSimulatedRamps;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = SimulatedBall)
+	TSubobjectPtr<UStaticMeshComponent> SimulatedExplosion;
+
 	void ClearSimulatedItems();
 	void DrawSimulatedWall(const FVector &Location, const FRotator& Rotation);
 	void DrawSimulatedRamp(const FVector &Location, const FRotator& Rotation);
+	void DrawSimulatedExplosion(const FVector &Location, float Radius);
 
 protected:
 

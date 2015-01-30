@@ -558,7 +558,12 @@ void USteamrollSphereComponent::DrawSimulationWall(ASteamrollBall* BallActor, ui
 void USteamrollSphereComponent::DrawSimulationExplosion(ASteamrollBall* BallActor)
 {
 	float Radius = 1000.f * FMath::Pow(BallActor->SlotsConfig.CountSlotType(ESlotTypeEnum::SE_EXPL), 2);
-	DrawDebugSphere(GetWorld(), GetActorLocation(), Radius, 10, FColor::Green);
+	//DrawDebugSphere(GetWorld(), GetActorLocation(), Radius, 10, FColor::Green);
+
+	if (PlayerBase)
+	{
+		PlayerBase->DrawSimulatedExplosion(GetActorLocation(), Radius);
+	}
 }
 
 

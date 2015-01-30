@@ -86,6 +86,17 @@ APlayerBase::APlayerBase(const class FPostConstructInitializeProperties& PCIP)
 
 	NumUsedSimulatedRamps = 0;
 
+	// Simulated ramps for ball trajectory prediction
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> Object2(TEXT("StaticMesh'/Game/Ball/Prediction/explosionStatic.explosionStatic'"));
+
+	SimulatedExplosion = PCIP.CreateAbstractDefaultSubobject<UStaticMeshComponent>(this, TEXT("SimulatedExplosion"));
+
+	SimulatedExplosion->SetStaticMesh(Object2.Object);
+	SimulatedExplosion->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	SimulatedExplosion->SetVisibility(false);
+	SimulatedExplosion->SetAbsolute(true, true, true);
+	SimulatedExplosion->SetRelativeTransform(FTransform::Identity);
+
 	PrimaryActorTick.bCanEverTick = true;
 }
 
@@ -450,6 +461,8 @@ void APlayerBase::ClearSimulatedItems()
 
 	NumUsedSimulatedWalls = 0;
 	NumUsedSimulatedRamps = 0;
+
+	SimulatedExplosion->SetVisibility(false);
 }
 
 
@@ -474,5 +487,13 @@ void APlayerBase::DrawSimulatedRamp(const FVector &Location, const FRotator& Rot
 		SimulatedRamps[NumUsedSimulatedRamps]->SetVisibility(true);
 		NumUsedSimulatedRamps++;
 	}
+}
+
+
+void APlayerBase::DrawSimulatedExplosion(const FVector &Location, float Radius)
+{
+	SimulatedExplosion->SetRelativeLocation(Location);
+	SimulatedExplosion->SetRelativeScale3D(FVector(Radius));
+	SimulatedExplosion->SetVisibility(true);
 }
 
