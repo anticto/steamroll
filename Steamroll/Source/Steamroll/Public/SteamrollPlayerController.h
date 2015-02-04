@@ -66,6 +66,9 @@ class STEAMROLL_API ASteamrollPlayerController : public APlayerController
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Slots)
 	TArray<FSlotContentConfigStruct> SlotContent;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Slots)
+	float AimingStep;
+
 	UFUNCTION(BlueprintCallable, Category = Radar)
 	void AddBallCamera(AActor* BallCamera);
 

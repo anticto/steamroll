@@ -557,8 +557,8 @@ void APlayerBase::FireBlueprint()
 void APlayerBase::MoveRight(float Val)
 {
 	if (Val != 0.f)
-	{
-		float Step = 22.5f;
+	{		
+		float Step = GetLocalPlayerController()->AimingStep;
 
 		//bMovedDuringTick = true;
 

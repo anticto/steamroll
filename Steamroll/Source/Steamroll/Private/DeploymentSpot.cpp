@@ -7,7 +7,7 @@
 ADeploymentSpot::ADeploymentSpot(const class FPostConstructInitializeProperties& PCIP)
 	: Super(PCIP)
 {
-
+	AimingStep = 22.5f;
 }
 
 

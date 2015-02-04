@@ -10,6 +10,7 @@ ASteamrollPlayerController::ASteamrollPlayerController(const class FPostConstruc
 	WallDeploymentAngle = 0.f;
 
 	CurrentCamera = -1;
+	AimingStep = 22.5f;
 }
 
 

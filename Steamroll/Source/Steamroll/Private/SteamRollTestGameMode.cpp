@@ -95,6 +95,7 @@ APawn* ASteamRollTestGameMode::SpawnDefaultPawnFor(AController* NewPlayer, class
 		if (PlayerController)
 		{
 			PlayerController->SlotContent = PlayerStart->DeploymentSpot->SlotContent;
+			PlayerController->AimingStep = PlayerStart->DeploymentSpot->AimingStep;
 		}
 
 		PlayerStart->DeploymentSpot->Destroy();
