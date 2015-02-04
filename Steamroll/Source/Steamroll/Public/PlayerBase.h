@@ -59,6 +59,14 @@ class STEAMROLL_API APlayerBase : public ASteamrollPawn
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = SimulatedBall)
 	TSubobjectPtr<UStaticMeshComponent> SimulatedExplosion;
 
+	// Aiming Controls
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Base)
+	float SteppedYaw;
+
+	/** Called from blueprint to fire with the current ChargeTime */
+	UFUNCTION(BlueprintCallable, Category = Base)
+	void FireBlueprint();
+
 	void ClearSimulatedItems();
 	void DrawSimulatedWall(const FVector &Location, const FRotator& Rotation);
 	void DrawSimulatedRamp(const FVector &Location, const FRotator& Rotation);
@@ -76,6 +84,9 @@ protected:
 
 	void FireCharge() override;
 	void FireRelease() override;
+
+	/** Called for side to side input */
+	virtual void MoveRight(float Val) override;
 
 	/** Called to angle the cannon */
 	void MoveForward(float Val);
@@ -116,5 +127,12 @@ protected:
 	float TargetChargeTime;
 	/** The speed at which the ChargeTime changes second */
 	float ChargeTimeSpeed;
+
+	// Aiming controls
+	float CumulativeYaw;
+	float CurrentYaw;
+	bool bMovedDuringTick;
+	float SecondsWithoutMoving;
+	float PrevSign;
 
 };

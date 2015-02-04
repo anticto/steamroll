@@ -97,6 +97,13 @@ APlayerBase::APlayerBase(const class FPostConstructInitializeProperties& PCIP)
 	SimulatedExplosion->SetAbsolute(true, true, true);
 	SimulatedExplosion->SetRelativeTransform(FTransform::Identity);
 
+	CumulativeYaw = 0.f;
+	SteppedYaw = 0.f;
+	CurrentYaw = 0.f;
+	bMovedDuringTick = false;
+	SecondsWithoutMoving = 0.f;
+	PrevSign = 0.f;
+
 	PrimaryActorTick.bCanEverTick = true;
 }
 
@@ -171,6 +178,49 @@ void APlayerBase::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
+	// Aiming
+	if (bMovedDuringTick)
+	{
+		SecondsWithoutMoving = 0.f;
+		bMovedDuringTick = false;
+	}
+	else
+	{
+		SecondsWithoutMoving += DeltaSeconds;
+	}
+
+	if (!FMath::IsNearlyEqual(CurrentYaw, SteppedYaw, 0.01f))
+	{
+		float Increment = SteppedYaw - CurrentYaw;
+
+		// Prevent yaw wrap-around when going from -180 to 180 degrees
+		if (FMath::Abs(Increment) > 180.f && FMath::Sign(SteppedYaw) != FMath::Sign(CurrentYaw))
+		{
+			Increment = -FMath::Sign(Increment) * (360.f - FMath::Abs(Increment));
+		}
+
+		float IncrementSpeed = 25.f;
+
+		if (FMath::Abs(Increment) < 26.f)
+		{
+			IncrementSpeed = 5.f;
+		}
+		else if (FMath::Abs(Increment) < 50.f)
+		{
+			IncrementSpeed = 10.f;
+		}
+
+		float TimedIncrement = Increment * DeltaSeconds * IncrementSpeed;
+		CurrentYaw += Increment >= 0.f ? FMath::Min(Increment, TimedIncrement) : FMath::Max(Increment, TimedIncrement);
+		AimTransform->SetRelativeRotation(FRotator(0.f, CurrentYaw, 0.f));
+	}
+	else if (CurrentYaw != SteppedYaw)
+	{
+		CurrentYaw = SteppedYaw;
+		AimTransform->SetRelativeRotation(FRotator(0.f, CurrentYaw, 0.f));
+	}
+
+	// Charging, firing and simulation
 	if (bFiring)
 	{
 		ChargeTime += DeltaSeconds;
@@ -495,5 +545,59 @@ void APlayerBase::DrawSimulatedExplosion(const FVector &Location, float Radius)
 	SimulatedExplosion->SetRelativeLocation(Location);
 	SimulatedExplosion->SetRelativeScale3D(FVector(Radius));
 	SimulatedExplosion->SetVisibility(true);
+}
+
+
+void APlayerBase::FireBlueprint()
+{
+	Fire(ChargeTime);
+}
+
+
+void APlayerBase::MoveRight(float Val)
+{
+	if (Val != 0.f)
+	{
+		float Step = 22.5f;
+
+		//bMovedDuringTick = true;
+
+		if (FMath::Abs(CumulativeYaw) > 10.f && (SecondsWithoutMoving > 0.25f || (FMath::Sign(Val) != PrevSign && FMath::Sign(CumulativeYaw) != PrevSign)))
+		{
+			bMovedDuringTick = true;
+			SecondsWithoutMoving = 0.f;
+			CumulativeYaw = FMath::Sign(Val) * (Step + Step * 0.05f); // Make sure we force a step and don't miss it due to precission issues
+		}
+		else
+		{
+			CumulativeYaw += 2.f * Val;
+
+			if (SecondsWithoutMoving == 0.f)
+			{
+				bMovedDuringTick = true;
+			}
+		}
+
+		if (bMovedDuringTick)
+		{
+			PrevSign = FMath::Sign(Val);
+
+			while (FMath::Abs(CumulativeYaw) >= Step)
+			{
+				if (CumulativeYaw > 0.f)
+				{
+					CumulativeYaw -= Step;
+					SteppedYaw += Step;
+				}
+				else
+				{
+					CumulativeYaw += Step;
+					SteppedYaw -= Step;
+				}
+			}
+		}
+
+		//RotationServer(AimTransform->RelativeRotation);
+	}
 }
 
