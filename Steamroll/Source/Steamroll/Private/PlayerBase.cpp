@@ -171,6 +171,8 @@ void APlayerBase::BeginPlay()
 	Super::BeginPlay();
 
 	SimulatedBall = CreateSimulatedBall();
+	CurrentYaw = AimTransform->GetComponentRotation().Yaw;
+	SteppedYaw = AimTransform->GetComponentRotation().Yaw;
 }
 
 
@@ -212,12 +214,12 @@ void APlayerBase::Tick(float DeltaSeconds)
 
 		float TimedIncrement = Increment * DeltaSeconds * IncrementSpeed;
 		CurrentYaw += Increment >= 0.f ? FMath::Min(Increment, TimedIncrement) : FMath::Max(Increment, TimedIncrement);
-		AimTransform->SetRelativeRotation(FRotator(0.f, CurrentYaw, 0.f));
+		AimTransform->SetWorldRotation(FRotator(0.f, CurrentYaw, 0.f));
 	}
 	else if (CurrentYaw != SteppedYaw)
 	{
 		CurrentYaw = SteppedYaw;
-		AimTransform->SetRelativeRotation(FRotator(0.f, CurrentYaw, 0.f));
+		AimTransform->SetWorldRotation(FRotator(0.f, CurrentYaw, 0.f));
 	}
 
 	// Charging, firing and simulation
