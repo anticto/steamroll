@@ -189,7 +189,7 @@ void APlayerBase::Tick(float DeltaSeconds)
 		SecondsWithoutMoving += DeltaSeconds;
 	}
 
-	if (!FMath::IsNearlyEqual(CurrentYaw, SteppedYaw, 0.01f))
+	if (!FMath::IsNearlyEqual(CurrentYaw, SteppedYaw, 0.05f))
 	{
 		float Increment = SteppedYaw - CurrentYaw;
 
