@@ -284,7 +284,10 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 
 					if (BallActor && Speed > 0.f && ((ReflectedVector | (Velocity / Speed)) < 0.f) && (FMath::Abs(OutHit.ImpactNormal | FVector::UpVector) < 0.1f))
 					{
-						ActivateSnapRamp(BallActor, OutHit.ImpactPoint, OutHit.ImpactNormal);
+						if (OutHit.Actor->GetName().StartsWith("Paret_Nivell"))
+						{
+							ActivateSnapRamp(BallActor, OutHit.ImpactPoint, OutHit.ImpactNormal);
+						}
 					}
 
 					//DrawDebugDirectionalArrow(Ball.GetWorld(), OutHit.ImpactPoint, OutHit.ImpactPoint + OutHit.ImpactNormal * 100.f, 3.f, FColor::Yellow);
