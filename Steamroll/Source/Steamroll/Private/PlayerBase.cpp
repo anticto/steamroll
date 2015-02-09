@@ -46,6 +46,9 @@ APlayerBase::APlayerBase(const class FPostConstructInitializeProperties& PCIP)
 	Camera2->AttachTo(RootComponent);
 	Camera2->bUsePawnControlRotation = false;
 
+	// Active camera from camera list (which comes from the deployment spot)
+	CameraListActiveIndex = 0;
+
 	// Create explosion particle system
 	Explosion = PCIP.CreateDefaultSubobject<UParticleSystemComponent>(this, TEXT("Explosion0"));
 	Explosion->bAutoActivate = false;
@@ -173,6 +176,15 @@ void APlayerBase::BeginPlay()
 	SimulatedBall = CreateSimulatedBall();
 	CurrentYaw = AimTransform->GetComponentRotation().Yaw;
 	SteppedYaw = AimTransform->GetComponentRotation().Yaw;
+
+	if (CameraList.Num() != 0)
+	{
+		//Camera->bAutoActivate = false;
+		//Camera2->bAutoActivate = false;
+
+		//CameraList[CameraListActiveIndex]->AttachRootComponentToActor(this, NAME_None, EAttachLocation::KeepWorldPosition);
+		GetLocalPlayerController()->SetViewTarget(CameraList[0]);
+	}
 }
 
 

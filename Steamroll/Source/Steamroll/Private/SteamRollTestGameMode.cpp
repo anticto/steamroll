@@ -83,14 +83,13 @@ APawn* ASteamRollTestGameMode::SpawnDefaultPawnFor(AController* NewPlayer, class
 	UClass* PawnClass;
 
 	ASteamrollPlayerStart* PlayerStart = Cast<ASteamrollPlayerStart>(StartSpot);
+	ASteamrollPlayerController* PlayerController = Cast<ASteamrollPlayerController>(NewPlayer);
 
 	if (PlayerStart && PlayerStart->DeploymentSpot)
 	{
 		PawnClass = PlayerBaseClass;
 		StartRotation.Yaw = PlayerStart->DeploymentSpot->GetActorRotation().Yaw;
 		StartLocation = PlayerStart->DeploymentSpot->GetActorLocation();
-
-		ASteamrollPlayerController* PlayerController = Cast<ASteamrollPlayerController>(NewPlayer);
 
 		if (PlayerController)
 		{
@@ -111,9 +110,21 @@ APawn* ASteamRollTestGameMode::SpawnDefaultPawnFor(AController* NewPlayer, class
 
 	ResultPawn = GetWorld()->SpawnActor<APawn>(PawnClass, StartLocation, StartRotation, SpawnInfo);
 
-	if (ResultPawn && PawnClass == BaseBallClass)
+	if (ResultPawn)
 	{
-		Cast<ABaseBall>(ResultPawn)->UndeployInstantly();
+		if (PawnClass == BaseBallClass)
+		{
+			Cast<ABaseBall>(ResultPawn)->UndeployInstantly();
+		}
+		else if (PawnClass == PlayerBaseClass)
+		{
+			APlayerBase* PlayerBase = Cast<APlayerBase>(ResultPawn);
+
+			if (PlayerBase && PlayerStart && PlayerStart->DeploymentSpot)
+			{
+				PlayerBase->CameraList = PlayerStart->DeploymentSpot->CameraList;
+			}
+		}
 	}
 
 	return ResultPawn;

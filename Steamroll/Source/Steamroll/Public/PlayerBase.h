@@ -63,6 +63,12 @@ class STEAMROLL_API APlayerBase : public ASteamrollPawn
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Base)
 	float SteppedYaw;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+	TArray<ACameraActor*> CameraList;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+	int32 CameraListActiveIndex;
+
 	/** Called from blueprint to fire with the current ChargeTime */
 	UFUNCTION(BlueprintCallable, Category = Base)
 	void FireBlueprint();
