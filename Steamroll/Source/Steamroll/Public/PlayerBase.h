@@ -73,6 +73,10 @@ class STEAMROLL_API APlayerBase : public ASteamrollPawn
 	UFUNCTION(BlueprintCallable, Category = Base)
 	void FireBlueprint();
 
+	/** Advance to the next camera in the camera list */
+	UFUNCTION(BlueprintCallable, Category = Camera)
+	void NextCamera();
+
 	void ClearSimulatedItems();
 	void DrawSimulatedWall(const FVector &Location, const FRotator& Rotation);
 	void DrawSimulatedRamp(const FVector &Location, const FRotator& Rotation);

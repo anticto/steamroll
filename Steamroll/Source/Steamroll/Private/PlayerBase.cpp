@@ -615,3 +615,14 @@ void APlayerBase::MoveRight(float Val)
 	}
 }
 
+
+void APlayerBase::NextCamera()
+{
+	CameraListActiveIndex++;
+
+	if (CameraListActiveIndex >= CameraList.Num())
+	{
+		CameraListActiveIndex = 0;
+	}
+}
+

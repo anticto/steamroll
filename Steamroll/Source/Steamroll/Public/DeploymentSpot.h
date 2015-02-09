@@ -22,5 +22,8 @@ class STEAMROLL_API ADeploymentSpot : public AActor
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 	TArray<ACameraActor*> CameraList;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+	int32 CameraListActiveIndex;
 	
 };
