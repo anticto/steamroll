@@ -10,4 +10,13 @@ ADeploymentSpot::ADeploymentSpot(const class FPostConstructInitializeProperties&
 	AimingStep = 22.5f;
 }
 
+void ADeploymentSpot::NextCamera()
+{
+	CameraListActiveIndex++;
+
+	if (CameraListActiveIndex >= CameraList.Num())
+	{
+		CameraListActiveIndex = 0;
+	}
+}
 

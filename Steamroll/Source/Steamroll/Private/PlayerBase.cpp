@@ -7,6 +7,7 @@
 #include "SteamrollSphereComponent.h"
 #include "TrajectoryComponent.h"
 #include "PhysicsVirtualSphereComponent.h"
+#include "DeploymentSpot.h"
 
 #include "EngineUtils.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -45,9 +46,6 @@ APlayerBase::APlayerBase(const class FPostConstructInitializeProperties& PCIP)
 	Camera->bUsePawnControlRotation = false; // We don't want the controller rotating the camera
 	Camera2->AttachTo(RootComponent);
 	Camera2->bUsePawnControlRotation = false;
-
-	// Active camera from camera list (which comes from the deployment spot)
-	CameraListActiveIndex = 0;
 
 	// Create explosion particle system
 	Explosion = PCIP.CreateDefaultSubobject<UParticleSystemComponent>(this, TEXT("Explosion0"));
@@ -175,15 +173,11 @@ void APlayerBase::BeginPlay()
 
 	SimulatedBall = CreateSimulatedBall();
 	CurrentYaw = AimTransform->GetComponentRotation().Yaw;
-	SteppedYaw = AimTransform->GetComponentRotation().Yaw;
+	SteppedYaw = CurrentYaw;
 
-	if (CameraList.Num() != 0)
+	if (AttachedToDeploymentSpot && AttachedToDeploymentSpot->CameraList.Num() != 0)
 	{
-		//Camera->bAutoActivate = false;
-		//Camera2->bAutoActivate = false;
-
-		//CameraList[CameraListActiveIndex]->AttachRootComponentToActor(this, NAME_None, EAttachLocation::KeepWorldPosition);
-		GetLocalPlayerController()->SetViewTarget(CameraList[0]);
+		GetLocalPlayerController()->SetViewTarget(AttachedToDeploymentSpot->CameraList[AttachedToDeploymentSpot->CameraListActiveIndex]);
 	}
 }
 
@@ -580,7 +574,7 @@ void APlayerBase::MoveRight(float Val)
 		{
 			bMovedDuringTick = true;
 			SecondsWithoutMoving = 0.f;
-			CumulativeYaw = FMath::Sign(Val) * (Step + Step * 0.05f); // Make sure we force a step and don't miss it due to precission issues
+			CumulativeYaw = FMath::Sign(Val) * (Step + Step * 0.05f); // Make sure we force a step and don't miss it due to precision issues
 		}
 		else
 		{
@@ -616,13 +610,37 @@ void APlayerBase::MoveRight(float Val)
 }
 
 
-void APlayerBase::NextCamera()
+void APlayerBase::AttachToDeploymentSpot(class ADeploymentSpot* DeploymentSpot)
 {
-	CameraListActiveIndex++;
+	AttachedToDeploymentSpot = DeploymentSpot;
+	AttachedToDeploymentSpot->SetActorHiddenInGame(true);
+}
 
-	if (CameraListActiveIndex >= CameraList.Num())
+
+ADeploymentSpot* APlayerBase::DetatchFromDeploymentSpot()
+{
+	if (AttachedToDeploymentSpot)
 	{
-		CameraListActiveIndex = 0;
+		AttachedToDeploymentSpot->SetActorHiddenInGame(false);
+		AttachedToDeploymentSpot->bHidden = false;
+		
+		auto Aux = AttachedToDeploymentSpot;
+		AttachedToDeploymentSpot = nullptr;
+
+		return Aux;
 	}
+
+	return nullptr;
+}
+
+
+AActor* APlayerBase::GetViewTargetActor()
+{
+	if (AttachedToDeploymentSpot && AttachedToDeploymentSpot->CameraList.Num() > 0)
+	{
+		return AttachedToDeploymentSpot->CameraList[AttachedToDeploymentSpot->CameraListActiveIndex];
+	}
+
+	return this;
 }
 

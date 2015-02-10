@@ -63,19 +63,24 @@ class STEAMROLL_API APlayerBase : public ASteamrollPawn
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Base)
 	float SteppedYaw;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
-	TArray<ACameraActor*> CameraList;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
-	int32 CameraListActiveIndex;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Base)
+	class ADeploymentSpot* AttachedToDeploymentSpot;
 
 	/** Called from blueprint to fire with the current ChargeTime */
 	UFUNCTION(BlueprintCallable, Category = Base)
 	void FireBlueprint();
 
-	/** Advance to the next camera in the camera list */
+	/** Attaches the playerbase to the deployment spot and hides it, keeps a reference for making it visible again later when it detaches */
+	UFUNCTION(BlueprintCallable, Category = Base)
+	void AttachToDeploymentSpot(class ADeploymentSpot* DeploymentSpot);
+
+	/** Detaches the playerbase from the deployment spot and makes it visible */
+	UFUNCTION(BlueprintCallable, Category = Base)
+	class ADeploymentSpot* DetatchFromDeploymentSpot();
+
+	/** Gets the actor that will set the view, if the attached deployment spot has camera actors, it will be one of them, otherwise the base's camera2 */
 	UFUNCTION(BlueprintCallable, Category = Camera)
-	void NextCamera();
+	AActor* GetViewTargetActor();
 
 	void ClearSimulatedItems();
 	void DrawSimulatedWall(const FVector &Location, const FRotator& Rotation);

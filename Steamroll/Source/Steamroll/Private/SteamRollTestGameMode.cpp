@@ -96,8 +96,6 @@ APawn* ASteamRollTestGameMode::SpawnDefaultPawnFor(AController* NewPlayer, class
 			PlayerController->SlotContent = PlayerStart->DeploymentSpot->SlotContent;
 			PlayerController->AimingStep = PlayerStart->DeploymentSpot->AimingStep;
 		}
-
-		PlayerStart->DeploymentSpot->Destroy();
 	}
 	else
 	{
@@ -122,7 +120,7 @@ APawn* ASteamRollTestGameMode::SpawnDefaultPawnFor(AController* NewPlayer, class
 
 			if (PlayerBase && PlayerStart && PlayerStart->DeploymentSpot)
 			{
-				PlayerBase->CameraList = PlayerStart->DeploymentSpot->CameraList;
+				PlayerBase->AttachToDeploymentSpot(PlayerStart->DeploymentSpot);
 			}
 		}
 	}

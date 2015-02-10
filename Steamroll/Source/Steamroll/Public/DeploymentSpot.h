@@ -25,5 +25,9 @@ class STEAMROLL_API ADeploymentSpot : public AActor
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 	int32 CameraListActiveIndex;
+
+	/** Advance to the next camera in the camera list */
+	UFUNCTION(BlueprintCallable, Category = Camera)
+	void NextCamera();
 	
 };
