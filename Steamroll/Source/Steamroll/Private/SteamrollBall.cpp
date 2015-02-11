@@ -30,6 +30,7 @@ ASteamrollBall::ASteamrollBall(const class FPostConstructInitializeProperties& P
 	bExplosionBlockedByContactSlot = false;
 	CurrentTime = 0.f;
 	TimeForNextPaint = 1.f;
+	bTravellingInTunnel = false;
 
 	// If there are timer slots, start timers
 	for (int32 i = 1; i < 5; i++)
@@ -48,7 +49,11 @@ void ASteamrollBall::Tick(float DeltaSeconds)
 
 	VirtualSphere->SteamrollTick(DeltaSeconds, Sphere);
 
-	CurrentTime += DeltaSeconds;
+	if (!bTravellingInTunnel)
+	{
+		CurrentTime += DeltaSeconds;
+	}
+
 	bool bTouchingFloor = IsTouchingFloor();
 
 	float SpeedSquared = GetVelocity().SizeSquared();
@@ -336,6 +341,7 @@ void ASteamrollBall::ExecuteTransport(ABallTunnel* ConnectedTunnel, float Speed)
 	Ball->SetActorHiddenInGame(false);
 	Ball->SetActorEnableCollision(true);
 	Ball->Sphere->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	Ball->bTravellingInTunnel = false;
 
 	Ball->VirtualSphere->SetSimulatePhysics(true);
 }

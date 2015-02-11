@@ -36,6 +36,9 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Collect)
 	float CollectCapacity;
 
+	/** True if the ball is travelling through a tunnel and it does not have to have its timer time incremented */
+	bool bTravellingInTunnel;
+
 	virtual void Tick(float DeltaSeconds) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Slots)

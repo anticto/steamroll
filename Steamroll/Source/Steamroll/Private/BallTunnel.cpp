@@ -45,9 +45,17 @@ void ABallTunnel::TransportToOtherTunnelEnd(AActor* OtherActor)
 			float Speed = Ball->GetVelocity().Size();
 			Ball->Sphere->bPhysicsEnabled = false;
 			Ball->VirtualSphere->SetSimulatePhysics(false);
+			Ball->bTravellingInTunnel = true;
 
-			auto Delegate = FTimerDelegate::CreateUFunction(Ball, FName("ExecuteTransport"), ConnectedTunnel, Speed);
-			GetWorldTimerManager().SetTimer(Delegate, TransportDelaySeconds, false);
+			if (TransportDelaySeconds > 0.f)
+			{
+				auto Delegate = FTimerDelegate::CreateUFunction(Ball, FName("ExecuteTransport"), ConnectedTunnel, Speed);
+				GetWorldTimerManager().SetTimer(Delegate, TransportDelaySeconds, false);
+			}
+			else
+			{
+				Ball->ExecuteTransport(ConnectedTunnel, Speed);
+			}
 		}
 	}
 }
