@@ -284,7 +284,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 
 					if (BallActor && Speed > 0.f && ((ReflectedVector | (Velocity / Speed)) < 0.f) && (FMath::Abs(OutHit.ImpactNormal | FVector::UpVector) < 0.1f))
 					{
-						if (OutHit.Actor->GetName().StartsWith("Paret_Nivell"))
+						if (OutHit.Actor != nullptr && OutHit.Actor->GetName().StartsWith("Paret_Nivell"))
 						{
 							ActivateSnapRamp(BallActor, OutHit.ImpactPoint, OutHit.ImpactNormal);
 						}
