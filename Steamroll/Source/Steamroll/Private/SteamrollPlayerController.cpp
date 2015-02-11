@@ -141,3 +141,27 @@ void ASteamrollPlayerController::SpendSlotItem(TEnumAsByte<ESlotTypeEnum::SlotTy
 	}
 }
 
+
+void ASteamrollPlayerController::IncrementSlotItem(TEnumAsByte<ESlotTypeEnum::SlotType> SlotTypeEnum, int32 Quantity)
+{
+	bool bFoundItem = false;
+
+	for (auto& Slot : SlotContent)
+	{
+		if (Slot.SlotType == SlotTypeEnum)
+		{
+			Slot.Quantity += Quantity;
+			bFoundItem = true;
+			break;
+		}
+	}
+
+	if (!bFoundItem)
+	{
+		FSlotContentConfigStruct ConfigStruct;
+		ConfigStruct.SlotType = SlotTypeEnum;
+		ConfigStruct.Quantity = Quantity;
+		SlotContent.Add(ConfigStruct);
+	}
+}
+

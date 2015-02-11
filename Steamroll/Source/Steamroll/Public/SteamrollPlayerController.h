@@ -86,5 +86,8 @@ class STEAMROLL_API ASteamrollPlayerController : public APlayerController
 
 	UFUNCTION(BlueprintCallable, Category = Slots)
 	void SpendSlotItem(TEnumAsByte<ESlotTypeEnum::SlotType> SlotTypeEnum);
+
+	UFUNCTION(BlueprintCallable, Category = Slots)
+	void IncrementSlotItem(TEnumAsByte<ESlotTypeEnum::SlotType> SlotTypeEnum, int32 Quantity);
 	
 };
