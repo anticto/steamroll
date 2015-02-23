@@ -31,12 +31,6 @@ ASteamrollBall::ASteamrollBall(const class FPostConstructInitializeProperties& P
 	CurrentTime = 0.f;
 	TimeForNextPaint = 1.f;
 	bTravellingInTunnel = false;
-
-	// If there are timer slots, start timers
-	for (int32 i = 1; i < 5; i++)
-	{
-		bIsTimerRunning[i] = SlotsConfig.GetSlotType(i) == ESlotTypeEnum::SE_TIME;
-	}
 }
 
 
@@ -65,14 +59,11 @@ void ASteamrollBall::Tick(float DeltaSeconds)
 
 	for (uint32 i = 1; i < 5; ++i)
 	{
-		if (SlotsConfig.GetSlotType(i) == ESlotTypeEnum::SE_TIME && !SlotsConfig.IsSlotUsed(i))
+		if (SlotsConfig.GetSlotActivatorType(i) == ESlotTypeEnum::SE_TIME && !SlotsConfig.IsSlotUsed(i))
 		{
-			if (SlotsConfig.GetSlotParam(i, 0) * 10.f < CurrentTime)
+			if (SlotsConfig.GetSlotTime(i) < CurrentTime)
 			{
-				SlotsConfig.SetSlotUsed(i);
 				ActivateTimerTrigger(i);
-				bIsTimerRunning[i] = false;
-				//Velocity = FVector::ZeroVector;
 			}
 		}
 	}
@@ -146,6 +137,42 @@ TEnumAsByte<ESlotTypeEnum::SlotType> ASteamrollBall::GetSlotState(int32 SlotInde
 void ASteamrollBall::SetSlotState(int32 SlotIndex, TEnumAsByte<ESlotTypeEnum::SlotType> SlotTypeEnum)
 {
 	SlotsConfig.SetSlotType(SlotIndex, SlotTypeEnum);
+}
+
+
+TEnumAsByte<ESlotTypeEnum::SlotType> ASteamrollBall::GetSlotActivatorType(int32 SlotIndex)
+{
+	return SlotsConfig.GetSlotActivatorType(SlotIndex);
+}
+
+
+void ASteamrollBall::SetSlotActivatorType(int32 SlotIndex, TEnumAsByte<ESlotTypeEnum::SlotType> SlotTypeEnum)
+{
+	SlotsConfig.SetSlotActivatorType(SlotIndex, SlotTypeEnum);
+}
+
+
+float ASteamrollBall::GetSlotAngle(int32 SlotIndex)
+{
+	return SlotsConfig.GetSlotAngle(SlotIndex);
+}
+
+
+void ASteamrollBall::SetSlotAngle(int32 SlotIndex, float Value)
+{
+	SlotsConfig.SetSlotAngle(SlotIndex, Value);
+}
+
+
+float ASteamrollBall::GetSlotTime(int32 SlotIndex)
+{
+	return SlotsConfig.GetSlotTime(SlotIndex);
+}
+
+
+void ASteamrollBall::SetSlotTime(int32 SlotIndex, float Value)
+{
+	SlotsConfig.SetSlotTime(SlotIndex, Value);
 }
 
 
@@ -241,7 +268,7 @@ void ASteamrollBall::ExplosionEvent_Implementation()
 void ASteamrollBall::ActivateTimerTrigger(int32 SlotIndex)
 {
 	//DrawDebugString(GetWorld(), GetActorLocation(), FString::Printf(TEXT("%f"), CurrentTime), nullptr, FColor::Blue, 2.f);
-	ActivateConnectedSlots(SlotIndex);
+	ActivateSlot(SlotIndex);
 }
 
 
@@ -249,54 +276,22 @@ void ASteamrollBall::ActivateRemoteTriggers()
 {
 	for (int32 i = 1; i < 5; i++)
 	{
-		if (SlotsConfig.GetSlotType(i) == ESlotTypeEnum::SE_REMOTE)
+		if (SlotsConfig.GetSlotActivatorType(i) == ESlotTypeEnum::SE_REMOTE)
 		{
-			ActivateConnectedSlots(i);
+			ActivateSlot(i);
 		}
 	}
-}
-
-
-void ASteamrollBall::ActivateStopTriggers()
-{
-	for (int32 i = 1; i < 5; i++)
-	{
-		if (SlotsConfig.GetSlotType(i) == ESlotTypeEnum::SE_STOP)
-		{
-			ActivateConnectedSlots(i);
-		}
-	}
-}
-
-
-void ASteamrollBall::ActivateConnectedSlots(int32 SlotIndex)
-{
-	//if (IsTouchingFloor())
-	//{
-		for (uint32 i = 1; i < 5; i++)
-		{
-			if (SlotsConfig.GetSlotConnection(SlotIndex, i))
-			{
-				// Only activate the first available slot
-				if (ActivateSlot(i)) 
-				{
-					break;
-				}
-			}
-		}
-	//}
 }
 
 
 bool ASteamrollBall::ActivateSlot(int32 SlotIndex)
 {
 	TEnumAsByte<ESlotTypeEnum::SlotType> Type = GetSlotState(SlotIndex);
-	bool bIsTrigger = Type == ESlotTypeEnum::SE_TIME || Type == ESlotTypeEnum::SE_CONTACT || Type == ESlotTypeEnum::SE_REMOTE || Type == ESlotTypeEnum::SE_STOP;
 
-	if (!SlotsConfig.IsSlotUsed(SlotIndex) && !bIsTrigger && Type != ESlotTypeEnum::SE_EMPTY && Type != ESlotTypeEnum::SE_RAMP) // Ramps snap when hit a wall, they aren't directly activated with triggers
+	if (!SlotsConfig.IsSlotUsed(SlotIndex) && Type != ESlotTypeEnum::SE_EMPTY && Type != ESlotTypeEnum::SE_RAMP) // Ramps snap when hit a wall, they aren't directly activated with triggers
 	{
 		SlotsConfig.SetSlotUsed(SlotIndex);
-		ActivateSlotEvent(SlotsConfig.GetSlotType(SlotIndex), SlotsConfig.GetSlotParam(SlotIndex, 1), SlotsConfig.GetSlotParam(SlotIndex, 2));
+		ActivateSlotEvent(SlotsConfig.GetSlotType(SlotIndex), SlotsConfig.GetSlotAngle(SlotIndex), SlotsConfig.GetSlotTime(SlotIndex));
 
 		return true;
 	}

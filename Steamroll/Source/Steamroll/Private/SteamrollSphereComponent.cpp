@@ -469,29 +469,19 @@ void USteamrollSphereComponent::DrawTimedSlots(float CurrentTime, const FVector&
 	{
 		for (uint32 i = 1; i < 5; ++i)
 		{
-			if (BallActor->GetSlotState(i) == ESlotTypeEnum::SE_TIME && !BallActor->SlotsConfig.IsSlotUsed(i))
+			if (BallActor->GetSlotState(i) != ESlotTypeEnum::SE_EMPTY && BallActor->GetSlotActivatorType(i) == ESlotTypeEnum::SE_TIME && !BallActor->SlotsConfig.IsSlotUsed(i))
 			{
-				if (BallActor->SlotsConfig.GetSlotParam(i, 0) * 10.f < CurrentTime)
+				//if(CurrentTime > 9.5f) UE_LOG(LogTemp, Warning, TEXT("%f, %f"), BallActor->GetSlotTime(i), CurrentTime);
+
+				if (BallActor->GetSlotTime(i) < CurrentTime || (BallActor->GetSlotTime(i) > 9.9f && CurrentTime > 9.85f))
 				{
-					for (uint32 j = 1; j < 5; ++j)
+					if (BallActor->GetSlotState(i) == ESlotTypeEnum::SE_WALL)
 					{
-						if (i != j && BallActor->SlotsConfig.GetSlotConnection(i, j) && !BallActor->SlotsConfig.IsSlotUsed(j))
-						{
-							if (BallActor->SlotsConfig.GetSlotType(j) == ESlotTypeEnum::SE_WALL)
-							{
-								DrawSimulationWall(BallActor, j);
-								BallActor->SlotsConfig.SetSlotUsed(j);
-
-								break;
-							}
-							else if (BallActor->SlotsConfig.GetSlotType(j) == ESlotTypeEnum::SE_EXPL)
-							{
-								DrawSimulationExplosion(BallActor);
-								BallActor->SlotsConfig.SetSlotUsed(j);
-
-								break;
-							}
-						}
+						DrawSimulationWall(BallActor, i);
+					}
+					else if (BallActor->GetSlotState(i) == ESlotTypeEnum::SE_EXPL)
+					{
+						DrawSimulationExplosion(BallActor);
 					}
 
 					BallActor->SlotsConfig.SetSlotUsed(i);
@@ -512,27 +502,17 @@ void USteamrollSphereComponent::DrawImpactSlots(AActor* HitActor, const FVector&
 	{
 		for (uint32 i = 1; i < 5; ++i)
 		{
-			if (BallActor->GetSlotState(i) == ESlotTypeEnum::SE_CONTACT && !BallActor->SlotsConfig.IsSlotUsed(i))
+			if (BallActor->GetSlotActivatorType(i) == ESlotTypeEnum::SE_CONTACT && !BallActor->SlotsConfig.IsSlotUsed(i) && BallActor->GetSlotState(i) != ESlotTypeEnum::SE_RAMP) // Ramps are handled separately
 			{
 				if (HitActor->GetClass()->ImplementsInterface(UExplosionDestructibleInterface::StaticClass()))
 				{
-					for (uint32 j = 1; j < 5; ++j)
+					if (BallActor->SlotsConfig.GetSlotType(i) == ESlotTypeEnum::SE_WALL)
 					{
-						if (i != j && BallActor->SlotsConfig.GetSlotConnection(i, j) && !BallActor->SlotsConfig.IsSlotUsed(j))
-						{
-							if (BallActor->SlotsConfig.GetSlotType(j) == ESlotTypeEnum::SE_WALL)
-							{
-								DrawSimulationWall(BallActor, j);
-								BallActor->SlotsConfig.SetSlotUsed(j);
-							}
-							else if (BallActor->SlotsConfig.GetSlotType(j) == ESlotTypeEnum::SE_EXPL)
-							{
-								DrawSimulationExplosion(BallActor);
-								BallActor->SlotsConfig.SetSlotUsed(j);
-							}
-
-							break;
-						}
+						DrawSimulationWall(BallActor, i);
+					}
+					else if (BallActor->SlotsConfig.GetSlotType(i) == ESlotTypeEnum::SE_EXPL)
+					{
+						DrawSimulationExplosion(BallActor);
 					}
 
 					BallActor->SlotsConfig.SetSlotUsed(i);
@@ -547,8 +527,8 @@ void USteamrollSphereComponent::DrawImpactSlots(AActor* HitActor, const FVector&
 
 void USteamrollSphereComponent::DrawSimulationWall(ASteamrollBall* BallActor, uint32 SlotIndex)
 {
-	float Angle = Velocity.Rotation().Yaw + (BallActor->SlotsConfig.GetSlotParam(SlotIndex, 0) - 0.5f) * 180.f + 90.f;
-	FQuat Quat = FQuat(FVector::UpVector, FMath::DegreesToRadians(Angle));
+	float Angle = Velocity.Rotation().Yaw + BallActor->GetSlotAngle(SlotIndex) + 90.f;
+	//FQuat Quat = FQuat(FVector::UpVector, FMath::DegreesToRadians(Angle));
 	//DrawDebugBox(GetWorld(), GetActorLocation(), FVector(300.f, 15.f, 175.f), Quat, FColor::White);
 
 	if (PlayerBase)
@@ -697,21 +677,8 @@ void USteamrollSphereComponent::ActivateSnapRamp(ASteamrollBall* BallActor, cons
 {
 	for (int32 i = 1; i < 5; i++)
 	{
-		bool bConnectedToTrigger = false;
-
-		for (uint32 j = 1; j < 5; j++)
-		{
-			TEnumAsByte<ESlotTypeEnum::SlotType> Type = BallActor->GetSlotState(j);
-			bool bIsTrigger = Type == ESlotTypeEnum::SE_TIME;
-
-			if (i != j && bIsTrigger && BallActor->SlotsConfig.GetSlotConnection(j, i))
-			{
-				bConnectedToTrigger = true;
-				break;
-			}
-		}
-
-		if (!bConnectedToTrigger && BallActor->SlotsConfig.GetSlotType(i) == ESlotTypeEnum::SE_RAMP && !BallActor->SlotsConfig.IsSlotUsed(i))
+		if (BallActor->SlotsConfig.GetSlotType(i) == ESlotTypeEnum::SE_RAMP && !BallActor->SlotsConfig.IsSlotUsed(i)
+			&& BallActor->SlotsConfig.GetSlotActivatorType(i) == ESlotTypeEnum::SE_CONTACT)
 		{
 			BallActor->SlotsConfig.SetSlotUsed(i);
 

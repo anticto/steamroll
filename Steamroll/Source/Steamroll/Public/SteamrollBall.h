@@ -50,16 +50,36 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = Ball)
 	void ActivateBall();
 
+	UFUNCTION(BlueprintCallable, Category = Slots)
+	class ASteamrollPlayerController* GetLocalPlayerController();
+
 	/** Gets a slot's state, SlotIndex goes from 1 to 4 */
 	UFUNCTION(BlueprintCallable, Category = Slots)
 	TEnumAsByte<ESlotTypeEnum::SlotType> GetSlotState(int32 SlotIndex);
 
 	/** Sets a slot's state, SlotIndex goes from 1 to 4 */
 	UFUNCTION(BlueprintCallable, Category = Slots)
-	void SetSlotState(int32 SlotIndex, TEnumAsByte<ESlotTypeEnum::SlotType> SlotTypeEnum);
+	void SetSlotState(int32 SlotIndex, TEnumAsByte<ESlotTypeEnum::SlotType> SlotTypeEnum);	
 
+	/** Gets a slot's activator type, SlotIndex goes from 1 to 4 */
 	UFUNCTION(BlueprintCallable, Category = Slots)
-	class ASteamrollPlayerController* GetLocalPlayerController();
+	TEnumAsByte<ESlotTypeEnum::SlotType> GetSlotActivatorType(int32 SlotIndex);
+
+	/** Sets a slot's activator type, SlotIndex goes from 1 to 4 */
+	UFUNCTION(BlueprintCallable, Category = Slots)
+	void SetSlotActivatorType(int32 SlotIndex, TEnumAsByte<ESlotTypeEnum::SlotType> SlotTypeEnum);
+
+	/** Gets a slot's angle, SlotIndex goes from 1 to 4 */
+	float GetSlotAngle(int32 SlotIndex);
+
+	/** Sets a slot's angle, SlotIndex goes from 1 to 4 */
+	void SetSlotAngle(int32 SlotIndex, float Value);
+
+	/** Gets a slot's time, SlotIndex goes from 1 to 4 */
+	float GetSlotTime(int32 SlotIndex);
+
+	/** Sets a slot's time, SlotIndex goes from 1 to 4 */
+	void SetSlotTime(int32 SlotIndex, float Value);
 
 	UFUNCTION(BlueprintCallable, Category = Slots)
 	bool HasSlotState(TEnumAsByte<ESlotTypeEnum::SlotType> SlotTypeEnum);
@@ -97,7 +117,7 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface
 	void SnapRampEvent(const FVector& Location, const FVector& Normal);
 
 	UFUNCTION(BlueprintImplementableEvent, Category = Slots)
-	virtual void ActivateSlotEvent(const TEnumAsByte<ESlotTypeEnum::SlotType>& SlotType, float Param1, float Param2);
+	virtual void ActivateSlotEvent(const TEnumAsByte<ESlotTypeEnum::SlotType>& SlotType, float Angle, float Time);
 
 	void ActivateRemoteTriggers();
 
@@ -113,15 +133,11 @@ protected:
 	float CurrentTime;
 	float TimeForNextPaint;
 
-	/** Timer slot timeout */
-	bool bIsTimerRunning[5];
-
 	virtual void BeginPlay() override;
 
 	/** Trigger and slot activation system */
 	void ActivateTimerTrigger(int32 SlotIndex);
 	void ActivateStopTriggers();
-	void ActivateConnectedSlots(int32 SlotIndex);
 	bool ActivateSlot(int32 SlotIndex);
 
 };

@@ -43,13 +43,13 @@ struct FSlotStruct
 	TEnumAsByte<ESlotTypeEnum::SlotType> SlotType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slots")
-	float SlotParam1;
+	TEnumAsByte<ESlotTypeEnum::SlotType> ActivatorType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slots")
-	float SlotParam2;
+	float Angle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slots")
-	TArray<bool> Connections;
+	float Time;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slots")
 	bool Used;
@@ -57,13 +57,9 @@ struct FSlotStruct
 	FSlotStruct()
 	{
 		SlotType = ESlotTypeEnum::SE_EMPTY;
-		SlotParam1 = 0.5f;
-		SlotParam2 = 0.5f;
-
-		for (uint32 i = 0; i < 4; ++i)
-		{
-			Connections.Add(true);
-		}
+		ActivatorType = ESlotTypeEnum::SE_TIME;
+		Angle = 0.0f;
+		Time = 0.5f;
 
 		Used = false;
 	}
@@ -99,39 +95,47 @@ struct FSlotsConfigStruct
 	{
 		Slots[SlotIndex - 1].SlotType = SlotTypeEnum;
 	}
-	
-	
-	/** Gets a slot's param, SlotIndex goes from 1 to 4, ParamIndex from 1 to 2 */
-	float GetSlotParam(int32 SlotIndex, int32 ParamIndex)
+
+
+	/** Gets a slot's activator type, SlotIndex goes from 1 to 4 */
+	TEnumAsByte<ESlotTypeEnum::SlotType> GetSlotActivatorType(int32 SlotIndex)
 	{
-		return ParamIndex == 2 ? Slots[SlotIndex - 1].SlotParam2 : Slots[SlotIndex - 1].SlotParam1;
+		return Slots[SlotIndex - 1].ActivatorType;
+	}
+
+
+	/** Sets a slot's activator type, SlotIndex goes from 1 to 4 */
+	void SetSlotActivatorType(int32 SlotIndex, TEnumAsByte<ESlotTypeEnum::SlotType> SlotTypeEnum)
+	{
+		Slots[SlotIndex - 1].ActivatorType = SlotTypeEnum;
 	}
 	
 	
-	/** Sets a slot's param, SlotIndex goes from 1 to 4, ParamIndex from 1 to 2 */
-	void SetSlotParam(int32 SlotIndex, int32 ParamIndex, float Value)
+	/** Gets a slot's angle, SlotIndex goes from 1 to 4 */
+	float GetSlotAngle(int32 SlotIndex)
 	{
-		if (ParamIndex == 2)
-		{
-			Slots[SlotIndex - 1].SlotParam2 = Value;
-		}
-		else
-		{
-			Slots[SlotIndex - 1].SlotParam1 = Value;
-		}
-	}
-	
-	/** Gets a slot's connections, SlotIndex goes from 1 to 4, ConnectionIndex from 1 to 4 */
-	bool GetSlotConnection(int32 SlotIndex, int32 ConnectionIndex)
-	{
-		return Slots[SlotIndex - 1].Connections[ConnectionIndex - 1];
+		return Slots[SlotIndex - 1].Angle;
 	}
 	
 	
-	/** Sets a slot's param, SlotIndex goes from 1 to 4, ConnectionIndex from 1 to 4 */
-	void SetSlotConnection(int32 SlotIndex, int32 ConnectionIndex, bool bIsConnected)
+	/** Sets a slot's angle, SlotIndex goes from 1 to 4 */
+	void SetSlotAngle(int32 SlotIndex, float Value)
 	{
-		Slots[SlotIndex - 1].Connections[ConnectionIndex - 1] = bIsConnected;
+		Slots[SlotIndex - 1].Angle = Value;
+	}
+
+
+	/** Gets a slot's time, SlotIndex goes from 1 to 4 */
+	float GetSlotTime(int32 SlotIndex)
+	{
+		return Slots[SlotIndex - 1].Time;
+	}
+
+
+	/** Sets a slot's time, SlotIndex goes from 1 to 4 */
+	void SetSlotTime(int32 SlotIndex, float Value)
+	{
+		Slots[SlotIndex - 1].Time = Value;
 	}
 	
 	

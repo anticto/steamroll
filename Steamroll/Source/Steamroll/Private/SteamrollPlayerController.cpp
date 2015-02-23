@@ -26,27 +26,12 @@ void ASteamrollPlayerController::SetSlotState(int32 SlotIndex, TEnumAsByte<ESlot
 }
 
 
-float ASteamrollPlayerController::GetSlotParam(int32 SlotIndex, int32 ParamIndex)
+void ASteamrollPlayerController::SetSlotCompleteState(int32 SlotIndex, TEnumAsByte<ESlotTypeEnum::SlotType> SlotTypeEnum, float Angle, TEnumAsByte<ESlotTypeEnum::SlotType> ActivatorType, float Time)
 {
-	return SlotsConfig.GetSlotParam(SlotIndex, ParamIndex);
-}
-
-
-void ASteamrollPlayerController::SetSlotParam(int32 SlotIndex, int32 ParamIndex, float Value)
-{
-	SlotsConfig.SetSlotParam(SlotIndex, ParamIndex, Value);
-}
-
-
-bool ASteamrollPlayerController::GetSlotConnection(int32 SlotIndex, int32 ConnectionIndex)
-{
-	return SlotsConfig.GetSlotConnection(SlotIndex, ConnectionIndex);
-}
-
-
-void ASteamrollPlayerController::SetSlotConnection(int32 SlotIndex, int32 ConnectionIndex, bool bIsConnected)
-{
-	SlotsConfig.SetSlotConnection(SlotIndex, ConnectionIndex, bIsConnected);
+	SlotsConfig.SetSlotType(SlotIndex, SlotTypeEnum);
+	SlotsConfig.SetSlotAngle(SlotIndex, Angle);
+	SlotsConfig.SetSlotActivatorType(SlotIndex, ActivatorType);
+	SlotsConfig.SetSlotTime(SlotIndex, Time);
 }
 
 
