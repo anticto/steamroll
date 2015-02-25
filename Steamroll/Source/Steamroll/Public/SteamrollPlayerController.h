@@ -77,5 +77,13 @@ class STEAMROLL_API ASteamrollPlayerController : public APlayerController
 
 	UFUNCTION(BlueprintCallable, Category = Slots)
 	void IncrementSlotItem(TEnumAsByte<ESlotTypeEnum::SlotType> SlotTypeEnum, int32 Quantity);
+
+	/** Returns true if a 3dObject was clicked */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = Ui3D)
+	bool LeftClickDown();
+
+	/** Returns true if finishing a 3dui action, such as releasing a dragging action */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = Ui3D)
+	bool LeftClickUp();
 	
 };

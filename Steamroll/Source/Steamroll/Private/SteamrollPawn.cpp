@@ -69,6 +69,9 @@ void ASteamrollPawn::SetupPlayerInputComponent(class UInputComponent* InputCompo
 	// set up gameplay key bindings
 	InputComponent->BindAxis("MoveRight", this, &ASteamrollPawn::MoveRight);
 
+	InputComponent->BindAction("LeftClick", IE_Pressed, this, &ASteamrollPawn::LeftClickDown);
+	InputComponent->BindAction("LeftClick", IE_Released, this, &ASteamrollPawn::LeftClickUp);
+
 	InputComponent->BindAction("Fire", IE_Pressed, this, &ASteamrollPawn::FireCharge);
 	InputComponent->BindAction("Fire", IE_Released, this, &ASteamrollPawn::FireRelease);
 
@@ -100,6 +103,24 @@ void ASteamrollPawn::MoveRight(float Val)
 		AimTransform->AddRelativeRotation(FRotator(0.f, Val, 0.f));
 
 		RotationServer(AimTransform->RelativeRotation);
+	}
+}
+
+
+void ASteamrollPawn::LeftClickDown()
+{
+	if (!GetLocalPlayerController()->LeftClickDown())
+	{
+		FireCharge();
+	}
+}
+
+
+void ASteamrollPawn::LeftClickUp()
+{
+	if(!GetLocalPlayerController()->LeftClickUp())
+	{
+		FireRelease();
 	}
 }
 

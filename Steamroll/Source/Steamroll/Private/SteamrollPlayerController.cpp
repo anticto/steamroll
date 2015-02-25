@@ -150,3 +150,15 @@ void ASteamrollPlayerController::IncrementSlotItem(TEnumAsByte<ESlotTypeEnum::Sl
 	}
 }
 
+
+bool ASteamrollPlayerController::LeftClickDown_Implementation()
+{
+	return false;
+}
+
+
+bool ASteamrollPlayerController::LeftClickUp_Implementation()
+{
+	return false;
+}
+
