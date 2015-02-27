@@ -369,6 +369,8 @@ void APlayerBase::Fire(float ChargeTime)
 
 	bool bOverlap = UKismetSystemLibrary::SphereOverlapActors_NEW(GetWorld(), LaunchLocation, 100.f, ObjectTypes, nullptr, ActorsToIgnore, OverlappingActors);
 
+	bool bAllItemsAvailable = GetLocalPlayerController()->CheckItemAvailability();
+
 	if (bOverlap)
 	{
 		bOverlap = false;
@@ -384,7 +386,7 @@ void APlayerBase::Fire(float ChargeTime)
 		}
 	}
 
-	if (!bOverlap)
+	if (!bOverlap && bAllItemsAvailable)
 	{
 		ASteamrollBall* Ball = GetWorld()->SpawnActor<ASteamrollBall>(WhatToSpawn, LaunchLocation, AimTransform->GetComponentRotation(), SpawnParams);
 
@@ -395,19 +397,13 @@ void APlayerBase::Fire(float ChargeTime)
 			Ball->SetVelocity(LaunchVelocity);
 			Ball->VirtualSphere->SetWorldLocation(LaunchLocation);
 			Ball->VirtualSphere->SetPhysicsLinearVelocity(LaunchVelocity);
+
+			GetLocalPlayerController()->SpendItemsInSlots();
+			ExplosionClient();
 		}
 	}
 
-	ExplosionClient();
-
-	ASteamrollPlayerController* SteamrollPlayerController = Cast<ASteamrollPlayerController>(this->GetController());
-
 	ClearSimulatedItems();
-
-	if (SteamrollPlayerController)
-	{
-		SteamrollPlayerController->SpendItemsInSlots();
-	}
 }
 
 

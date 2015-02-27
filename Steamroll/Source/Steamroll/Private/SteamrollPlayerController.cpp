@@ -127,6 +127,41 @@ void ASteamrollPlayerController::SpendSlotItem(TEnumAsByte<ESlotTypeEnum::SlotTy
 }
 
 
+bool ASteamrollPlayerController::CheckItemAvailability()
+{
+	auto SlotContentCopy = SlotContent;
+
+	for (int32 i = 1; i < 5; ++i)
+	{
+		auto NeededType = SlotsConfig.GetSlotType(i);
+
+		if (NeededType == ESlotTypeEnum::SE_EMPTY)
+		{
+			continue;
+		}
+
+		bool bFoundNeededQuantity = false;
+
+		for (auto& Slot : SlotContentCopy)
+		{
+			if (Slot.SlotType == NeededType && Slot.Quantity > 0)
+			{
+				Slot.Quantity--;
+				bFoundNeededQuantity = true;
+				break;
+			}
+		}
+
+		if (!bFoundNeededQuantity)
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+
 void ASteamrollPlayerController::IncrementSlotItem(TEnumAsByte<ESlotTypeEnum::SlotType> SlotTypeEnum, int32 Quantity)
 {
 	bool bFoundItem = false;

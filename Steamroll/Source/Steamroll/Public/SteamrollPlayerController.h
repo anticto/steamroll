@@ -23,6 +23,7 @@ class STEAMROLL_API ASteamrollPlayerController : public APlayerController
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Slots)
 	float WallDeploymentAngle;
 
+	/** The current ball configuration */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Slots)
 	FSlotsConfigStruct SlotsConfig;
 
@@ -51,6 +52,7 @@ class STEAMROLL_API ASteamrollPlayerController : public APlayerController
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Radar)
 	int32 CurrentCamera;
 
+	/** The available items in the current deployment spot */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Slots)
 	TArray<FSlotContentConfigStruct> SlotContent;
 
@@ -77,6 +79,10 @@ class STEAMROLL_API ASteamrollPlayerController : public APlayerController
 
 	UFUNCTION(BlueprintCallable, Category = Slots)
 	void IncrementSlotItem(TEnumAsByte<ESlotTypeEnum::SlotType> SlotTypeEnum, int32 Quantity);
+
+	/** Checks whether the currently assembled steamball has all the required items in the current deployment spot */
+	UFUNCTION(BlueprintCallable, Category = Slots)
+	bool CheckItemAvailability();
 
 	/** Returns true if a 3dObject was clicked */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = Ui3D)
