@@ -114,6 +114,7 @@ void APlayerBase::SetupPlayerInputComponent(class UInputComponent* InputComponen
 	Super::SetupPlayerInputComponent(InputComponent);
 
 	// set up gameplay key bindings
+	InputComponent->BindAxis("MoveRightBase", this, &APlayerBase::MoveRight);
 	InputComponent->BindAxis("MoveForward", this, &APlayerBase::MoveForward);
 
 	InputComponent->BindAction("Undo", IE_Pressed, this, &APlayerBase::Undo);

@@ -67,10 +67,10 @@ void ASteamrollPawn::SetupPlayerInputComponent(class UInputComponent* InputCompo
 	Super::SetupPlayerInputComponent(InputComponent);
 
 	// set up gameplay key bindings
-	InputComponent->BindAxis("MoveRight", this, &ASteamrollPawn::MoveRight);
-
 	InputComponent->BindAction("LeftClick", IE_Pressed, this, &ASteamrollPawn::LeftClickDown);
 	InputComponent->BindAction("LeftClick", IE_Released, this, &ASteamrollPawn::LeftClickUp);
+	InputComponent->BindAction("RightClick", IE_Pressed, this, &ASteamrollPawn::RightClickDown);
+	InputComponent->BindAction("RightClick", IE_Released, this, &ASteamrollPawn::RightClickUp);
 
 	InputComponent->BindAction("Fire", IE_Pressed, this, &ASteamrollPawn::FireCharge);
 	InputComponent->BindAction("Fire", IE_Released, this, &ASteamrollPawn::FireRelease);
@@ -98,7 +98,7 @@ void ASteamrollPawn::SetupPlayerInputComponent(class UInputComponent* InputCompo
 
 void ASteamrollPawn::MoveRight(float Val)
 {
-	if (Val != 0)
+	if (Val != 0.f)
 	{
 		AimTransform->AddRelativeRotation(FRotator(0.f, Val, 0.f));
 
@@ -121,6 +121,24 @@ void ASteamrollPawn::LeftClickUp()
 	if(!GetLocalPlayerController()->LeftClickUp())
 	{
 		FireRelease();
+	}
+}
+
+
+void ASteamrollPawn::RightClickDown()
+{
+	if (!GetLocalPlayerController()->RightClickDown())
+	{
+		//FireCharge();
+	}
+}
+
+
+void ASteamrollPawn::RightClickUp()
+{
+	if (!GetLocalPlayerController()->RightClickUp())
+	{
+		//FireRelease();
 	}
 }
 

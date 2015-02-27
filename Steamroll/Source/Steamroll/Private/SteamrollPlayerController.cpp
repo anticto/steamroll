@@ -197,3 +197,15 @@ bool ASteamrollPlayerController::LeftClickUp_Implementation()
 	return false;
 }
 
+
+bool ASteamrollPlayerController::RightClickDown_Implementation()
+{
+	return false;
+}
+
+
+bool ASteamrollPlayerController::RightClickUp_Implementation()
+{
+	return false;
+}
+

@@ -33,6 +33,15 @@ ABaseBall::ABaseBall(const class FPostConstructInitializeProperties& PCIP)
 }
 
 
+void ABaseBall::SetupPlayerInputComponent(class UInputComponent* InputComponent)
+{
+	Super::SetupPlayerInputComponent(InputComponent);
+
+	// set up gameplay key bindings
+	InputComponent->BindAxis("MoveRightBall", this, &ABaseBall::MoveRight);
+}
+
+
 void ABaseBall::Tick(float DeltaSeconds)
 {
 	static const float StoppingSpeed = 10.f;

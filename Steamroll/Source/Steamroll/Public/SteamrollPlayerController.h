@@ -92,4 +92,11 @@ class STEAMROLL_API ASteamrollPlayerController : public APlayerController
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = Ui3D)
 	bool LeftClickUp();
 	
+	/** Returns true if a 3dObject was clicked */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = Ui3D)
+	bool RightClickDown();
+
+	/** Returns true if finishing a 3dui action, such as releasing a dragging action */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = Ui3D)
+	bool RightClickUp();
 };

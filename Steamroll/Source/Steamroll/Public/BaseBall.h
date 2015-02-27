@@ -42,6 +42,9 @@ class STEAMROLL_API ABaseBall : public ASteamrollPawn
 	virtual void ReceiveHit(class UPrimitiveComponent* MyComp, AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) override;
 
 protected:
+	// APawn interface
+	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
+	// End of APawn interface
 
 	virtual void Tick(float DeltaSeconds);
 

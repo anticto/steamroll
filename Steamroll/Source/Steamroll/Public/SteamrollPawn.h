@@ -90,9 +90,11 @@ protected:
 	/** Called for side to side input */
 	virtual void MoveRight(float Val);
 
-	/** Left Click actions */
+	/** Mouse Click actions */
 	virtual void LeftClickDown();
 	virtual void LeftClickUp();
+	virtual void RightClickDown();
+	virtual void RightClickUp();
 
 	/** Called to charge the cannon */
 	virtual void FireCharge();
