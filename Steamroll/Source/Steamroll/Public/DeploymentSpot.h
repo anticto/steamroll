@@ -20,6 +20,9 @@ class STEAMROLL_API ADeploymentSpot : public AActor
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Slots)
 	float AimingStep;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Slots)
+	int32 NumSlots;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 	TArray<ACameraActor*> CameraList;
 

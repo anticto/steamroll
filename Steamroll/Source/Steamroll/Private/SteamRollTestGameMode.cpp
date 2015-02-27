@@ -94,6 +94,7 @@ APawn* ASteamRollTestGameMode::SpawnDefaultPawnFor(AController* NewPlayer, class
 		if (PlayerController)
 		{
 			PlayerController->SlotContent = PlayerStart->DeploymentSpot->SlotContent;
+			PlayerController->NumSlots = PlayerStart->DeploymentSpot->NumSlots;
 			PlayerController->AimingStep = PlayerStart->DeploymentSpot->AimingStep;
 		}
 	}

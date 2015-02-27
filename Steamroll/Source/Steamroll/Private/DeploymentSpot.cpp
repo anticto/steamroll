@@ -8,6 +8,7 @@ ADeploymentSpot::ADeploymentSpot(const class FPostConstructInitializeProperties&
 	: Super(PCIP)
 {
 	AimingStep = 22.5f;
+	NumSlots = 4;
 }
 
 void ADeploymentSpot::NextCamera()

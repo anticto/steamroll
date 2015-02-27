@@ -27,6 +27,10 @@ class STEAMROLL_API ASteamrollPlayerController : public APlayerController
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Slots)
 	FSlotsConfigStruct SlotsConfig;
 
+	/** The number of available slots in the current ball */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Slots)
+	int32 NumSlots;
+
 	/** Gets a slot's state, SlotIndex goes from 1 to 4 */
 	UFUNCTION(BlueprintCallable, Category = Slots)
 	TEnumAsByte<ESlotTypeEnum::SlotType> GetSlotState(int32 SlotIndex);
@@ -83,6 +87,10 @@ class STEAMROLL_API ASteamrollPlayerController : public APlayerController
 	/** Checks whether the currently assembled steamball has all the required items in the current deployment spot */
 	UFUNCTION(BlueprintCallable, Category = Slots)
 	bool CheckItemAvailability();
+
+	/** Empties the currently assembled steamball */
+	UFUNCTION(BlueprintCallable, Category = Slots)
+	void EmptySteamball();
 
 	/** Returns true if a 3dObject was clicked */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = Ui3D)

@@ -209,3 +209,16 @@ bool ASteamrollPlayerController::RightClickUp_Implementation()
 	return false;
 }
 
+
+void ASteamrollPlayerController::EmptySteamball()
+{
+	for (int32 i = 1; i < 4; ++i)
+	{
+		SlotsConfig.SetSlotType(i, ESlotTypeEnum::SE_EMPTY);
+		SlotsConfig.SetSlotActivatorType(i, ESlotTypeEnum::SE_TIME);
+		SlotsConfig.SetSlotAngle(i, 0.f);
+		SlotsConfig.SetSlotTime(i, 5.f);
+		SlotsConfig.SetSlotUsed(i, false);
+	}
+}
+
