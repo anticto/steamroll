@@ -677,8 +677,7 @@ void USteamrollSphereComponent::ActivateSnapRamp(ASteamrollBall* BallActor, cons
 {
 	for (int32 i = 1; i < 5; i++)
 	{
-		if (BallActor->SlotsConfig.GetSlotType(i) == ESlotTypeEnum::SE_RAMP && !BallActor->SlotsConfig.IsSlotUsed(i)
-			&& BallActor->SlotsConfig.GetSlotActivatorType(i) == ESlotTypeEnum::SE_CONTACT)
+		if (BallActor->SlotsConfig.GetSlotType(i) == ESlotTypeEnum::SE_RAMP && !BallActor->SlotsConfig.IsSlotUsed(i))
 		{
 			BallActor->SlotsConfig.SetSlotUsed(i);
 
