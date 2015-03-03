@@ -39,28 +39,32 @@ void ABaseBall::SetupPlayerInputComponent(class UInputComponent* InputComponent)
 
 	// set up gameplay key bindings
 	InputComponent->BindAxis("MoveRightBall", this, &ABaseBall::MoveRight);
+	InputComponent->BindAxis("TriggerAxis", this, &ABaseBall::Trigger);
 }
 
 
 void ABaseBall::Tick(float DeltaSeconds)
 {
 	static const float StoppingSpeed = 10.f;
-	static const float MaxSpeed = 5000.f;
+	static const float MaxSpeed = 3000.f;
+	static const float Acceleration = 2000.f;
 
 	Super::Tick(DeltaSeconds);
 	Sphere->SteamrollTick(DeltaSeconds);
 	VirtualSphere->SteamrollTick(DeltaSeconds, Sphere);
 
-	if (bFiring)
+	float AxisValue = bFiring ? 1.f : FMath::Clamp(FMath::Abs(InputComponent->GetAxisValue("TriggerAxis")), 0.f, 1.f);
+
+	if (AxisValue)
 	{
 		// Firing direction
 		FVector Direction = AimTransform->GetComponentToWorld().TransformVector(FVector(1.f, 0.f, 0.f));
 		Direction.Z = 0.f;
 
 		// Firing power
-		float LaunchPower = DeltaSeconds / FiringTimeout;
-		float LaunchSpeed = FMath::Lerp(MinLaunchSpeed, MaxLaunchSpeed, LaunchPower);
-		Sphere->Velocity += Direction * LaunchSpeed;
+		//float LaunchPower = DeltaSeconds / FiringTimeout;
+		//float LaunchSpeed = FMath::Lerp(MinLaunchSpeed, MaxLaunchSpeed, LaunchPower);
+		Sphere->Velocity += Direction * Acceleration * DeltaSeconds * AxisValue;
 
 		float Speed = Sphere->Velocity.Size();
 
@@ -118,5 +122,14 @@ void ABaseBall::ReceiveHit(class UPrimitiveComponent* MyComp, AActor* Other, cla
 void ABaseBall::UndeployInstantly_Implementation()
 {
 
+}
+
+
+void ABaseBall::Trigger(float Val)
+{
+	if (Val != 0.f)
+	{
+		
+	}
 }
 

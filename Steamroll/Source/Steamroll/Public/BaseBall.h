@@ -48,6 +48,9 @@ protected:
 
 	virtual void Tick(float DeltaSeconds);
 
+	/** Called to charge the cannon */
+	void Trigger(float Val);
+
 	/** Actual Firing procedure */
 	virtual void Fire(float ChargeTime) override;
 
