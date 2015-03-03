@@ -120,6 +120,7 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface
 	virtual void ActivateSlotEvent(const TEnumAsByte<ESlotTypeEnum::SlotType>& SlotType, float Angle, float Time);
 
 	void ActivateRemoteTriggers();
+	bool ActivateSlot(int32 SlotIndex);
 
 	UFUNCTION(BlueprintCallable, Category = Tunnel)
 	void ExecuteTransport(class ABallTunnel* Tunnel, float Speed);
@@ -137,7 +138,5 @@ protected:
 
 	/** Trigger and slot activation system */
 	void ActivateTimerTrigger(int32 SlotIndex);
-	void ActivateStopTriggers();
-	bool ActivateSlot(int32 SlotIndex);
-
+	void ActivateStopTriggers();	
 };

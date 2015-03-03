@@ -208,17 +208,8 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 				Ball.SetActorLocation(CurrentLocation);
 				Ball.AddLocation(CurrentLocation, CurrentTime);
 
-				DrawImpactSlots(Ball.LastCollidedActor, Velocity);
-
 				// Activate steamball by contact trigger
-				if (BallActor && BallActor->HasSlotState(ESlotTypeEnum::SE_EXPL) && BallActor->HasSlotState(ESlotTypeEnum::SE_CONTACT)
-					&& Ball.LastCollidedActor->GetClass()->ImplementsInterface(UExplosionDestructibleInterface::StaticClass()))
-				{
-					if (!Ball.bSimulationBall && BallActor)
-					{
-						BallActor->ExplosionEvent();
-					}
-				}
+				HandleImpactSlots(BallActor, Ball.LastCollidedActor, Velocity);				
 
 				if (OtherBall) // Collided with another ball
 				{
@@ -254,11 +245,15 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 					}
 
 					// Activate the other steamball by contact trigger if needed
-					if (OtherBall->HasSlotState(ESlotTypeEnum::SE_EXPL) && OtherBall->HasSlotState(ESlotTypeEnum::SE_CONTACT))
+					if (!Ball.bSimulationBall)
 					{
-						if (!Ball.bSimulationBall)
+						for (int32 i = 1; i < 5; ++i)
 						{
-							OtherBall->ExplosionEvent();
+							if (OtherBall->GetSlotState(i) == ESlotTypeEnum::SE_EXPL && OtherBall->GetSlotActivatorType(i) == ESlotTypeEnum::SE_CONTACT)
+							{
+								OtherBall->ExplosionEvent();
+								break;
+							}
 						}
 					}
 
@@ -494,11 +489,9 @@ void USteamrollSphereComponent::DrawTimedSlots(float CurrentTime, const FVector&
 }
 
 
-void USteamrollSphereComponent::DrawImpactSlots(AActor* HitActor, const FVector& Velocity)
+void USteamrollSphereComponent::HandleImpactSlots(ASteamrollBall* BallActor, AActor* HitActor, const FVector& Velocity)
 {
-	ASteamrollBall* BallActor = Cast<ASteamrollBall>(GetAttachmentRootActor());
-
-	if (bSimulationBall && BallActor)
+	if (BallActor)
 	{
 		for (uint32 i = 1; i < 5; ++i)
 		{
@@ -508,11 +501,25 @@ void USteamrollSphereComponent::DrawImpactSlots(AActor* HitActor, const FVector&
 				{
 					if (BallActor->SlotsConfig.GetSlotType(i) == ESlotTypeEnum::SE_WALL)
 					{
-						DrawSimulationWall(BallActor, i);
+						if (bSimulationBall)
+						{
+							DrawSimulationWall(BallActor, i);
+						}
+						else
+						{
+							BallActor->ActivateSlot(i);
+						}
 					}
 					else if (BallActor->SlotsConfig.GetSlotType(i) == ESlotTypeEnum::SE_EXPL)
 					{
-						DrawSimulationExplosion(BallActor);
+						if (bSimulationBall)
+						{
+							DrawSimulationExplosion(BallActor);
+						}
+						else
+						{
+							BallActor->ExplosionEvent();
+						}
 					}
 
 					BallActor->SlotsConfig.SetSlotUsed(i);

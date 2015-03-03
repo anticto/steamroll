@@ -82,27 +82,27 @@ void ASteamrollBall::Tick(float DeltaSeconds)
 		}
 	}
 
-	if (HasSlotState(ESlotTypeEnum::SE_CONTACT))
-	{
-		bExplosionBlockedByContactSlot = true;
+	//if (HasSlotState(ESlotTypeEnum::SE_CONTACT))
+	//{
+	//	bExplosionBlockedByContactSlot = true;
 
-		TArray<AActor*> Actors;
-		TArray<AActor*> ActorsToIgnore;
-		ActorsToIgnore.Add(this);
-		TArray<TEnumAsByte<EObjectTypeQuery> > ObjectTypes;
-		
-		Sphere->GetOverlappingActors(Actors);
+	//	TArray<AActor*> Actors;
+	//	TArray<AActor*> ActorsToIgnore;
+	//	ActorsToIgnore.Add(this);
+	//	TArray<TEnumAsByte<EObjectTypeQuery> > ObjectTypes;
+	//	
+	//	Sphere->GetOverlappingActors(Actors);
 
-		for (auto Actor : Actors)
-		{
-			if (InterfaceCast<IExplosionDestructibleInterface>(Actor))
-			{
-				ActivateBall();
-				bExplosionBlockedByContactSlot = false;
-				break;
-			}
-		}
-	}
+	//	for (auto Actor : Actors)
+	//	{
+	//		if (InterfaceCast<IExplosionDestructibleInterface>(Actor))
+	//		{
+	//			ActivateBall();
+	//			bExplosionBlockedByContactSlot = false;
+	//			break;
+	//		}
+	//	}
+	//}
 
 	//// Uncoment for debug boxes
 	//if (TouchingFloor)
