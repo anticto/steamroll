@@ -116,6 +116,7 @@ void APlayerBase::SetupPlayerInputComponent(class UInputComponent* InputComponen
 	// set up gameplay key bindings
 	InputComponent->BindAxis("MoveRightBase", this, &APlayerBase::MoveRight);
 	InputComponent->BindAxis("MoveForward", this, &APlayerBase::MoveForward);
+	InputComponent->BindAxis("TriggerAxis", this, &APlayerBase::Trigger);
 
 	InputComponent->BindAction("Undo", IE_Pressed, this, &APlayerBase::Undo);
 	InputComponent->BindAction("RemoteTrigger", IE_Pressed, this, &APlayerBase::ActivateBall);
@@ -503,6 +504,16 @@ void APlayerBase::SetChargeDown()
 {
 	TargetChargeTime -= 0.1f * FiringTimeout;
 	TargetChargeTime = FMath::Max(TargetChargeTime, 0.f);
+}
+
+
+void APlayerBase::Trigger(float Val)
+{
+	if (Val != 0.f)
+	{
+		TargetChargeTime += 0.02f * Val * FiringTimeout;
+		TargetChargeTime = FMath::Clamp(TargetChargeTime, 0.f, FiringTimeout);
+	}
 }
 
 

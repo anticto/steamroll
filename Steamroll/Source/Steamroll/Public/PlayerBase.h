@@ -106,6 +106,9 @@ protected:
 	/** Called to angle the cannon */
 	void MoveForward(float Val);
 
+	/** Called to charge the cannon */
+	void Trigger(float Val);
+
 	/** Actual Firing procedure */
 	virtual void Fire(float ChargeTime) override;
 
