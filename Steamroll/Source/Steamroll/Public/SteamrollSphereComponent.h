@@ -14,7 +14,7 @@ class STEAMROLL_API USteamrollSphereComponent : public USphereComponent
 	GENERATED_UCLASS_BODY()
 
 	UPROPERTY()
-	TSubobjectPtr<class UTrajectoryComponent> TrajectoryComponent;
+	class UTrajectoryComponent* TrajectoryComponent;
 
 	/** Collision/Physics system */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Physics)

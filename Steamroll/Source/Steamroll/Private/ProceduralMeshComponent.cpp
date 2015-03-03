@@ -24,7 +24,7 @@ public:
 #endif
 		// Copy the vertex data into the vertex buffer.
 		void* VertexBufferData = RHILockVertexBuffer(VertexBufferRHI, 0, Vertices.Num() * sizeof(FDynamicMeshVertex), RLM_WriteOnly);
-		FMemory::Memcpy(VertexBufferData, Vertices.GetTypedData(), Vertices.Num() * sizeof(FDynamicMeshVertex));
+		FMemory::Memcpy(VertexBufferData, Vertices.GetData(), Vertices.Num() * sizeof(FDynamicMeshVertex));
 		RHIUnlockVertexBuffer(VertexBufferRHI);
 	}
 };
@@ -45,7 +45,7 @@ public:
 #endif
 		// Write the indices to the index buffer.
 		void* Buffer = RHILockIndexBuffer(IndexBufferRHI, 0, Indices.Num() * sizeof(int32), RLM_WriteOnly);
-		FMemory::Memcpy(Buffer, Indices.GetTypedData(), Indices.Num() * sizeof(int32));
+		FMemory::Memcpy(Buffer, Indices.GetData(), Indices.Num() * sizeof(int32));
 		RHIUnlockIndexBuffer(IndexBufferRHI);
 	}
 };
@@ -92,7 +92,9 @@ public:
 
 	FProceduralMeshSceneProxy(UProceduralMeshComponent* Component)
 		: FPrimitiveSceneProxy(Component)
-#if ENGINE_MAJOR_VERSION >= 4 && ENGINE_MINOR_VERSION >= 5
+#if ENGINE_MAJOR_VERSION >= 4 && ENGINE_MINOR_VERSION >= 7
+		, MaterialRelevance(Component->GetMaterialRelevance(GetScene().GetFeatureLevel()))
+#elif ENGINE_MAJOR_VERSION >= 4 && ENGINE_MINOR_VERSION >= 5
 		, MaterialRelevance(Component->GetMaterialRelevance(GetScene()->GetFeatureLevel()))
 #else
 		, MaterialRelevance(Component->GetMaterialRelevance())
@@ -106,9 +108,9 @@ public:
 			const FVector Edge01 = (Tri.Vertex1.Position - Tri.Vertex0.Position);
 			const FVector Edge02 = (Tri.Vertex2.Position - Tri.Vertex0.Position);
 
-			const FVector TangentX = Edge01.SafeNormal();
-			const FVector TangentZ = (Edge02 ^ Edge01).SafeNormal();
-			const FVector TangentY = (TangentX ^ TangentZ).SafeNormal();
+			const FVector TangentX = Edge01.GetSafeNormal();
+			const FVector TangentZ = (Edge02 ^ Edge01).GetSafeNormal();
+			const FVector TangentY = (TangentX ^ TangentZ).GetSafeNormal();
 
 			FDynamicMeshVertex Vert0;
 			Vert0.Position = Tri.Vertex0.Position;
@@ -290,7 +292,7 @@ private:
 
 //////////////////////////////////////////////////////////////////////////
 
-UProceduralMeshComponent::UProceduralMeshComponent(const FPostConstructInitializeProperties& PCIP)
+UProceduralMeshComponent::UProceduralMeshComponent(const FObjectInitializer& PCIP)
 : Super(PCIP)
 {
 	PrimaryComponentTick.bCanEverTick = false;
@@ -428,7 +430,7 @@ void UProceduralMeshComponent::UpdateCollision()
 		CreatePhysicsState();
 
 		// Works in Packaged build only since UE4.5:
-		ModelBodySetup->InvalidatePhysicsData();
+		// [jordi] android build requires this ModelBodySetup->InvalidatePhysicsData();
 		ModelBodySetup->CreatePhysicsMeshes();
 	}
 }

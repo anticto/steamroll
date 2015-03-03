@@ -15,11 +15,11 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface
 
 	/** Capsule used for ball collison and physics */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Ball)
-	TSubobjectPtr<class USteamrollSphereComponent> Sphere;
+	class USteamrollSphereComponent* Sphere;
 
 	/** Shadow physics capsule used to get collision events from physx */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = VirtualBall)
-	TSubobjectPtr<class UPhysicsVirtualSphereComponent> VirtualSphere;
+	class UPhysicsVirtualSphereComponent* VirtualSphere;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Ball)
 	bool Activated;

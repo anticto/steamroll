@@ -4,10 +4,10 @@
 #include "SteamrollPlayerStart.h"
 
 
-ASteamrollPlayerStart::ASteamrollPlayerStart(const class FPostConstructInitializeProperties& PCIP)
+ASteamrollPlayerStart::ASteamrollPlayerStart(const class FObjectInitializer& PCIP)
 	: Super(PCIP)
 {
-	CapsuleComponent->SetCapsuleSize(200.f, 100.f);
+	GetCapsuleComponent()->SetCapsuleSize(200.f, 100.f);
 }
 
 

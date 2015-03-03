@@ -14,7 +14,7 @@ class STEAMROLL_API APortal : public AActor
 	GENERATED_UCLASS_BODY()
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Portal)
-	TSubobjectPtr<class UBoxComponent> BoxPortal;
+	class UBoxComponent* BoxPortal;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Portal)
 	APortal* LinkedPortal;

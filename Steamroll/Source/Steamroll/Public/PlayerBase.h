@@ -15,15 +15,15 @@ class STEAMROLL_API APlayerBase : public ASteamrollPawn
 
 	/** StaticMesh used for the base */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Base)
-	TSubobjectPtr<class UStaticMeshComponent> Base;
+	class UStaticMeshComponent* Base;
 
 	/** StaticMesh used for the cannon */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Base)
-	TSubobjectPtr<class UStaticMeshComponent> Cannon;
+	class UStaticMeshComponent* Cannon;
 
 	/** Spring arm for positioning the camera above the base */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Base)
-	TSubobjectPtr<class USpringArmComponent> SpringArm;
+	class USpringArmComponent* SpringArm;
 
 	/** What subclass of SteamRollTestBall is going to be fired */
 	UPROPERTY(EditAnywhere, Category = Base)
@@ -31,7 +31,7 @@ class STEAMROLL_API APlayerBase : public ASteamrollPawn
 
 	/** Particle system used for the cannon firing */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Base)
-	TSubobjectPtr<class UParticleSystemComponent> Explosion;
+	class UParticleSystemComponent* Explosion;
 
 	/** Base's collected resource quantity */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Collect)
@@ -47,17 +47,17 @@ class STEAMROLL_API APlayerBase : public ASteamrollPawn
 
 	/** Subcomponents for rendering the wall deployment predictions on simulated ball trajectory */
 	UPROPERTY(VisibleAnywhere, Category = SimulatedBall)
-	TSubobjectPtr<UStaticMeshComponent> SimulatedWalls[4];
+	UStaticMeshComponent* SimulatedWalls[4];
 
 	uint32 NumUsedSimulatedWalls;
 
 	UPROPERTY(VisibleAnywhere, Category = SimulatedBall)
-	TSubobjectPtr<UStaticMeshComponent> SimulatedRamps[4];
+	UStaticMeshComponent* SimulatedRamps[4];
 
 	uint32 NumUsedSimulatedRamps;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = SimulatedBall)
-	TSubobjectPtr<UStaticMeshComponent> SimulatedExplosion;
+	UStaticMeshComponent* SimulatedExplosion;
 
 	// Aiming Controls
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Base)

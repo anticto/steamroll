@@ -10,7 +10,7 @@
 #include "UnrealNetwork.h"
 
 
-ASteamrollPawn::ASteamrollPawn(const class FPostConstructInitializeProperties& PCIP)
+ASteamrollPawn::ASteamrollPawn(const class FObjectInitializer& PCIP)
 	: Super(PCIP)
 {
 	AimTransform = PCIP.CreateDefaultSubobject<USceneComponent>(this, TEXT("Tranform0"));
@@ -204,9 +204,9 @@ void ASteamrollPawn::RotationClient_Implementation(FRotator Rotation)
 
 float ASteamrollPawn::GetCharge()
 {
-	if (GetWorldTimerManager().IsTimerActive(this, &ASteamrollPawn::Timeout))
+	if (GetWorldTimerManager().IsTimerActive(FireTimer))
 	{
-		return GetWorldTimerManager().GetTimerElapsed(this, &ASteamrollPawn::Timeout);
+		return GetWorldTimerManager().GetTimerElapsed(FireTimer);
 	}
 
 	return bFiring ? FiringTimeout : 0.f;
@@ -271,7 +271,7 @@ void ASteamrollPawn::InitCameraAnim()
 void ASteamrollPawn::FireCharge()
 {
 	bFiring = true;
-	GetWorldTimerManager().SetTimer(this, &ASteamrollPawn::Timeout, FiringTimeout, false);
+	GetWorldTimerManager().SetTimer(FireTimer, this, &ASteamrollPawn::Timeout, FiringTimeout, false);
 }
 
 
@@ -280,14 +280,14 @@ void ASteamrollPawn::FireRelease()
 	if (bFiring)
 	{
 		// To prevent multiple firing when releasing the fire button check that we actually loaded/charged before releasing
-		if (GetWorldTimerManager().IsTimerActive(this, &ASteamrollPawn::Timeout))
+		if (GetWorldTimerManager().IsTimerActive(FireTimer))
 		{
-			float TimeElapsed = GetWorldTimerManager().GetTimerElapsed(this, &ASteamrollPawn::Timeout);
-			GetWorldTimerManager().PauseTimer(this, &ASteamrollPawn::Timeout);
+			float TimeElapsed = GetWorldTimerManager().GetTimerElapsed(FireTimer);
+			GetWorldTimerManager().PauseTimer(FireTimer);
 
 			FireServer(TimeElapsed, AimTransform->RelativeRotation);
 
-			GetWorldTimerManager().ClearTimer(this, &ASteamrollPawn::Timeout);
+			GetWorldTimerManager().ClearTimer(FireTimer);
 		}
 		else
 		{

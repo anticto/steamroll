@@ -5,7 +5,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 
 
-ACylinderWall::ACylinderWall(const class FPostConstructInitializeProperties& PCIP)
+ACylinderWall::ACylinderWall(const class FObjectInitializer& PCIP)
 	: Super(PCIP)
 {
 	// Base transform

@@ -5,7 +5,7 @@
 #include "Engine.h"
 
 
-ASteamrollHUD::ASteamrollHUD(const class FPostConstructInitializeProperties& PCIP)
+ASteamrollHUD::ASteamrollHUD(const class FObjectInitializer& PCIP)
 	: Super(PCIP)
 {
 	

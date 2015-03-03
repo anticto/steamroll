@@ -7,7 +7,7 @@
 #include "SteamrollBall.h"
 
 
-ABaseBall::ABaseBall(const class FPostConstructInitializeProperties& PCIP)
+ABaseBall::ABaseBall(const class FObjectInitializer& PCIP)
 	: Super(PCIP)
 {
 	Activated = true;

@@ -6,7 +6,7 @@
 #include "DrawDebugHelpers.h"
 
 
-UTrajectoryComponent::UTrajectoryComponent(const class FPostConstructInitializeProperties& PCIP)
+UTrajectoryComponent::UTrajectoryComponent(const class FObjectInitializer& PCIP)
 	: Super(PCIP)
 {
 	static ConstructorHelpers::FObjectFinder<UMaterial> Object0(TEXT("Material'/Game/Ball/TrajectoryMat.TrajectoryMat'"));

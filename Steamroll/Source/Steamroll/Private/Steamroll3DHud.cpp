@@ -4,7 +4,7 @@
 #include "Steamroll3DHud.h"
 
 
-ASteamroll3DHud::ASteamroll3DHud(const class FPostConstructInitializeProperties& PCIP)
+ASteamroll3DHud::ASteamroll3DHud(const class FObjectInitializer& PCIP)
 	: Super(PCIP)
 {
 	PrimaryActorTick.bCanEverTick = true;

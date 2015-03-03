@@ -15,19 +15,19 @@ class STEAMROLL_API ADynamicWall : public AActor, public IExplosionDestructibleI
 	GENERATED_UCLASS_BODY()
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Wall)
-	TSubobjectPtr<class USceneComponent> TransformBase;
+	class USceneComponent* TransformBase;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Wall)
-	TSubobjectPtr<class USceneComponent> TransformLeft;
+	class USceneComponent* TransformLeft;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Wall)
-	TSubobjectPtr<class USceneComponent> TransformRight;
+	class USceneComponent* TransformRight;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Wall)
-	TSubobjectPtr<class UStaticMeshComponent> WallLeft;
+	class UStaticMeshComponent* WallLeft;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Wall)
-	TSubobjectPtr<class UStaticMeshComponent> WallRight;
+	class UStaticMeshComponent* WallRight;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Wall)
 	bool ExpandedVertically;

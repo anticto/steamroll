@@ -15,15 +15,15 @@ class STEAMROLL_API ASteamrollPawn : public APawn
 
 	/** Transform used to aim the cannon or base ball */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Base)
-	TSubobjectPtr<class USceneComponent> AimTransform;
+	class USceneComponent* AimTransform;
 
 	/** Camera attached to the base */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Base)
-	TSubobjectPtr<class UCameraComponent> Camera;
+	class UCameraComponent* Camera;
 
 	/** Camera free to move around the level */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Base)
-	TSubobjectPtr<class UCameraComponent> Camera2;
+	class UCameraComponent* Camera2;
 
 	// Camera controls
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Base)
@@ -95,6 +95,9 @@ protected:
 	virtual void LeftClickUp();
 	virtual void RightClickDown();
 	virtual void RightClickUp();
+
+	/** Timer to control the firing operation. */
+	FTimerHandle FireTimer;
 
 	/** Called to charge the cannon */
 	virtual void FireCharge();

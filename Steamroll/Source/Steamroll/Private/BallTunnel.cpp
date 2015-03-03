@@ -8,7 +8,7 @@
 #include "PhysicsVirtualSphereComponent.h"
 
 
-ABallTunnel::ABallTunnel(const class FPostConstructInitializeProperties& PCIP)
+ABallTunnel::ABallTunnel(const class FObjectInitializer& PCIP)
 	: Super(PCIP)
 {
 	Root = PCIP.CreateDefaultSubobject<USceneComponent>(this, TEXT("Root"));
@@ -50,7 +50,7 @@ void ABallTunnel::TransportToOtherTunnelEnd(AActor* OtherActor)
 			if (TransportDelaySeconds > 0.f)
 			{
 				auto Delegate = FTimerDelegate::CreateUFunction(Ball, FName("ExecuteTransport"), ConnectedTunnel, Speed);
-				GetWorldTimerManager().SetTimer(Delegate, TransportDelaySeconds, false);
+				GetWorldTimerManager().SetTimer(TunnelTimer, Delegate, TransportDelaySeconds, false);
 			}
 			else
 			{
