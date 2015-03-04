@@ -53,17 +53,24 @@ void ABaseBall::Tick(float DeltaSeconds)
 	Sphere->SteamrollTick(DeltaSeconds);
 	VirtualSphere->SteamrollTick(DeltaSeconds, Sphere);
 
-	float AxisValue = bFiring ? 1.f : FMath::Clamp(FMath::Abs(InputComponent->GetAxisValue("TriggerAxis")), 0.f, 1.f);
+	float AxisValue = 0.f;
 
-	if (AxisValue)
+	if (bFiring)
+	{
+		AxisValue = 1.f;
+	}
+	else if (InputComponent)
+	{
+		AxisValue = FMath::Clamp(FMath::Abs(InputComponent->GetAxisValue("TriggerAxis")), 0.f, 1.f);
+	}
+
+	if (AxisValue > 0.f)
 	{
 		// Firing direction
 		FVector Direction = AimTransform->GetComponentToWorld().TransformVector(FVector(1.f, 0.f, 0.f));
 		Direction.Z = 0.f;
 
 		// Firing power
-		//float LaunchPower = DeltaSeconds / FiringTimeout;
-		//float LaunchSpeed = FMath::Lerp(MinLaunchSpeed, MaxLaunchSpeed, LaunchPower);
 		Sphere->Velocity += Direction * Acceleration * DeltaSeconds * AxisValue;
 
 		float Speed = Sphere->Velocity.Size();
