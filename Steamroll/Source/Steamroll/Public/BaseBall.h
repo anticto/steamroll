@@ -18,23 +18,23 @@ class STEAMROLL_API ABaseBall : public ASteamrollPawn
 
 	/** Capsule used for the ball collison and physics */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Base)
-	TSubobjectPtr<class USteamrollSphereComponent> Sphere;
+	class USteamrollSphereComponent* Sphere;
 
 	/** Shadow physics capsule used to get collision events from physx */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = VirtualBall)
-	TSubobjectPtr<class UPhysicsVirtualSphereComponent> VirtualSphere;
+	class UPhysicsVirtualSphereComponent* VirtualSphere;
 
 	/** Mesh used for the ball */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Base)
-	TSubobjectPtr<class UStaticMeshComponent> GyroMesh;
+	class UStaticMeshComponent* GyroMesh;
 
 	/** Mesh used for the ball */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Base)
-	TSubobjectPtr<class UStaticMeshComponent> SphereMesh;
+	class UStaticMeshComponent* SphereMesh;
 
 	/** Spring arm for positioning the camera above the base */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Base)
-	TSubobjectPtr<class USpringArmComponent> SpringArm;
+	class USpringArmComponent* SpringArm;
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = Base)
 	void UndeployInstantly();

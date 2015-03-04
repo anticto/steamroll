@@ -4,7 +4,7 @@
 #include "DeploymentSpot.h"
 
 
-ADeploymentSpot::ADeploymentSpot(const class FPostConstructInitializeProperties& PCIP)
+ADeploymentSpot::ADeploymentSpot(const class FObjectInitializer& PCIP)
 	: Super(PCIP)
 {
 	AimingStep = 22.5f;

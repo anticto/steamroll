@@ -5,7 +5,7 @@
 #include "Engine.h"
 
 
-ALaserSight::ALaserSight(const class FPostConstructInitializeProperties& PCIP)
+ALaserSight::ALaserSight(const class FObjectInitializer& PCIP)
 	: Super(PCIP)
 {
 	FirstHit = false;

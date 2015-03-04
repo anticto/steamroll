@@ -10,7 +10,7 @@
 #include "PhysicsVirtualSphereComponent.h"
 
 
-ASteamrollBall::ASteamrollBall(const class FPostConstructInitializeProperties& PCIP)
+ASteamrollBall::ASteamrollBall(const class FObjectInitializer& PCIP)
 	: Super(PCIP)
 {
 	Sphere = PCIP.CreateDefaultSubobject<USteamrollSphereComponent>(this, TEXT("Sphere"));

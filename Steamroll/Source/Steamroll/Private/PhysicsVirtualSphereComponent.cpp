@@ -7,7 +7,7 @@
 #include "Engine.h"
 
 
-UPhysicsVirtualSphereComponent::UPhysicsVirtualSphereComponent(const class FPostConstructInitializeProperties& PCIP)
+UPhysicsVirtualSphereComponent::UPhysicsVirtualSphereComponent(const class FObjectInitializer& PCIP)
 	: Super(PCIP)
 {
 	Location = FVector::ZeroVector;

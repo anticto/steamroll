@@ -5,7 +5,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 
 
-ADynamicWall::ADynamicWall(const class FPostConstructInitializeProperties& PCIP)
+ADynamicWall::ADynamicWall(const class FObjectInitializer& PCIP)
 	: Super(PCIP)
 {
 	// Base transform

@@ -5,7 +5,7 @@
 #include "SteamrollBall.h"
 
 
-APortal::APortal(const class FPostConstructInitializeProperties& PCIP)
+APortal::APortal(const class FObjectInitializer& PCIP)
 	: Super(PCIP)
 {
 	BoxPortal = PCIP.CreateDefaultSubobject<UBoxComponent>(this, TEXT("Box"));

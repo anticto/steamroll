@@ -4,7 +4,7 @@
 #include "SteamrollPlayerController.h"
 
 
-ASteamrollPlayerController::ASteamrollPlayerController(const class FPostConstructInitializeProperties& PCIP)
+ASteamrollPlayerController::ASteamrollPlayerController(const class FObjectInitializer& PCIP)
 	: Super(PCIP)
 {
 	WallDeploymentAngle = 0.f;

@@ -9,7 +9,10 @@ class ASteamRollTestGameMode : public AGameMode
 {
 	GENERATED_UCLASS_BODY()
 
+	UPROPERTY()
 	TSubclassOf<class APawn> PlayerBaseClass;
+
+	UPROPERTY()
 	TSubclassOf<class APawn> BaseBallClass;
 
 	virtual AActor* ChoosePlayerStart(AController* Player) override;

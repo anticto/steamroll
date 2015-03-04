@@ -4,7 +4,7 @@
 #include "ExplosionDestructibleInterface.h"
 
 
-UExplosionDestructibleInterface::UExplosionDestructibleInterface(const class FPostConstructInitializeProperties& PCIP)
+UExplosionDestructibleInterface::UExplosionDestructibleInterface(const class FObjectInitializer& PCIP)
 	: Super(PCIP)
 {
 

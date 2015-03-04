@@ -15,10 +15,10 @@ class STEAMROLL_API ACylinderWall : public AActor, public IExplosionDestructible
 	GENERATED_UCLASS_BODY()
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Wall)
-	TSubobjectPtr<class USceneComponent> TransformBase;
+	class USceneComponent* TransformBase;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Wall)
-	TSubobjectPtr<class UStaticMeshComponent> Cylinder;
+	class UStaticMeshComponent* Cylinder;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Wall)
 	bool ExpandedVertically;

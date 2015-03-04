@@ -13,7 +13,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 
 
-APlayerBase::APlayerBase(const class FPostConstructInitializeProperties& PCIP)
+APlayerBase::APlayerBase(const class FObjectInitializer& PCIP)
 	: Super(PCIP)
 {
 	// Create mesh component for the base

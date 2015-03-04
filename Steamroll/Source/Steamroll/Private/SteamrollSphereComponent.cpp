@@ -13,7 +13,7 @@
 #include "BallTunnel.h"
 
 
-USteamrollSphereComponent::USteamrollSphereComponent(const class FPostConstructInitializeProperties& PCIP)
+USteamrollSphereComponent::USteamrollSphereComponent(const class FObjectInitializer& PCIP)
 	: Super(PCIP)
 {
 	TrajectoryComponent = PCIP.CreateDefaultSubobject<UTrajectoryComponent>(this, TEXT("TrajectoryComponent"));
@@ -183,7 +183,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 					}
 					else
 					{
-						CurrentLocation -= Velocity.SafeNormal() * 0.01f;
+						CurrentLocation -= Velocity.GetSafeNormal() * 0.01f;
 					}
 
 					Ball.SetActorLocation(CurrentLocation);
@@ -264,7 +264,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 					//ActorsToIgnore.Push(Ball.LastCollidedActor);
 					CollidedWithBallThisFrame = nullptr;
 
-					FVector ImpactRadiusVector = (OutHit.Location - OutHit.ImpactPoint).SafeNormal(); // In fact this is the ball's normal
+					FVector ImpactRadiusVector = (OutHit.Location - OutHit.ImpactPoint).GetSafeNormal(); // In fact this is the ball's normal
 					
 					if (FMath::Abs(OutHit.ImpactNormal | ImpactRadiusVector) < 0.99f && FMath::Abs(OutHit.ImpactPoint.Z - OutHit.Location.Z) > BallRadius / 2.f)
 					{
@@ -298,7 +298,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 
 					if (FMath::IsWithin(OutHit.ImpactNormal | FVector::UpVector, 0.1f, 0.9f))
 					{
-						VelocityT = VelocityT.SafeNormal() * Speed;
+						VelocityT = VelocityT.GetSafeNormal() * Speed;
 						Restitution = 0.f;
 					}
 
@@ -598,7 +598,7 @@ void USteamrollSphereComponent::ReduceVerticalVelocity(FVector& Velocity, bool b
 				float InitialLen = Velocity.Size();
 				float Drag = FMath::Min(10.f * Velocity.Z * DeltaSeconds, Velocity.Z);
 				Velocity.Z = Velocity.Z - Drag;
-				Velocity = Velocity.SafeNormal() * InitialLen;
+				Velocity = Velocity.GetSafeNormal() * InitialLen;
 
 				//Velocity.Z = 0.f;
 				//Velocity.Normalize();

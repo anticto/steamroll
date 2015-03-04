@@ -10,7 +10,7 @@
 
 #include "Engine.h"
 
-ASteamRollTestGameMode::ASteamRollTestGameMode(const class FPostConstructInitializeProperties& PCIP)
+ASteamRollTestGameMode::ASteamRollTestGameMode(const class FObjectInitializer& PCIP)
 	: Super(PCIP)
 {
 	// set default pawn class to our ball

@@ -14,13 +14,13 @@ class STEAMROLL_API ABallTunnel : public AActor
 	GENERATED_UCLASS_BODY()
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Tunnel)
-	TSubobjectPtr<class USceneComponent> Root;
+	class USceneComponent* Root;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Tunnel)
-	TSubobjectPtr<class UStaticMeshComponent> Mesh;
+	class UStaticMeshComponent* Mesh;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Tunnel)
-	TSubobjectPtr<class USphereComponent> TriggerVolume;
+	class USphereComponent* TriggerVolume;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Tunnel)
 	ABallTunnel* ConnectedTunnel;
@@ -40,5 +40,8 @@ class STEAMROLL_API ABallTunnel : public AActor
 
 	UFUNCTION(BlueprintCallable, Category = Tunnel)
 	void TransportToOtherTunnelEnd(AActor* OtherActor);
-	
+
+	/** Timer to control the tunnel time. */
+	FTimerHandle TunnelTimer;
+
 };
