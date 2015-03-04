@@ -11,6 +11,7 @@ AMusicManager::AMusicManager(const class FObjectInitializer& PCIP)
 	: Super(PCIP)
 {
 	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bTickEvenWhenPaused = true;
 
 	AudioComponent = PCIP.CreateDefaultSubobject<UAudioComponent>(this, TEXT("AudioComponent"));
 	RootComponent = AudioComponent;
@@ -25,14 +26,8 @@ void AMusicManager::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//AudioComponent->OnAudioFinishedNative.AddUObject( this, &AMusicManager::OnAudioFinished );
-
-	if (State<States.Num())
-	{
-		AudioComponent->Sound = Sound;
-		AudioComponent->Play();
-	}
-
+	AudioComponent->Sound = Sound;
+	AudioComponent->Play();
 }
 
 
@@ -40,29 +35,6 @@ void AMusicManager::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	//if (AudioComponent->)
-	//{
-	//	// Change state?
-	//	int LastTarget = 0;
-	//	int NewTarget = 0;
-	//	if (State < States.Num())
-	//	{
-	//		for (int i = 0; i < States[State].Transitions.Num(); ++i)
-	//		{
-	//			if (GameStage == States[State].Transitions[i].Stage)
-	//			{
-	//				State = States[State].Transitions[i].Target;
-	//				break;
-	//			}
-	//		}
-	//	}
-
-	//	// Update play parameters
-	//	if (State < States.Num())
-	//	{
-	//		AudioComponent->SetIntParameter("Active", NewTarget);
-	//		AudioComponent->SetIntParameter("Fading", LastTarget);
-	//	}
-	//}
+	AudioComponent->SetIntParameter("Stage", (int32)GameStage);
 }
 
