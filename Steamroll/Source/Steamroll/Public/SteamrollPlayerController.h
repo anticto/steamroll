@@ -107,4 +107,8 @@ class STEAMROLL_API ASteamrollPlayerController : public APlayerController
 	/** Returns true if finishing a 3dui action, such as releasing a dragging action */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = Ui3D)
 	bool RightClickUp();
+
+	/** Converts Ui3D coords to world location and direction */
+	UFUNCTION(BlueprintCallable, Category = Ui3D)
+	void Ui3DToWorld(float X, float Y, float SizeX, float SizeY, const AActor* Camera, float FOV, FVector& OutLocation, FVector& OutDirection);
 };

@@ -222,3 +222,23 @@ void ASteamrollPlayerController::EmptySteamball()
 	}
 }
 
+
+void ASteamrollPlayerController::Ui3DToWorld(float X, float Y, float SizeX, float SizeY, const AActor* Camera, float FOV, FVector& OutLocation, FVector& OutDirection)
+{
+	float CenteredX = X - SizeX / 2.f;
+	float CenteredY = Y - SizeY / 2.f;
+
+	//UE_LOG(LogTemp, Error, TEXT("%f; %f"), CenteredX, CenteredY);
+	
+	FVector Origin = Camera->GetActorLocation() + Camera->GetActorForwardVector();
+	float UnitLength = FMath::Tan(FOV / 2.f) / (SizeY / 1.f);
+
+	FVector Vx = Camera->GetActorRightVector() * UnitLength;
+	FVector Vy = -Camera->GetActorUpVector() * UnitLength;
+	//DrawDebugLine(GetWorld(), Origin, Origin + Vx.GetSafeNormal() * 1000.f, FColor::Red, false, 3.f);
+	//DrawDebugLine(GetWorld(), Origin, Origin + Vy.GetSafeNormal() * 1000.f, FColor::Blue, false, 3.f);
+
+	OutLocation = Origin + Vx * CenteredX + Vy * CenteredY;
+	OutDirection = (OutLocation - Camera->GetActorLocation()).GetSafeNormal();
+}
+
