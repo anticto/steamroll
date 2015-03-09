@@ -78,6 +78,10 @@ class STEAMROLL_API ASteamrollPawn : public APawn
 	/** Firing timer timeout callback */
 	virtual void Timeout();
 
+	/** Called to charge the cannon */
+	UFUNCTION(BlueprintCallable, Category = Base)
+	virtual void FireCharge();
+
 protected:
 
 	virtual void BeginPlay() override;
@@ -98,9 +102,6 @@ protected:
 
 	/** Timer to control the firing operation. */
 	FTimerHandle FireTimer;
-
-	/** Called to charge the cannon */
-	virtual void FireCharge();
 
 	/** Called to fire the cannon */
 	virtual void FireRelease();
