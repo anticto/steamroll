@@ -56,4 +56,6 @@ protected:
 
 	/** Actual Explosion procedure */
 	virtual void Explode() override;
+
+	virtual void LeftClickDown();
 };

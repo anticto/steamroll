@@ -140,3 +140,9 @@ void ABaseBall::Trigger(float Val)
 	}
 }
 
+
+void ABaseBall::LeftClickDown()
+{
+	bFiring = true;
+}
+
