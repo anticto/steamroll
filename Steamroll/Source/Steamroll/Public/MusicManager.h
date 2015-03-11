@@ -25,7 +25,7 @@ public:
 
 public:
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	ESoundNodeComposeStage GameStage = ESoundNodeComposeStage::Start;
 
 	UPROPERTY(EditAnywhere)
