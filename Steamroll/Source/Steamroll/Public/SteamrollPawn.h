@@ -41,6 +41,10 @@ class STEAMROLL_API ASteamrollPawn : public APawn
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Base)
 	float CurrCameraTime;
 
+	// Firing timeout
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Base)
+	float FiringTimeout;
+
 	UFUNCTION()
 	void Debug(FString Msg);
 
@@ -134,8 +138,6 @@ protected:
 	void LowerCameraPressed();
 	void LowerCameraReleased();
 
-	// Firing timeout
-	float FiringTimeout;
 	float MinLaunchSpeed;
 	float MaxLaunchSpeed;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Base)

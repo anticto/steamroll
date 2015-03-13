@@ -45,6 +45,10 @@ class STEAMROLL_API APlayerBase : public ASteamrollPawn
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Base)
 	float ChargeTime;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Base)
+	/** The value ChargeTime should be smoothly moved to to avoid abrupt trajectory changes */
+	float TargetChargeTime;
+
 	/** Subcomponents for rendering the wall deployment predictions on simulated ball trajectory */
 	UPROPERTY(VisibleAnywhere, Category = SimulatedBall)
 	UStaticMeshComponent* SimulatedWalls[4];
@@ -140,9 +144,7 @@ protected:
 	FVector GetLaunchLocation() const;
 	FVector GetLaunchVelocity(float ChargeTime) const;
 	ASteamrollBall* CreateSimulatedBall();
-
-	/** The value ChargeTime should be smoothly moved to to avoid abrupt trajectory changes */
-	float TargetChargeTime;
+	
 	/** The speed at which the ChargeTime changes second */
 	float ChargeTimeSpeed;
 
