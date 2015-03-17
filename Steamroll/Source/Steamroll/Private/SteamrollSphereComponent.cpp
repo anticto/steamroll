@@ -464,7 +464,8 @@ void USteamrollSphereComponent::DrawTimedSlots(float CurrentTime, const FVector&
 	{
 		for (uint32 i = 1; i < 5; ++i)
 		{
-			if (BallActor->GetSlotState(i) != ESlotTypeEnum::SE_EMPTY && BallActor->GetSlotActivatorType(i) == ESlotTypeEnum::SE_TIME && !BallActor->SlotsConfig.IsSlotUsed(i))
+			if (BallActor->GetSlotState(i) != ESlotTypeEnum::SE_EMPTY && BallActor->GetSlotActivatorType(i) == ESlotTypeEnum::SE_TIME && 
+				!BallActor->SlotsConfig.IsSlotUsed(i) && BallActor->GetSlotState(i) != ESlotTypeEnum::SE_RAMP)
 			{
 				//if(CurrentTime > 9.5f) UE_LOG(LogTemp, Warning, TEXT("%f, %f"), BallActor->GetSlotTime(i), CurrentTime);
 
@@ -491,7 +492,7 @@ void USteamrollSphereComponent::DrawTimedSlots(float CurrentTime, const FVector&
 
 void USteamrollSphereComponent::HandleImpactSlots(ASteamrollBall* BallActor, AActor* HitActor, const FVector& Velocity)
 {
-	if (BallActor)
+	if (BallActor && HitActor)
 	{
 		for (uint32 i = 1; i < 5; ++i)
 		{
