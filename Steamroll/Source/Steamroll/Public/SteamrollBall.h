@@ -119,6 +119,9 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface
 	UFUNCTION(BlueprintImplementableEvent, Category = Slots)
 	virtual void ActivateSlotEvent(const TEnumAsByte<ESlotTypeEnum::SlotType>& SlotType, float Angle, float Time);
 
+	UFUNCTION(BlueprintCallable, Category = Ball)
+	bool HasUnusedExplosionSlot();
+
 	/** Trigger and slot activation system */
 	void ActivateTimerTrigger(int32 SlotIndex);
 	void ActivateStopTriggers();

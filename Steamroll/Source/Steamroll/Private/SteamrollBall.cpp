@@ -337,3 +337,17 @@ void ASteamrollBall::ReceiveHit(class UPrimitiveComponent* MyComp, AActor* Other
 	}
 }
 
+
+bool ASteamrollBall::HasUnusedExplosionSlot()
+{
+	for (int32 i = 1; i < 5; i++)
+	{
+		if (SlotsConfig.GetSlotType(i) == ESlotTypeEnum::SE_EXPL && !SlotsConfig.IsSlotUsed(i))
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
