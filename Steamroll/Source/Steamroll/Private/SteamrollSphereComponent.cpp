@@ -269,9 +269,15 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 					//ActorsToIgnore.Push(Ball.LastCollidedActor);
 					CollidedWithBallThisFrame = nullptr;
 
-					FVector ImpactRadiusVector = (OutHit.Location - OutHit.ImpactPoint).GetSafeNormal(); // In fact this is the ball's normal
+					//if (((OutHit.Location - OutHit.ImpactPoint) | OutHit.ImpactNormal) < 0.f)
+					//{
+					//	OutHit.ImpactNormal = -OutHit.ImpactNormal;
+					//}
+
+					FVector ImpactRadiusVector = (OutHit.Location - OutHit.ImpactPoint).GetSafeNormal(); // In fact this is the ball's normal					
+					float Aux = OutHit.ImpactNormal | ImpactRadiusVector;
 					
-					if (FMath::Abs(OutHit.ImpactNormal | ImpactRadiusVector) < 0.99f && FMath::Abs(OutHit.ImpactPoint.Z - OutHit.Location.Z) > BallRadius / 2.f)
+					if (FMath::Abs(OutHit.ImpactNormal | ImpactRadiusVector) < 1.f && FMath::Abs(OutHit.ImpactPoint.Z - OutHit.Location.Z) > BallRadius / 2.f)
 					{
 						// Impacted against corner, use an interpolated "corner" normal
 						OutHit.ImpactNormal = ImpactRadiusVector;
@@ -337,11 +343,11 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 				// Too many iterations so the collision situation might be too complicated to solve with the current velocity, let the ball drop freely
 				Velocity = FVector::ZeroVector;
 
-				if (Ball.bSimulationBall)
-				{
-					//DrawDebugSphere(Ball.GetWorld(), Ball.GetActorLocation(), Ball.GetScaledSphereRadius() + 0.1f, 20, FColor::Magenta, false, 0.f);
-					//DrawDebugString(Ball.GetWorld(), OutHit.ImpactPoint, FString::Printf(TEXT("Iteration Limit!")), nullptr, FColor::Red, 0.f);
-				}
+				//if (Ball.bSimulationBall)
+				//{
+				//	DrawDebugSphere(Ball.GetWorld(), Ball.GetActorLocation(), Ball.GetScaledSphereRadius() + 0.1f, 20, FColor::Magenta, false, 0.f);
+				//	DrawDebugString(Ball.GetWorld(), OutHit.ImpactPoint, FString::Printf(TEXT("Iteration Limit!")), nullptr, FColor::Red, 0.f);
+				//}
 
 				break;
 			}
