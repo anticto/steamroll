@@ -42,19 +42,19 @@ void ABallTunnel::TransportToOtherTunnelEnd(AActor* OtherActor)
 			Ball->Sphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			//Ball->Sphere->SetCollisionProfileName(FName("NoCollision"));
 
-			float Speed = Ball->GetVelocity().Size();
+			//float Speed = Ball->GetVelocity().Size();
 			Ball->Sphere->bPhysicsEnabled = false;
 			Ball->VirtualSphere->SetSimulatePhysics(false);
 			Ball->bTravellingInTunnel = true;
 
 			if (TransportDelaySeconds > 0.f)
 			{
-				auto Delegate = FTimerDelegate::CreateUFunction(Ball, FName("ExecuteTransport"), ConnectedTunnel, Speed);
+				auto Delegate = FTimerDelegate::CreateUFunction(Ball, FName("ExecuteTransport"), ConnectedTunnel, 0.f);
 				GetWorldTimerManager().SetTimer(TunnelTimer, Delegate, TransportDelaySeconds, false);
 			}
 			else
 			{
-				Ball->ExecuteTransport(ConnectedTunnel, Speed);
+				Ball->ExecuteTransport(ConnectedTunnel, 0.f);
 			}
 		}
 	}

@@ -43,11 +43,6 @@ void ASteamrollBall::Tick(float DeltaSeconds)
 
 	VirtualSphere->SteamrollTick(DeltaSeconds, Sphere);
 
-	if (!bTravellingInTunnel)
-	{
-		CurrentTime += DeltaSeconds;
-	}
-
 	bool bTouchingFloor = IsTouchingFloor();
 
 	float SpeedSquared = GetVelocity().SizeSquared();
@@ -55,17 +50,6 @@ void ASteamrollBall::Tick(float DeltaSeconds)
 	if (!Activated && bTouchingFloor && SpeedSquared < StoppingSpeed)
 	{
 		ActivateBall();
-	}
-
-	for (uint32 i = 1; i < 5; ++i)
-	{
-		if (SlotsConfig.GetSlotActivatorType(i) == ESlotTypeEnum::SE_TIME && !SlotsConfig.IsSlotUsed(i))
-		{
-			if (SlotsConfig.GetSlotTime(i) < CurrentTime)
-			{
-				ActivateTimerTrigger(i);
-			}
-		}
 	}
 
 	if (HasSlotState(ESlotTypeEnum::SE_PAINT))
@@ -324,13 +308,13 @@ void ASteamrollBall::ExecuteTransport(ABallTunnel* ConnectedTunnel, float Speed)
 
 	ASteamrollBall* Ball = this;
 
-	FVector NewLocation = ConnectedTunnel->GetActorLocation();
-	FVector NewVelocity = ConnectedTunnel->Mesh->GetUpVector() * (Speed * ConnectedTunnel->SpeedMultiplier);
-	Ball->TeleportTo(NewLocation, Ball->GetActorRotation(), false, true);
-	Ball->SetVelocity(NewVelocity);
+	//FVector NewLocation = ConnectedTunnel->GetActorLocation();
+	//FVector NewVelocity = ConnectedTunnel->Mesh->GetUpVector() * (Speed * ConnectedTunnel->SpeedMultiplier);
+	//Ball->TeleportTo(NewLocation, Ball->GetActorRotation(), false, true);
+	//Ball->SetVelocity(NewVelocity);
 
-	Ball->VirtualSphere->SetWorldLocation(NewLocation);
-	Ball->VirtualSphere->SetPhysicsLinearVelocity(NewVelocity);
+	//Ball->VirtualSphere->SetWorldLocation(NewLocation);
+	//Ball->VirtualSphere->SetPhysicsLinearVelocity(NewVelocity);
 
 	Ball->Sphere->bPhysicsEnabled = true;
 	Ball->SetActorHiddenInGame(false);

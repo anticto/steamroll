@@ -82,7 +82,7 @@ void USoundNodeCompose::ParseNodes( FAudioDevice* AudioDevice, const UPTRINT Nod
 		if (CurrentChildNode)
 		{
 			TimeLeft = CurrentChildNode->GetDuration() + AccumulatedTime - ActiveSound.PlaybackTime;
-			UE_LOG(LogAudio, Error, TEXT("Time Left [%2.3f]"), TimeLeft);
+			//UE_LOG(LogAudio, Error, TEXT("Time Left [%2.3f]"), TimeLeft);
 			if (TimeLeft > 0.0f)
 			{
 				FSoundParseParameters UpdatedParams = ParseParams;

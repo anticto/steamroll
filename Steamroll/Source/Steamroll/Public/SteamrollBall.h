@@ -119,6 +119,9 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface
 	UFUNCTION(BlueprintImplementableEvent, Category = Slots)
 	virtual void ActivateSlotEvent(const TEnumAsByte<ESlotTypeEnum::SlotType>& SlotType, float Angle, float Time);
 
+	/** Trigger and slot activation system */
+	void ActivateTimerTrigger(int32 SlotIndex);
+	void ActivateStopTriggers();
 	void ActivateRemoteTriggers();
 	bool ActivateSlot(int32 SlotIndex);
 
@@ -130,13 +133,11 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface
 
 	virtual void ReceiveHit(class UPrimitiveComponent* MyComp, AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) override;
 
-protected:
+	/** How long the ball has been in the world */
 	float CurrentTime;
+
+protected:
 	float TimeForNextPaint;
 
-	virtual void BeginPlay() override;
-
-	/** Trigger and slot activation system */
-	void ActivateTimerTrigger(int32 SlotIndex);
-	void ActivateStopTriggers();	
+	virtual void BeginPlay() override;	
 };

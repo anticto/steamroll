@@ -26,7 +26,7 @@ class STEAMROLL_API ABallTunnel : public AActor
 	ABallTunnel* ConnectedTunnel;
 
 	/** True if the player has already sent a steamball through this tunnel, which means trajectory prediction will go through the tunnel */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Tunnel)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Tunnel)
 	bool bDiscovered;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Tunnel)

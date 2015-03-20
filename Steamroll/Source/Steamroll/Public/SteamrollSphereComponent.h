@@ -53,7 +53,8 @@ class STEAMROLL_API USteamrollSphereComponent : public USphereComponent
 	uint32 NumFramesCollidingWithBall;
 	float RemainingTime;
 
-	void SteamrollTick(float DeltaSeconds);
+	/** Returns how much time from the DeltaSeconds was actually simulated */
+	float SteamrollTick(float DeltaSeconds);
 	FVector DragPhysics(const FVector& Velocity, float TravelTime);
 	
 	float UpdateBallPhysics(float DeltaSeconds);

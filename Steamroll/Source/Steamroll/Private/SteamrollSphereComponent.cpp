@@ -11,6 +11,7 @@
 #include "Engine.h"
 #include "PlayerBase.h"
 #include "BallTunnel.h"
+#include "PhysicsVirtualSphereComponent.h"
 
 
 USteamrollSphereComponent::USteamrollSphereComponent(const class FObjectInitializer& PCIP)
@@ -36,14 +37,17 @@ USteamrollSphereComponent::USteamrollSphereComponent(const class FObjectInitiali
 }
 
 
-void USteamrollSphereComponent::SteamrollTick(float DeltaSeconds)
+float USteamrollSphereComponent::SteamrollTick(float DeltaSeconds)
 {
 	if (bSimulationBall)
 	{
-		return;
+		return 0.f;
 	}
 
-	RemainingTime = UpdateBallPhysics(DeltaSeconds + RemainingTime);
+	float TimeToSimulate = DeltaSeconds + RemainingTime;
+	RemainingTime = UpdateBallPhysics(TimeToSimulate);
+
+	return TimeToSimulate - RemainingTime;
 }
 
 
@@ -64,13 +68,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 		ResetTimedSlots(BallActor);
 	}
 
-	float DeltaSeconds = DeltaSecondsUnsubdivided;
-
-	//if (DeltaSecondsUnsubdivided > MaxDeltaSeconds)
-	//{
-	DeltaSeconds = MaxDeltaSeconds;
-	//}
-
+	float DeltaSeconds = MaxDeltaSeconds; // Constant timestep
 	float CurrentTime = 0.f;
 
 	while (CurrentTime <= DeltaSecondsUnsubdivided)
@@ -140,6 +138,11 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 				{						
 					if ((BallTunnel->TriggerVolume->GetComponentLocation() - OutHit.Location).Size() < BallRadius + BallTunnel->TriggerVolume->GetScaledSphereRadius())
 					{
+						CurrentLocation = BallTunnel->ConnectedTunnel->GetActorLocation();
+						Speed = Velocity.Size() * BallTunnel->ConnectedTunnel->SpeedMultiplier;
+						Velocity = BallTunnel->ConnectedTunnel->Mesh->GetUpVector() * Speed;
+						Ball.SetActorLocation(CurrentLocation);
+
 						if (Ball.bSimulationBall)
 						{
 							if (!BallTunnel->bDiscovered)
@@ -148,23 +151,25 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 								return DeltaSecondsUnsubdivided - CurrentTime; // Stop simulation if we hit an undiscovered tunnel
 							}
 
-							CurrentLocation = BallTunnel->ConnectedTunnel->GetActorLocation();
-							Speed = Velocity.Size() * BallTunnel->ConnectedTunnel->SpeedMultiplier;
-							Velocity = BallTunnel->ConnectedTunnel->Mesh->GetUpVector() * Speed;
-							Ball.SetActorLocation(CurrentLocation);
+							
 							TrajectoryComponent->CutTrajectory();
 							Ball.AddLocation(CurrentLocation, CurrentTime);
-
-							float TravelTime = OutHit.Time * RemainingTime;
-							RemainingTime -= TravelTime;
-							NewLocation = CurrentLocation + Velocity * TravelTime;
-							continue;
 						}
 						else
 						{
+							// Return 0.f unused time to spend all the time in the current timestep, to make reality and simulation coincide
+							BallActor->VirtualSphere->SetWorldLocation(NewLocation);
+							BallActor->VirtualSphere->SetPhysicsLinearVelocity(Velocity);
 							BallTunnel->TransportToOtherTunnelEnd(BallActor);
-							return DeltaSeconds - CurrentTime;
 						}
+
+						// Set RemainingTime = 0.f to spend all the time in the current timestep, to make reality and simulation coincide since they are handled differently (simulation continues simulating while reality will stop TransportDelaySeconds and then restart)
+						// No need to set TravelTime or NewLocation because as we have ended the current iteration, they will be reset in the next one
+						// float TravelTime = OutHit.Time * RemainingTime;
+						RemainingTime = 0.f;
+						// NewLocation = CurrentLocation + Velocity * TravelTime;
+
+						continue;
 					}
 				}
 				
@@ -380,7 +385,12 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 		//GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, FString::Printf(TEXT("Velocity=%s"), *(Velocity).ToString()));
 		//UE_LOG(LogTemp, Warning, TEXT("Velocity=%s"), *(Velocity).ToString());		
 
-		CurrentTime += DeltaSeconds;	
+		CurrentTime += DeltaSeconds;
+
+		if (BallActor)
+		{
+			BallActor->CurrentTime += DeltaSeconds;
+		}
 	}
 
 	//if (SimulationLocations) DrawDebugString(Ball.GetWorld(), Ball.GetActorLocation(), FString::Printf(TEXT("Simulation end!")), nullptr, FColor::Red, 0.f);
@@ -460,7 +470,7 @@ void USteamrollSphereComponent::DrawTimedSlots(float CurrentTime, const FVector&
 {
 	ASteamrollBall* BallActor = Cast<ASteamrollBall>(GetAttachmentRootActor());
 
-	if (bSimulationBall && BallActor)
+	if (BallActor)
 	{
 		for (uint32 i = 1; i < 5; ++i)
 		{
@@ -469,18 +479,29 @@ void USteamrollSphereComponent::DrawTimedSlots(float CurrentTime, const FVector&
 			{
 				//if(CurrentTime > 9.5f) UE_LOG(LogTemp, Warning, TEXT("%f, %f"), BallActor->GetSlotTime(i), CurrentTime);
 
-				if (BallActor->GetSlotTime(i) < CurrentTime || (BallActor->GetSlotTime(i) > 9.9f && CurrentTime > 9.85f))
-				{
-					if (BallActor->GetSlotState(i) == ESlotTypeEnum::SE_WALL)
-					{
-						DrawSimulationWall(BallActor, i);
-					}
-					else if (BallActor->GetSlotState(i) == ESlotTypeEnum::SE_EXPL)
-					{
-						DrawSimulationExplosion(BallActor);
-					}
+				float TestTime = bSimulationBall ? CurrentTime : BallActor->CurrentTime;
 
-					BallActor->SlotsConfig.SetSlotUsed(i);
+				if (BallActor->GetSlotTime(i) < TestTime || (BallActor->GetSlotTime(i) > 9.9f && TestTime > 9.85f))
+				{
+					if (bSimulationBall)
+					{
+						if (BallActor->GetSlotState(i) == ESlotTypeEnum::SE_WALL)
+						{
+							DrawSimulationWall(BallActor, i);
+						}
+						else if (BallActor->GetSlotState(i) == ESlotTypeEnum::SE_EXPL)
+						{
+							DrawSimulationExplosion(BallActor);
+						}
+
+						BallActor->SlotsConfig.SetSlotUsed(i);
+					}
+					else
+					{
+						//UE_LOG(LogTemp, Warning, TEXT("Deploy time=%f, Timer time=%f"), TestTime, BallActor->GetSlotTime(i));
+						BallActor->ActivateTimerTrigger(i);
+					}
+					
 					//DrawDebugSphere(GetWorld(), GetActorLocation(), GetScaledSphereRadius(), 10, FColor::White);
 					//DrawDebugString(GetWorld(), GetActorLocation() + FVector(-50.f, -50.f, -50.f), FString::Printf(TEXT("%f"), CurrentTime), nullptr, FColor::Red, 0.f);
 				}
