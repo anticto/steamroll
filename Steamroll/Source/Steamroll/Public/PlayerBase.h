@@ -106,6 +106,7 @@ protected:
 
 	/** Called for side to side input */
 	virtual void MoveRight(float Val) override;
+	void MoveRightKey(float Val);
 
 	/** Called to angle the cannon */
 	void MoveForward(float Val);

@@ -269,11 +269,6 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 					//ActorsToIgnore.Push(Ball.LastCollidedActor);
 					CollidedWithBallThisFrame = nullptr;
 
-					//if (((OutHit.Location - OutHit.ImpactPoint) | OutHit.ImpactNormal) < 0.f)
-					//{
-					//	OutHit.ImpactNormal = -OutHit.ImpactNormal;
-					//}
-
 					FVector ImpactRadiusVector = (OutHit.Location - OutHit.ImpactPoint).GetSafeNormal(); // In fact this is the ball's normal					
 					float Aux = OutHit.ImpactNormal | ImpactRadiusVector;
 					

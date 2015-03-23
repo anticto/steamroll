@@ -115,6 +115,7 @@ void APlayerBase::SetupPlayerInputComponent(class UInputComponent* InputComponen
 
 	// set up gameplay key bindings
 	InputComponent->BindAxis("MoveRightBase", this, &APlayerBase::MoveRight);
+	InputComponent->BindAxis("MoveRightBaseKey", this, &APlayerBase::MoveRightKey);
 	InputComponent->BindAxis("MoveForward", this, &APlayerBase::MoveForward);
 	InputComponent->BindAxis("TriggerAxis", this, &APlayerBase::Trigger);
 
@@ -209,25 +210,18 @@ void APlayerBase::Tick(float DeltaSeconds)
 			Increment = -FMath::Sign(Increment) * (360.f - FMath::Abs(Increment));
 		}
 
-		float IncrementSpeed = 25.f;
+		float IncrementSpeed = FMath::Max(FMath::Abs(Increment * 8.f), 5.f);
 
-		if (FMath::Abs(Increment) < 26.f)
-		{
-			IncrementSpeed = 5.f;
-		}
-		else if (FMath::Abs(Increment) < 50.f)
-		{
-			IncrementSpeed = 10.f;
-		}
-
-		float TimedIncrement = Increment * DeltaSeconds * IncrementSpeed;
+		float TimedIncrement = FMath::Sign(Increment) * DeltaSeconds * IncrementSpeed;
 		CurrentYaw += Increment >= 0.f ? FMath::Min(Increment, TimedIncrement) : FMath::Max(Increment, TimedIncrement);
 		AimTransform->SetWorldRotation(FRotator(0.f, CurrentYaw, 0.f));
+		//UE_LOG(LogTemp, Warning, TEXT("Inc to %f, speed=%f"), CurrentYaw, IncrementSpeed);
 	}
 	else if (CurrentYaw != SteppedYaw)
 	{
 		CurrentYaw = SteppedYaw;
 		AimTransform->SetWorldRotation(FRotator(0.f, CurrentYaw, 0.f));
+		//UE_LOG(LogTemp, Warning, TEXT("Snap to %f"), CurrentYaw);
 	}
 
 	// Charging, firing and simulation
@@ -615,6 +609,42 @@ void APlayerBase::MoveRight(float Val)
 
 		//RotationServer(AimTransform->RelativeRotation);
 	}
+}
+
+
+void APlayerBase::MoveRightKey(float Val)
+{
+	static float PrevVal = 0.f;
+
+	if (Val != 0.f)
+	{
+		float Step = GetLocalPlayerController()->AimingStep;
+
+		if (PrevVal != 0.f)
+		{
+			CumulativeYaw += 2.f * Val;
+		}
+		else
+		{
+			CumulativeYaw = FMath::Sign(Val) * (Step + Step * 0.05f); // Make sure we force a step and don't miss it due to precision issues
+		}
+
+		while (FMath::Abs(CumulativeYaw) >= Step)
+		{
+			if (CumulativeYaw > 0.f)
+			{
+				CumulativeYaw -= Step;
+				SteppedYaw += Step;
+			}
+			else
+			{
+				CumulativeYaw += Step;
+				SteppedYaw -= Step;
+			}
+		}
+	}
+
+	PrevVal = Val;
 }
 
 
