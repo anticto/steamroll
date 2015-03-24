@@ -209,17 +209,19 @@ void APlayerBase::Tick(float DeltaSeconds)
 		{
 			Increment = -FMath::Sign(Increment) * (360.f - FMath::Abs(Increment));
 		}
-
+		
 		float IncrementSpeed = FMath::Max(FMath::Abs(Increment * 8.f), 5.f);
 
 		float TimedIncrement = FMath::Sign(Increment) * DeltaSeconds * IncrementSpeed;
 		CurrentYaw += Increment >= 0.f ? FMath::Min(Increment, TimedIncrement) : FMath::Max(Increment, TimedIncrement);
+		CurrentYaw = FMath::UnwindDegrees(CurrentYaw);
 		AimTransform->SetWorldRotation(FRotator(0.f, CurrentYaw, 0.f));
 		//UE_LOG(LogTemp, Warning, TEXT("Inc to %f, speed=%f"), CurrentYaw, IncrementSpeed);
 	}
 	else if (CurrentYaw != SteppedYaw)
 	{
 		CurrentYaw = SteppedYaw;
+		CurrentYaw = FMath::UnwindDegrees(CurrentYaw);
 		AimTransform->SetWorldRotation(FRotator(0.f, CurrentYaw, 0.f));
 		//UE_LOG(LogTemp, Warning, TEXT("Snap to %f"), CurrentYaw);
 	}
@@ -243,6 +245,11 @@ void APlayerBase::Tick(float DeltaSeconds)
 
 	if (SimulatedBall)
 	{
+		for (auto& Ball : SimulatedBall->WallReboundPredictionBalls)
+		{
+			Ball->Destroy();
+		}
+
 		SimulatedBall->Destroy();
 		SimulatedBall = nullptr;
 	}
@@ -605,6 +612,8 @@ void APlayerBase::MoveRight(float Val)
 					SteppedYaw -= Step;
 				}
 			}
+
+			SteppedYaw = FMath::UnwindDegrees(SteppedYaw);
 		}
 
 		//RotationServer(AimTransform->RelativeRotation);
@@ -640,8 +649,10 @@ void APlayerBase::MoveRightKey(float Val)
 			{
 				CumulativeYaw += Step;
 				SteppedYaw -= Step;
-			}
+			}			
 		}
+
+		SteppedYaw = FMath::UnwindDegrees(SteppedYaw);
 	}
 
 	PrevVal = Val;

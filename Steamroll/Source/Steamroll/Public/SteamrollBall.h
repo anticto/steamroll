@@ -47,6 +47,9 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Slots)
 	bool bExplosionBlockedByContactSlot;
 
+	UPROPERTY()
+	TArray<ASteamrollBall*> WallReboundPredictionBalls;
+
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = Ball)
 	void ActivateBall();
 

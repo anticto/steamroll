@@ -565,6 +565,56 @@ void USteamrollSphereComponent::DrawSimulationWall(ASteamrollBall* BallActor, ui
 	{
 		PlayerBase->DrawSimulatedWall(GetActorLocation() - FVector(0.f, 0.f, 95.f), FRotator(0.f, Angle, 0.f));
 	}
+
+	// Rebound prediction
+	float WallAngle = BallActor->GetSlotAngle(SlotIndex);
+
+	if (FMath::Abs(WallAngle) > 0.f && FMath::Abs(WallAngle) < 90.f)
+	{
+		float WallHalfWidth = 5.f;
+		float BallRadius = BallActor->Sphere->GetScaledSphereRadius();
+		FVector Direction = Velocity.GetSafeNormal();
+		
+		float Displacement1 = WallHalfWidth / FMath::Cos(FMath::DegreesToRadians(WallAngle));
+		float Displacement2 = BallRadius / FMath::Cos(FMath::DegreesToRadians(WallAngle));
+		FVector ReboundLocation = GetActorLocation() - Direction * (Displacement1 + Displacement2);
+		//DrawDebugSphere(GetWorld(), ReboundLocation, BallRadius, 20, FColor::Green);
+
+		ASteamrollBall* SimulatedBall = Cast<ASteamrollBall>(GetWorld()->SpawnActor(ASteamrollBall::StaticClass()));
+
+		if (SimulatedBall)
+		{
+			BallActor->WallReboundPredictionBalls.Add(SimulatedBall);
+
+			SimulatedBall->Sphere->bSimulationBall = true;
+			SimulatedBall->SetActorEnableCollision(false);
+			SimulatedBall->Sphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			SimulatedBall->Sphere->SetSimulatePhysics(false);
+			SimulatedBall->SetActorLocation(GetActorLocation());
+			SimulatedBall->Sphere->SetSphereRadius(99.442101f);
+			SimulatedBall->Sphere->PlayerBase = PlayerBase;
+
+			SimulatedBall->VirtualSphere->SetSimulatePhysics(false);
+			SimulatedBall->VirtualSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+			SimulatedBall->SetActorLocation(ReboundLocation);
+
+			FVector Normal = -Direction.RotateAngleAxis(WallAngle, FVector::UpVector);
+			SimulatedBall->SetVelocity(Velocity.MirrorByVector(Normal));
+
+			SimulatedBall->Sphere->TrajectoryComponent->DeleteLocations();
+
+			float TotalTime = SimulatedBall->Sphere->UpdateBallPhysics(2.f);
+			auto MaterialInstance = SimulatedBall->Sphere->TrajectoryComponent->CreateAndSetMaterialInstanceDynamicFromMaterial(0, SimulatedBall->Sphere->TrajectoryComponent->GetMaterial(0));
+			MaterialInstance->SetScalarParameterValue("Charging", 0.f);
+
+			SimulatedBall->Sphere->TrajectoryComponent->SendData();
+
+			SimulatedBall->SetActorEnableCollision(false);
+			SimulatedBall->Sphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			SimulatedBall->Sphere->SetSimulatePhysics(false);
+		}
+	}
 }
 
 
