@@ -13,6 +13,9 @@ class STEAMROLL_API UTrajectoryComponent : public UProceduralMeshComponent
 {
 	GENERATED_UCLASS_BODY()
 
+	UPROPERTY()
+	UMaterialInstanceDynamic* MatInstance;
+
 	void AddLocation(const FVector& Location, float CurrentTime, bool bOverrideMinDistBetweenLocations = false);
 	void DeleteLocations();
 	void SendData();
@@ -28,7 +31,4 @@ protected:
 	bool bLastPValid;
 	float Radius;
 	float CumulativeV;
-
-	UPROPERTY()
-	UMaterial* TrajectoryMat;
 };

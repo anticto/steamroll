@@ -10,9 +10,9 @@ UTrajectoryComponent::UTrajectoryComponent(const class FObjectInitializer& PCIP)
 	: Super(PCIP)
 {
 	static ConstructorHelpers::FObjectFinder<UMaterial> Object0(TEXT("Material'/Game/Ball/TrajectoryMat.TrajectoryMat'"));
-	TrajectoryMat = Object0.Object;
-
-	SetMaterial(0, TrajectoryMat);
+	UMaterial* TrajectoryMat = Object0.Object;
+	MatInstance = UMaterialInstanceDynamic::Create(TrajectoryMat, this);
+	SetMaterial(0, MatInstance);
 
 	bAddedFirstLocation = false;
 	bLastPValid = false;

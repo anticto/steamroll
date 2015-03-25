@@ -585,6 +585,7 @@ void USteamrollSphereComponent::DrawSimulationWall(ASteamrollBall* BallActor, ui
 		if (SimulatedBall)
 		{
 			BallActor->WallReboundPredictionBalls.Add(SimulatedBall);
+			SimulatedBall->Sphere->TrajectoryComponent->MatInstance->SetScalarParameterValue("IsPrimaryPrediction", 0.f);
 
 			SimulatedBall->Sphere->bSimulationBall = true;
 			SimulatedBall->SetActorEnableCollision(false);
