@@ -351,7 +351,7 @@ FVector APlayerBase::GetLaunchVelocity(float ChargeTime) const
 {
 	FVector Direction = AimTransform->GetComponentToWorld().TransformVector(FVector(1.f, 0.f, 0.f));
 	float LaunchPower = ChargeTime / FiringTimeout;
-	float LaunchSpeed = FMath::Lerp(MinLaunchSpeed, MaxLaunchSpeed, LaunchPower);
+	float LaunchSpeed = FMath::Lerp(MinLaunchSpeed, MaxLaunchSpeed, LaunchPower) * AttachedToDeploymentSpot->LaunchPowerFactor;
 
 	return Direction * LaunchSpeed;
 }
