@@ -27,9 +27,12 @@ ABaseBall::ABaseBall(const class FObjectInitializer& PCIP)
 	SpringArm->AttachTo(AimTransform);
 	Camera->AttachTo(SpringArm);
 
-	PrimaryActorTick.bCanEverTick = true;
-
 	Sphere->DragCoefficientSlow = 10.f;
+
+	Acceleration = 2000.f;
+	MaxSpeed = 3000.f;
+
+	PrimaryActorTick.bCanEverTick = true;	
 }
 
 
@@ -46,8 +49,6 @@ void ABaseBall::SetupPlayerInputComponent(class UInputComponent* InputComponent)
 void ABaseBall::Tick(float DeltaSeconds)
 {
 	static const float StoppingSpeed = 10.f;
-	static const float MaxSpeed = 3000.f;
-	static const float Acceleration = 2000.f;
 
 	Super::Tick(DeltaSeconds);
 	Sphere->SteamrollTick(DeltaSeconds);

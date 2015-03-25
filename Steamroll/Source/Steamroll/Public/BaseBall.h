@@ -36,6 +36,14 @@ class STEAMROLL_API ABaseBall : public ASteamrollPawn
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Base)
 	class USpringArmComponent* SpringArm;
 
+	/** Ball acceleration value */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Base)
+	float Acceleration;
+
+	/** Ball max speed value */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Base)
+	float MaxSpeed;
+
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = Base)
 	void UndeployInstantly();
 
