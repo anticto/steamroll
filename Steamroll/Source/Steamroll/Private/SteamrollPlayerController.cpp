@@ -2,6 +2,8 @@
 
 #include "Steamroll.h"
 #include "SteamrollPlayerController.h"
+#include "PlayerBase.h"
+#include "DeploymentSpot.h"
 
 
 ASteamrollPlayerController::ASteamrollPlayerController(const class FObjectInitializer& PCIP)
@@ -240,5 +242,57 @@ void ASteamrollPlayerController::Ui3DToWorld(float X, float Y, float SizeX, floa
 
 	OutLocation = Origin + Vx * CenteredX + Vy * CenteredY;
 	OutDirection = (OutLocation - Camera->GetActorLocation()).GetSafeNormal();
+}
+
+
+bool ASteamrollPlayerController::IsActivatorAvailable(TEnumAsByte<ESlotTypeEnum::SlotType> Activator)
+{
+	APlayerBase* Base = Cast<APlayerBase>(GetPawn());
+
+	if (Base)
+	{
+		if (Base->AttachedToDeploymentSpot->ActivatorContent.Num() == 0)
+		{
+			return true;
+		}
+
+		bool AllEmpty = true;
+
+		for (auto& ActivatorItem : Base->AttachedToDeploymentSpot->ActivatorContent)
+		{
+			if (Activator == ActivatorItem)
+			{
+				return true;
+			}
+
+			if (ActivatorItem != ESlotTypeEnum::SE_EMPTY)
+			{
+				AllEmpty = false;
+			}
+		}
+
+		if (AllEmpty)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+
+bool ASteamrollPlayerController::MorethanOneActivatorAvailable()
+{
+	APlayerBase* Base = Cast<APlayerBase>(GetPawn());
+
+	if (Base)
+	{
+		if (Base->AttachedToDeploymentSpot->ActivatorContent.Num() == 1)
+		{
+			return false;
+		}
+	}
+
+	return true;
 }
 

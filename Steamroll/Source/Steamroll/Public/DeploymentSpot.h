@@ -18,6 +18,9 @@ class STEAMROLL_API ADeploymentSpot : public AActor
 	TArray<FSlotContentConfigStruct> SlotContent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Slots)
+	TArray<TEnumAsByte<ESlotTypeEnum::SlotType>> ActivatorContent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Slots)
 	float AimingStep;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Slots)

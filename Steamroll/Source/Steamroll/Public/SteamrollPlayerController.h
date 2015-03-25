@@ -88,6 +88,14 @@ class STEAMROLL_API ASteamrollPlayerController : public APlayerController
 	UFUNCTION(BlueprintCallable, Category = Slots)
 	bool CheckItemAvailability();
 
+	/** Checks whether the currently assembled steamball has all the required items in the current deployment spot */
+	UFUNCTION(BlueprintCallable, Category = Slots)
+	bool IsActivatorAvailable(TEnumAsByte<ESlotTypeEnum::SlotType> Activator);
+
+	/** Returns true if there's more than one activator available in the current deployment spot */
+	UFUNCTION(BlueprintCallable, Category = Slots)
+	bool MorethanOneActivatorAvailable();
+
 	/** Empties the currently assembled steamball */
 	UFUNCTION(BlueprintCallable, Category = Slots)
 	void EmptySteamball();
