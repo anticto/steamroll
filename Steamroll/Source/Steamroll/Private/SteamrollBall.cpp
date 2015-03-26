@@ -36,54 +36,26 @@ ASteamrollBall::ASteamrollBall(const class FObjectInitializer& PCIP)
 
 void ASteamrollBall::Tick(float DeltaSeconds)
 {
-	static const float StoppingSpeed = 10.f;
-
 	Super::Tick(DeltaSeconds);
 	Sphere->SteamrollTick(DeltaSeconds);
 
 	VirtualSphere->SteamrollTick(DeltaSeconds, Sphere);
 
-	bool bTouchingFloor = IsTouchingFloor();
+	//bool bTouchingFloor = IsTouchingFloor();
 
-	float SpeedSquared = GetVelocity().SizeSquared();
+	//float SpeedSquared = GetVelocity().SizeSquared();
 
-	if (!Activated && bTouchingFloor && SpeedSquared < StoppingSpeed)
-	{
-		ActivateBall();
-	}
-
-	if (HasSlotState(ESlotTypeEnum::SE_PAINT))
-	{
-		if (!Activated && SpeedSquared >= StoppingSpeed * StoppingSpeed && bTouchingFloor)
-		{
-			TimeForNextPaint -= DeltaSeconds;
-
-			if (TimeForNextPaint <= 0.f)
-			{
-				SplatPaint();
-				TimeForNextPaint = 1.f;
-			}
-		}
-	}
-
-	//if (HasSlotState(ESlotTypeEnum::SE_CONTACT))
+	//static const float StoppingSpeed = 10.f;
+	//if (HasSlotState(ESlotTypeEnum::SE_PAINT))
 	//{
-	//	bExplosionBlockedByContactSlot = true;
-
-	//	TArray<AActor*> Actors;
-	//	TArray<AActor*> ActorsToIgnore;
-	//	ActorsToIgnore.Add(this);
-	//	TArray<TEnumAsByte<EObjectTypeQuery> > ObjectTypes;
-	//	
-	//	Sphere->GetOverlappingActors(Actors);
-
-	//	for (auto Actor : Actors)
+	//	if (!Activated && SpeedSquared >= StoppingSpeed * StoppingSpeed && bTouchingFloor)
 	//	{
-	//		if (InterfaceCast<IExplosionDestructibleInterface>(Actor))
+	//		TimeForNextPaint -= DeltaSeconds;
+
+	//		if (TimeForNextPaint <= 0.f)
 	//		{
-	//			ActivateBall();
-	//			bExplosionBlockedByContactSlot = false;
-	//			break;
+	//			SplatPaint();
+	//			TimeForNextPaint = 1.f;
 	//		}
 	//	}
 	//}

@@ -39,6 +39,7 @@ class STEAMROLL_API USteamrollSphereComponent : public USphereComponent
 	uint32 NumIterations;
 	/** Timestep length */
 	float MaxDeltaSeconds;
+	float StoppingSpeed;
 	float DepenetrationSpeed;
 	float DragCoefficient;
 	float DragCoefficientSlow;
@@ -61,7 +62,7 @@ class STEAMROLL_API USteamrollSphereComponent : public USphereComponent
 	void SeparateBalls(class ASteamrollBall* OtherBall, const FVector& PushVector, float DepenetrationSpeed, float DeltaSeconds, float CurrentTime);
 	void RotateBall(FVector& Velocity, float Speed, float DeltaSeconds);
 	void ResetTimedSlots(ASteamrollBall* BallActor);
-	void DrawTimedSlots(float CurrentTime, const FVector& Velocity);
+	void DrawTimedSlots(ASteamrollBall* BallActor, float CurrentTime, const FVector& Velocity);
 	void HandleImpactSlots(ASteamrollBall* BallActor, AActor* HitActor, const FVector& Velocity);
 	bool IsTouchingFloor(bool bSphereTrace = false) const;
 	FVector GetActorLocation() const;
@@ -74,4 +75,5 @@ private:
 	void DrawSimulationExplosion(ASteamrollBall* BallActor);
 	void DrawSimulationRamp(const FVector& Location, const FVector& Normal);
 	void ActivateSnapRamp(ASteamrollBall* BallActor, const FVector& Location, const FVector& Normal);
+	void ActivateStopTriggers(ASteamrollBall* BallActor);
 };

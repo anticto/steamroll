@@ -28,6 +28,8 @@ ABaseBall::ABaseBall(const class FObjectInitializer& PCIP)
 	Camera->AttachTo(SpringArm);
 
 	Sphere->DragCoefficientSlow = 10.f;
+	Sphere->DragCoefficientSlowSpeed = 100.f;
+	Sphere->StoppingSpeed = 3.36f;
 
 	Acceleration = 2000.f;
 	MaxSpeed = 3000.f;
@@ -80,14 +82,6 @@ void ABaseBall::Tick(float DeltaSeconds)
 		{
 			Sphere->Velocity = Sphere->Velocity / Speed * MaxSpeed;
 		}
-	}
-
-	bool bTouchingFloor = Sphere->IsTouchingFloor();
-
-	if (!Activated && bTouchingFloor && Sphere->Velocity.SizeSquared() < FMath::Square(StoppingSpeed))
-	{
-		Activated = true;
-		Sphere->Velocity = FVector::ZeroVector;
 	}
 }
 

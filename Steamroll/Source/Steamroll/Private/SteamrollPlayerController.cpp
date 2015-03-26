@@ -275,9 +275,11 @@ bool ASteamrollPlayerController::IsActivatorAvailable(TEnumAsByte<ESlotTypeEnum:
 		{
 			return true;
 		}
+
+		return false;
 	}
 
-	return false;
+	return true; // Not attached, return true to prevent 3dui from infinite loop in MenuLeftRight function when not finding any activator
 }
 
 
