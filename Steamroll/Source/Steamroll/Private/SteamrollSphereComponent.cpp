@@ -596,7 +596,7 @@ void USteamrollSphereComponent::DrawSimulationWall(ASteamrollBall* BallActor, ui
 
 		if (FMath::Abs(WallAngle) > 0.f && FMath::Abs(WallAngle) < 90.f)
 		{
-			float WallHalfWidth = 5.f;
+			float WallHalfWidth = 1.f;
 			float BallRadius = BallActor->Sphere->GetScaledSphereRadius();
 			FVector Direction = Velocity.GetSafeNormal();
 
