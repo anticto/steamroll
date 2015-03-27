@@ -626,7 +626,8 @@ void USteamrollSphereComponent::DrawSimulationWall(ASteamrollBall* BallActor, ui
 				SimulatedBall->SetActorLocation(ReboundLocation);
 
 				FVector Normal = -Direction.RotateAngleAxis(WallAngle, FVector::UpVector);
-				SimulatedBall->SetVelocity(Velocity.MirrorByVector(Normal));
+				FVector NewVelocity = Velocity.GetSafeNormal() * 1500.f;
+				SimulatedBall->SetVelocity(NewVelocity.MirrorByVector(Normal));
 
 				SimulatedBall->Sphere->TrajectoryComponent->DeleteLocations();
 
