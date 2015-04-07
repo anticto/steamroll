@@ -302,14 +302,20 @@ bool ASteamrollPlayerController::MorethanOneActivatorAvailable()
 
 void ASteamrollPlayerController::AddDebris(ADebris* DebrisActor)
 {
-	LevelDebris.Add(DebrisActor);
+	if (DebrisActor)
+	{
+		LevelDebris.Add(DebrisActor);
+	}
 
 	if (LevelDebris.Num() > 30)
 	{
 		ADebris* RemovedActor = LevelDebris[0];
 		LevelDebris.RemoveAt(0, 1, false);
 
-		RemovedActor->bDissolving = true;
+		if (RemovedActor)
+		{
+			RemovedActor->bDissolving = true;
+		}
 	}
 }
 
