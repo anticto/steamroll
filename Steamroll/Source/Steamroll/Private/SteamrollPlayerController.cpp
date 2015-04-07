@@ -4,6 +4,7 @@
 #include "SteamrollPlayerController.h"
 #include "PlayerBase.h"
 #include "DeploymentSpot.h"
+#include "Debris.h"
 
 
 ASteamrollPlayerController::ASteamrollPlayerController(const class FObjectInitializer& PCIP)
@@ -296,5 +297,19 @@ bool ASteamrollPlayerController::MorethanOneActivatorAvailable()
 	}
 
 	return true;
+}
+
+
+void ASteamrollPlayerController::AddDebris(ADebris* DebrisActor)
+{
+	LevelDebris.Add(DebrisActor);
+
+	if (LevelDebris.Num() > 30)
+	{
+		ADebris* RemovedActor = LevelDebris[0];
+		LevelDebris.RemoveAt(0, 1, false);
+
+		RemovedActor->bDissolving = true;
+	}
 }
 

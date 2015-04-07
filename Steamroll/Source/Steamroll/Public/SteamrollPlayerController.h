@@ -60,6 +60,10 @@ class STEAMROLL_API ASteamrollPlayerController : public APlayerController
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Slots)
 	TArray<FSlotContentConfigStruct> SlotContent;
 
+	/** The debris in the level that should be deleted when there is too much */
+	UPROPERTY()
+	TArray<class ADebris*> LevelDebris;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Slots)
 	float AimingStep;
 
@@ -119,4 +123,7 @@ class STEAMROLL_API ASteamrollPlayerController : public APlayerController
 	/** Converts Ui3D coords to world location and direction */
 	UFUNCTION(BlueprintCallable, Category = Ui3D)
 	void Ui3DToWorld(float X, float Y, float SizeX, float SizeY, const AActor* Camera, float FOV, FVector& OutLocation, FVector& OutDirection);
+
+	UFUNCTION(BlueprintCallable, Category = Debris)
+	void AddDebris(ADebris* DebrisActor);
 };
