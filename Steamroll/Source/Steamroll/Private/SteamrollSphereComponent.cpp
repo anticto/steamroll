@@ -351,7 +351,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 		{			
 			if (bTouchingFloor)
 			{
-				DrawTimedSlots(BallActor, 999999.f, Velocity); // Force all remaining timed slots to activate
+				DrawTimedSlots(BallActor, CurrentTime, Velocity, true); // Force all remaining timed slots to activate
 				ActivateStopTriggers(BallActor);
 
 				if (Ball.bSimulationBall)
@@ -492,7 +492,7 @@ void USteamrollSphereComponent::ResetTimedSlots(ASteamrollBall* BallActor)
 }
 
 
-void USteamrollSphereComponent::DrawTimedSlots(ASteamrollBall* BallActor, float CurrentTime, const FVector& Velocity)
+void USteamrollSphereComponent::DrawTimedSlots(ASteamrollBall* BallActor, float CurrentTime, const FVector& Velocity, bool bForceRemainingSlots)
 {
 	if (BallActor)
 	{
@@ -505,7 +505,7 @@ void USteamrollSphereComponent::DrawTimedSlots(ASteamrollBall* BallActor, float 
 
 				float TestTime = bSimulationBall ? CurrentTime : BallActor->CurrentTime;
 
-				if (BallActor->GetSlotTime(i) < TestTime || (BallActor->GetSlotTime(i) > 9.9f && TestTime > 9.85f))
+				if (bForceRemainingSlots || BallActor->GetSlotTime(i) < TestTime || (BallActor->GetSlotTime(i) > 9.9f && TestTime > 9.85f))
 				{
 					if (bSimulationBall)
 					{

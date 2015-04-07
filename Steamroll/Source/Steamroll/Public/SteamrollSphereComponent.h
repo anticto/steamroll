@@ -62,7 +62,7 @@ class STEAMROLL_API USteamrollSphereComponent : public USphereComponent
 	void SeparateBalls(class ASteamrollBall* OtherBall, const FVector& PushVector, float DepenetrationSpeed, float DeltaSeconds, float CurrentTime);
 	void RotateBall(FVector& Velocity, float Speed, float DeltaSeconds);
 	void ResetTimedSlots(ASteamrollBall* BallActor);
-	void DrawTimedSlots(ASteamrollBall* BallActor, float CurrentTime, const FVector& Velocity);
+	void DrawTimedSlots(ASteamrollBall* BallActor, float CurrentTime, const FVector& Velocity, bool bForceRemainingSlots = false);
 	void HandleImpactSlots(ASteamrollBall* BallActor, AActor* HitActor, const FVector& Velocity);
 	bool IsTouchingFloor(bool bSphereTrace = false) const;
 	FVector GetActorLocation() const;
