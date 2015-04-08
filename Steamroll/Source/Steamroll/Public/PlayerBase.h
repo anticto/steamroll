@@ -13,6 +13,8 @@ class STEAMROLL_API APlayerBase : public ASteamrollPawn
 {
 	GENERATED_UCLASS_BODY()
 
+	virtual void PostInitializeComponents() override;
+
 	/** StaticMesh used for the base */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Base)
 	class UStaticMeshComponent* Base;
@@ -60,8 +62,10 @@ class STEAMROLL_API APlayerBase : public ASteamrollPawn
 
 	uint32 NumUsedSimulatedRamps;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = SimulatedBall)
-	UStaticMeshComponent* SimulatedExplosion;
+	UPROPERTY(VisibleAnywhere, Category = SimulatedBall)
+	UStaticMeshComponent* SimulatedExplosions[4];
+
+	uint32 NumUsedSimulatedExplosions;
 
 	// Aiming Controls
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Base)
@@ -87,9 +91,9 @@ class STEAMROLL_API APlayerBase : public ASteamrollPawn
 	AActor* GetViewTargetActor();
 
 	void ClearSimulatedItems();
-	void DrawSimulatedWall(const FVector &Location, const FRotator& Rotation);
-	void DrawSimulatedRamp(const FVector &Location, const FRotator& Rotation);
-	void DrawSimulatedExplosion(const FVector &Location, float Radius);
+	void DrawSimulatedWall(const FVector &Location, const FRotator& Rotation, float CurrentTime);
+	void DrawSimulatedRamp(const FVector &Location, const FRotator& Rotation, float CurrentTime);
+	void DrawSimulatedExplosion(const FVector &Location, float Radius, float CurrentTime);
 
 protected:
 

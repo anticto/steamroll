@@ -63,7 +63,7 @@ class STEAMROLL_API USteamrollSphereComponent : public USphereComponent
 	void RotateBall(FVector& Velocity, float Speed, float DeltaSeconds);
 	void ResetTimedSlots(ASteamrollBall* BallActor);
 	void DrawTimedSlots(ASteamrollBall* BallActor, float CurrentTime, const FVector& Velocity, bool bForceRemainingSlots = false);
-	void HandleImpactSlots(ASteamrollBall* BallActor, AActor* HitActor, const FVector& Velocity);
+	void HandleImpactSlots(ASteamrollBall* BallActor, AActor* HitActor, const FVector& Velocity, float CurrentTime);
 	bool IsTouchingFloor(bool bSphereTrace = false) const;
 	FVector GetActorLocation() const;
 	void SetActorLocation(const FVector& Location);
@@ -71,9 +71,9 @@ class STEAMROLL_API USteamrollSphereComponent : public USphereComponent
 private:
 	void AddLocation(const FVector& Location, float CurrentTime);
 	void ReduceVerticalVelocity(FVector& Velocity, bool bTouchingFloor, float DeltaSeconds);
-	void DrawSimulationWall(ASteamrollBall* BallActor, uint32 SlotIndex);
-	void DrawSimulationExplosion(ASteamrollBall* BallActor);
-	void DrawSimulationRamp(const FVector& Location, const FVector& Normal);
-	void ActivateSnapRamp(ASteamrollBall* BallActor, const FVector& Location, const FVector& Normal);
-	void ActivateStopTriggers(ASteamrollBall* BallActor);
+	void DrawSimulationWall(ASteamrollBall* BallActor, uint32 SlotIndex, float CurrentTime);
+	void DrawSimulationExplosion(ASteamrollBall* BallActor, float CurrentTime);
+	void DrawSimulationRamp(const FVector& Location, const FVector& Normal, float CurrentTime);
+	void ActivateSnapRamp(ASteamrollBall* BallActor, const FVector& Location, const FVector& Normal, float CurrentTime);
+	void ActivateStopTriggers(ASteamrollBall* BallActor, float CurrentTime);
 };

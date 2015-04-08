@@ -66,7 +66,7 @@ APlayerBase::APlayerBase(const class FObjectInitializer& PCIP)
 		SimulatedWalls[i]->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		SimulatedWalls[i]->SetVisibility(false);
 		SimulatedWalls[i]->SetAbsolute(true, true);
-		SimulatedWalls[i]->SetRelativeTransform(FTransform::Identity);		
+		SimulatedWalls[i]->SetRelativeTransform(FTransform::Identity);
 	}
 
 	NumUsedSimulatedWalls = 0;
@@ -77,7 +77,7 @@ APlayerBase::APlayerBase(const class FObjectInitializer& PCIP)
 	for (int32 i = 0; i < 4; ++i)
 	{
 		SimulatedRamps[i] = PCIP.CreateAbstractDefaultSubobject<UStaticMeshComponent>(this, *FString::Printf(TEXT("SimulatedRamp%i"), i));
-				 
+		
 		SimulatedRamps[i]->SetStaticMesh(Object1.Object);
 		SimulatedRamps[i]->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		SimulatedRamps[i]->SetVisibility(false);
@@ -87,16 +87,21 @@ APlayerBase::APlayerBase(const class FObjectInitializer& PCIP)
 
 	NumUsedSimulatedRamps = 0;
 
-	// Simulated ramps for ball trajectory prediction
+	// Simulated explosions for ball trajectory prediction
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> Object2(TEXT("StaticMesh'/Game/Ball/Prediction/explosionStatic.explosionStatic'"));
 
-	SimulatedExplosion = PCIP.CreateAbstractDefaultSubobject<UStaticMeshComponent>(this, TEXT("SimulatedExplosion"));
+	for (int32 i = 0; i < 4; ++i)
+	{
+		SimulatedExplosions[i] = PCIP.CreateAbstractDefaultSubobject<UStaticMeshComponent>(this, *FString::Printf(TEXT("SimulatedExplosion%i"), i));
 
-	SimulatedExplosion->SetStaticMesh(Object2.Object);
-	SimulatedExplosion->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	SimulatedExplosion->SetVisibility(false);
-	SimulatedExplosion->SetAbsolute(true, true, true);
-	SimulatedExplosion->SetRelativeTransform(FTransform::Identity);
+		SimulatedExplosions[i]->SetStaticMesh(Object2.Object);
+		SimulatedExplosions[i]->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		SimulatedExplosions[i]->SetVisibility(false);
+		SimulatedExplosions[i]->SetAbsolute(true, true, true);
+		SimulatedExplosions[i]->SetRelativeTransform(FTransform::Identity);
+	}
+
+	NumUsedSimulatedExplosions = 0;
 
 	CumulativeYaw = 0.f;
 	SteppedYaw = 0.f;
@@ -106,6 +111,18 @@ APlayerBase::APlayerBase(const class FObjectInitializer& PCIP)
 	PrevSign = 0.f;
 
 	PrimaryActorTick.bCanEverTick = true;
+}
+
+
+void APlayerBase::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	for (int32 i = 0; i < 4; ++i)
+	{
+		SimulatedWalls[i]->CreateAndSetMaterialInstanceDynamic(0);
+		SimulatedRamps[i]->CreateAndSetMaterialInstanceDynamic(0);
+	}
 }
 
 
@@ -525,44 +542,69 @@ void APlayerBase::ClearSimulatedItems()
 	{
 		SimulatedWalls[i]->SetVisibility(false);
 		SimulatedRamps[i]->SetVisibility(false);
+		SimulatedExplosions[i]->SetVisibility(false);
 	}
 
 	NumUsedSimulatedWalls = 0;
 	NumUsedSimulatedRamps = 0;
-
-	SimulatedExplosion->SetVisibility(false);
+	NumUsedSimulatedExplosions = 0;
 }
 
 
-void APlayerBase::DrawSimulatedWall(const FVector &Location, const FRotator& Rotation)
+void APlayerBase::DrawSimulatedWall(const FVector &Location, const FRotator& Rotation, float CurrentTime)
 {
 	if (NumUsedSimulatedWalls < 4)
 	{
 		SimulatedWalls[NumUsedSimulatedWalls]->SetRelativeLocation(Location);
 		SimulatedWalls[NumUsedSimulatedWalls]->SetRelativeRotation(Rotation);
 		SimulatedWalls[NumUsedSimulatedWalls]->SetVisibility(true);
+
+		UMaterialInstanceDynamic* MatInstance = Cast<UMaterialInstanceDynamic>(SimulatedWalls[NumUsedSimulatedWalls]->GetMaterial(0));
+
+		if (MatInstance)
+		{
+			MatInstance->SetScalarParameterValue("ManualTime", CurrentTime * 0.1f/* * 256.f*/);
+			MatInstance->SetScalarParameterValue("Charging", ChargeTime != TargetChargeTime ? 1.f : 0.f);
+		}
+
+		//SimulatedWallsMaterials[NumUsedSimulatedWalls]->SetScalarParameterValue("ManualTime", CurrentTime * 0.1f/* * 256.f*/);
+
 		NumUsedSimulatedWalls++;
 	}
 }
 
 
-void APlayerBase::DrawSimulatedRamp(const FVector &Location, const FRotator& Rotation)
+void APlayerBase::DrawSimulatedRamp(const FVector &Location, const FRotator& Rotation, float CurrentTime)
 {
 	if (NumUsedSimulatedRamps < 4)
 	{
 		SimulatedRamps[NumUsedSimulatedRamps]->SetRelativeLocation(Location);
 		SimulatedRamps[NumUsedSimulatedRamps]->SetRelativeRotation(Rotation);
 		SimulatedRamps[NumUsedSimulatedRamps]->SetVisibility(true);
+
+		UMaterialInstanceDynamic* MatInstance = Cast<UMaterialInstanceDynamic>(SimulatedRamps[NumUsedSimulatedRamps]->GetMaterial(0));
+
+		if (MatInstance)
+		{
+			MatInstance->SetScalarParameterValue("ManualTime", CurrentTime * 0.1f/* * 256.f*/);
+			MatInstance->SetScalarParameterValue("Charging", ChargeTime != TargetChargeTime ? 1.f : 0.f);
+		}
+
 		NumUsedSimulatedRamps++;
 	}
 }
 
 
-void APlayerBase::DrawSimulatedExplosion(const FVector &Location, float Radius)
+void APlayerBase::DrawSimulatedExplosion(const FVector &Location, float Radius, float CurrentTime)
 {
-	SimulatedExplosion->SetRelativeLocation(Location);
-	SimulatedExplosion->SetRelativeScale3D(FVector(Radius));
-	SimulatedExplosion->SetVisibility(true);
+	if (NumUsedSimulatedExplosions < 4)
+	{
+		SimulatedExplosions[NumUsedSimulatedExplosions]->SetRelativeLocation(Location);
+		SimulatedExplosions[NumUsedSimulatedExplosions]->SetRelativeScale3D(FVector(Radius));
+		SimulatedExplosions[NumUsedSimulatedExplosions]->SetVisibility(true);
+
+		NumUsedSimulatedExplosions++;
+	}
 }
 
 

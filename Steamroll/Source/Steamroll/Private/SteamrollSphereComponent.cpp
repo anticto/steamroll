@@ -213,7 +213,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 				Ball.AddLocation(CurrentLocation, CurrentTime);
 
 				// Activate steamball by contact trigger
-				HandleImpactSlots(BallActor, Ball.LastCollidedActor, Velocity);				
+				HandleImpactSlots(BallActor, Ball.LastCollidedActor, Velocity, CurrentTime);				
 
 				if (OtherBall) // Collided with another ball
 				{
@@ -286,7 +286,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 					{
 						if (OutHit.Actor != nullptr && OutHit.Actor->GetName().StartsWith("Paret_Nivell"))
 						{
-							ActivateSnapRamp(BallActor, OutHit.ImpactPoint, OutHit.ImpactNormal);
+							ActivateSnapRamp(BallActor, OutHit.ImpactPoint, OutHit.ImpactNormal, CurrentTime);
 						}
 					}
 
@@ -352,7 +352,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 			if (bTouchingFloor)
 			{
 				DrawTimedSlots(BallActor, CurrentTime, Velocity, true); // Force all remaining timed slots to activate
-				ActivateStopTriggers(BallActor);
+				ActivateStopTriggers(BallActor, CurrentTime);
 
 				if (Ball.bSimulationBall)
 				{
@@ -407,7 +407,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 			if (AuxTime >= 10.f && !BallActor->Activated)
 			{
 				DrawTimedSlots(BallActor, 999999.f, Velocity); // Force all remaining timed slots to activate
-				ActivateStopTriggers(BallActor);
+				ActivateStopTriggers(BallActor, CurrentTime);
 
 				BallActor->ActivateBall();
 
@@ -511,11 +511,11 @@ void USteamrollSphereComponent::DrawTimedSlots(ASteamrollBall* BallActor, float 
 					{
 						if (BallActor->GetSlotState(i) == ESlotTypeEnum::SE_WALL)
 						{
-							DrawSimulationWall(BallActor, i);
+							DrawSimulationWall(BallActor, i, TestTime);
 						}
 						else if (BallActor->GetSlotState(i) == ESlotTypeEnum::SE_EXPL)
 						{
-							DrawSimulationExplosion(BallActor);
+							DrawSimulationExplosion(BallActor, TestTime);
 						}
 
 						BallActor->SlotsConfig.SetSlotUsed(i);
@@ -535,7 +535,7 @@ void USteamrollSphereComponent::DrawTimedSlots(ASteamrollBall* BallActor, float 
 }
 
 
-void USteamrollSphereComponent::HandleImpactSlots(ASteamrollBall* BallActor, AActor* HitActor, const FVector& Velocity)
+void USteamrollSphereComponent::HandleImpactSlots(ASteamrollBall* BallActor, AActor* HitActor, const FVector& Velocity, float CurrentTime)
 {
 	if (BallActor && HitActor)
 	{
@@ -549,7 +549,7 @@ void USteamrollSphereComponent::HandleImpactSlots(ASteamrollBall* BallActor, AAc
 					{
 						if (bSimulationBall)
 						{
-							DrawSimulationWall(BallActor, i);
+							DrawSimulationWall(BallActor, i, CurrentTime);
 						}
 						else
 						{
@@ -560,7 +560,7 @@ void USteamrollSphereComponent::HandleImpactSlots(ASteamrollBall* BallActor, AAc
 					{
 						if (bSimulationBall)
 						{
-							DrawSimulationExplosion(BallActor);
+							DrawSimulationExplosion(BallActor, CurrentTime);
 						}
 						else
 						{
@@ -578,7 +578,7 @@ void USteamrollSphereComponent::HandleImpactSlots(ASteamrollBall* BallActor, AAc
 }
 
 
-void USteamrollSphereComponent::DrawSimulationWall(ASteamrollBall* BallActor, uint32 SlotIndex)
+void USteamrollSphereComponent::DrawSimulationWall(ASteamrollBall* BallActor, uint32 SlotIndex, float CurrentTime)
 {
 	if (BallActor)
 	{
@@ -588,7 +588,7 @@ void USteamrollSphereComponent::DrawSimulationWall(ASteamrollBall* BallActor, ui
 
 		if (PlayerBase)
 		{
-			PlayerBase->DrawSimulatedWall(GetActorLocation() - FVector(0.f, 0.f, 95.f), FRotator(0.f, Angle, 0.f));
+			PlayerBase->DrawSimulatedWall(GetActorLocation() - FVector(0.f, 0.f, 95.f), FRotator(0.f, Angle, 0.f), CurrentTime);
 		}
 
 		// Rebound prediction
@@ -646,7 +646,7 @@ void USteamrollSphereComponent::DrawSimulationWall(ASteamrollBall* BallActor, ui
 }
 
 
-void USteamrollSphereComponent::DrawSimulationExplosion(ASteamrollBall* BallActor)
+void USteamrollSphereComponent::DrawSimulationExplosion(ASteamrollBall* BallActor, float CurrentTime)
 {
 	if (BallActor)
 	{
@@ -655,13 +655,13 @@ void USteamrollSphereComponent::DrawSimulationExplosion(ASteamrollBall* BallActo
 
 		if (PlayerBase)
 		{
-			PlayerBase->DrawSimulatedExplosion(GetActorLocation(), Radius);
+			PlayerBase->DrawSimulatedExplosion(GetActorLocation(), Radius, CurrentTime);
 		}
 	}
 }
 
 
-void USteamrollSphereComponent::DrawSimulationRamp(const FVector& Location, const FVector& Normal)
+void USteamrollSphereComponent::DrawSimulationRamp(const FVector& Location, const FVector& Normal, float CurrentTime)
 {
 	float Size = 150.f;
 	FRotator Rotation = Normal.Rotation();
@@ -671,7 +671,7 @@ void USteamrollSphereComponent::DrawSimulationRamp(const FVector& Location, cons
 
 	if (PlayerBase)
 	{
-		PlayerBase->DrawSimulatedRamp(Location + Normal * Size * 2.62f - FVector(0.f, 0.f, 95.f), Rotation);
+		PlayerBase->DrawSimulatedRamp(Location + Normal * Size * 2.62f - FVector(0.f, 0.f, 95.f), Rotation, CurrentTime);
 	}
 }
 
@@ -784,7 +784,7 @@ void USteamrollSphereComponent::SetActorLocation(const FVector& Location)
 }
 
 
-void USteamrollSphereComponent::ActivateSnapRamp(ASteamrollBall* BallActor, const FVector& Location, const FVector& Normal)
+void USteamrollSphereComponent::ActivateSnapRamp(ASteamrollBall* BallActor, const FVector& Location, const FVector& Normal, float CurrentTime)
 {
 	if (BallActor)
 	{
@@ -796,7 +796,7 @@ void USteamrollSphereComponent::ActivateSnapRamp(ASteamrollBall* BallActor, cons
 
 				if (bSimulationBall)
 				{
-					DrawSimulationRamp(Location, Normal);
+					DrawSimulationRamp(Location, Normal, CurrentTime);
 				}
 				else
 				{
@@ -810,7 +810,7 @@ void USteamrollSphereComponent::ActivateSnapRamp(ASteamrollBall* BallActor, cons
 }
 
 
-void USteamrollSphereComponent::ActivateStopTriggers(ASteamrollBall* BallActor)
+void USteamrollSphereComponent::ActivateStopTriggers(ASteamrollBall* BallActor, float CurrentTime)
 {
 	if (BallActor)
 	{
@@ -822,7 +822,7 @@ void USteamrollSphereComponent::ActivateStopTriggers(ASteamrollBall* BallActor)
 				{
 					if (bSimulationBall)
 					{
-						DrawSimulationWall(BallActor, i);
+						DrawSimulationWall(BallActor, i, CurrentTime);
 						BallActor->SlotsConfig.SetSlotUsed(i);
 					}
 					else
@@ -834,7 +834,7 @@ void USteamrollSphereComponent::ActivateStopTriggers(ASteamrollBall* BallActor)
 				{
 					if (bSimulationBall)
 					{
-						DrawSimulationExplosion(BallActor);
+						DrawSimulationExplosion(BallActor, CurrentTime);
 						BallActor->SlotsConfig.SetSlotUsed(i);
 					}
 					else
