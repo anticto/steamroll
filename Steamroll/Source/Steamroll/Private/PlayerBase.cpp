@@ -401,6 +401,7 @@ void APlayerBase::Fire(float ChargeTime)
 			Ball->VirtualSphere->SetWorldLocation(LaunchLocation);
 			Ball->VirtualSphere->SetPhysicsLinearVelocity(LaunchVelocity);
 
+			GetLocalPlayerController()->SpendBallsInDeploymentSpot(1);
 			GetLocalPlayerController()->SpendItemsInSlots();
 			ExplosionClient();
 		}

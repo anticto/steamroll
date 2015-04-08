@@ -9,6 +9,7 @@ ADeploymentSpot::ADeploymentSpot(const class FObjectInitializer& PCIP)
 {
 	AimingStep = 22.5f;
 	NumSlots = 4;
+	NumBalls = 1000;
 	LaunchPowerFactor = 1.f;
 }
 

@@ -118,7 +118,7 @@ void ASteamrollPlayerController::SpendItemsInSlots_Implementation()
 
 
 void ASteamrollPlayerController::SpendSlotItem(TEnumAsByte<ESlotTypeEnum::SlotType> SlotTypeEnum)
-{
+{	
 	for (auto& Slot : SlotContent)
 	{
 		if (Slot.SlotType == SlotTypeEnum && Slot.Quantity > 0)
@@ -132,6 +132,11 @@ void ASteamrollPlayerController::SpendSlotItem(TEnumAsByte<ESlotTypeEnum::SlotTy
 
 bool ASteamrollPlayerController::CheckItemAvailability()
 {
+	if (GetNumAvailableBalls() < 1)
+	{
+		return false;
+	}
+
 	auto SlotContentCopy = SlotContent;
 
 	for (int32 i = 1; i < 5; ++i)
@@ -297,6 +302,31 @@ bool ASteamrollPlayerController::MorethanOneActivatorAvailable()
 	}
 
 	return true;
+}
+
+
+int32 ASteamrollPlayerController::GetNumAvailableBalls() const
+{
+	APlayerBase* Base = Cast<APlayerBase>(GetPawn());
+
+	if (Base && Base->AttachedToDeploymentSpot)
+	{
+		return Base->AttachedToDeploymentSpot->NumBalls;
+	}
+
+	return 0;
+}
+
+
+void ASteamrollPlayerController::SpendBallsInDeploymentSpot(int32 NumBalls)
+{
+	APlayerBase* Base = Cast<APlayerBase>(GetPawn());
+
+	if (Base && Base->AttachedToDeploymentSpot)
+	{
+		Base->AttachedToDeploymentSpot->NumBalls -= NumBalls;
+		Base->AttachedToDeploymentSpot->NumBalls = FMath::Max(Base->AttachedToDeploymentSpot->NumBalls, 0);
+	}
 }
 
 

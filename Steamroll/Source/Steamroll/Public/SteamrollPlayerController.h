@@ -100,6 +100,14 @@ class STEAMROLL_API ASteamrollPlayerController : public APlayerController
 	UFUNCTION(BlueprintCallable, Category = Slots)
 	bool MorethanOneActivatorAvailable();
 
+	/** Returns the number of available balls in the current deployment spot */
+	UFUNCTION(BlueprintCallable, Category = Slots)
+	int32 GetNumAvailableBalls() const;
+
+	/** spends NumBalls balls in the current deployment spot */
+	UFUNCTION(BlueprintCallable, Category = Slots)
+	void SpendBallsInDeploymentSpot(int32 NumBalls);
+
 	/** Empties the currently assembled steamball */
 	UFUNCTION(BlueprintCallable, Category = Slots)
 	void EmptySteamball();
