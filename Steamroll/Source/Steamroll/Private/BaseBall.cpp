@@ -33,6 +33,7 @@ ABaseBall::ABaseBall(const class FObjectInitializer& PCIP)
 
 	Acceleration = 2000.f;
 	MaxSpeed = 3000.f;
+	SteamPressure = 1.f;
 
 	PrimaryActorTick.bCanEverTick = true;	
 }
@@ -67,8 +68,10 @@ void ABaseBall::Tick(float DeltaSeconds)
 		AxisValue = FMath::Clamp(FMath::Abs(InputComponent->GetAxisValue("TriggerAxis")), 0.f, 1.f);
 	}
 
-	if (AxisValue > 0.f)
+	if (AxisValue > 0.f && SteamPressure > 0.f)
 	{
+		SteamPressure -= AxisValue * DeltaSeconds / 60.f;
+
 		// Firing direction
 		FVector Direction = AimTransform->GetComponentToWorld().TransformVector(FVector(1.f, 0.f, 0.f));
 		Direction.Z = 0.f;

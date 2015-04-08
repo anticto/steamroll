@@ -113,7 +113,13 @@ APawn* ASteamRollTestGameMode::SpawnDefaultPawnFor(AController* NewPlayer, class
 	{
 		if (PawnClass == BaseBallClass)
 		{
-			Cast<ABaseBall>(ResultPawn)->UndeployInstantly();
+			ABaseBall* BaseBall = Cast<ABaseBall>(ResultPawn);
+			BaseBall->UndeployInstantly();
+
+			if (PlayerStart)
+			{
+				BaseBall->SteamPressure = PlayerStart->SteamPressure;
+			}
 		}
 		else if (PawnClass == PlayerBaseClass)
 		{

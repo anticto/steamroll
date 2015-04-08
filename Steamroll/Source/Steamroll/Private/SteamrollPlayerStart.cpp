@@ -8,6 +8,6 @@ ASteamrollPlayerStart::ASteamrollPlayerStart(const class FObjectInitializer& PCI
 	: Super(PCIP)
 {
 	GetCapsuleComponent()->SetCapsuleSize(200.f, 100.f);
+	SteamPressure = 1.f;
 }
-
 

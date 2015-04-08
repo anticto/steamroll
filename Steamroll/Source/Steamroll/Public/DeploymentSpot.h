@@ -39,6 +39,10 @@ class STEAMROLL_API ADeploymentSpot : public AActor
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Base)
 	float LaunchPowerFactor;
 
+	/** How much a base ball will recharge when attached, range is [0, 1] */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Base)
+	float SteamPressure;
+
 	/** Advance to the next camera in the camera list */
 	UFUNCTION(BlueprintCallable, Category = Camera)
 	void NextCamera();

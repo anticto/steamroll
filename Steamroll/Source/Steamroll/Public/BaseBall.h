@@ -44,6 +44,10 @@ class STEAMROLL_API ABaseBall : public ASteamrollPawn
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Base)
 	float MaxSpeed;
 
+	/** Ball max speed value */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Base)
+	float SteamPressure;
+
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = Base)
 	void UndeployInstantly();
 
