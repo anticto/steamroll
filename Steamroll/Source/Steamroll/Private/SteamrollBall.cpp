@@ -323,3 +323,13 @@ bool ASteamrollBall::HasUnusedExplosionSlot()
 	return false;
 }
 
+void ASteamrollBall::Destroyed()
+{
+	Super::Destroyed();
+
+	for (auto Ball : WallReboundPredictionBalls)
+	{
+		Ball->Destroy();
+	}
+}
+

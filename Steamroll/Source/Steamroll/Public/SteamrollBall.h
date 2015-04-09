@@ -146,4 +146,5 @@ protected:
 	float TimeForNextPaint;
 
 	virtual void BeginPlay() override;	
+	virtual void Destroyed() override;
 };
