@@ -530,8 +530,10 @@ void APlayerBase::Trigger(float Val)
 {
 	if (Val != 0.f)
 	{
-		TargetChargeTime += 0.02f * Val * FiringTimeout;
-		TargetChargeTime = FMath::Clamp(TargetChargeTime, 0.f, FiringTimeout);
+		ChargeTime += 0.02f * Val * FiringTimeout;
+		ChargeTime = FMath::Clamp(ChargeTime, 0.f, FiringTimeout);
+
+		TargetChargeTime = ChargeTime;
 	}
 }
 
