@@ -43,7 +43,7 @@ public:
 	int32 NumCounters;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Inventory)
-	USceneComponent* Root;
+	UStaticMeshComponent* Frame;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Inventory)
 	TSubclassOf<class AInvCounter> CounterClass;
@@ -71,4 +71,25 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Inventory)
 	TArray<UChildActorComponent*> Counters;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Inventory)
+	UMaterialInterface* BallMaterial;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Inventory)
+	UMaterialInterface* WallMaterial;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Inventory)
+	UMaterialInterface* ExplosionMaterial;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Inventory)
+	UMaterialInterface* RampMaterial;
+
+	UFUNCTION(BlueprintCallable, Category = Inventory)
+	class AInvCounter* GetCounter(int32 Index);
+
+	UFUNCTION(BlueprintCallable, Category = Inventory)
+	void UpdateInventory(const TArray<struct FSlotContentConfigStruct>& SlotContent);
+
+	UFUNCTION(BlueprintCallable, Category = Inventory)
+	void UpdateNumBalls(int32 NumBalls);
 };

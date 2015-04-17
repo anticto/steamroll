@@ -14,6 +14,8 @@ class STEAMROLL_API ANumberCounter : public AActor
 	GENERATED_UCLASS_BODY()
 	
 public:
+	virtual void Tick(float DeltaSeconds) override;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Counter)
 	int32 Count;
 
@@ -31,4 +33,7 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Counter)
 	class UTextRenderComponent* NumberRightText;
+
+	bool bRotating;
+	float TimeRotating;
 };

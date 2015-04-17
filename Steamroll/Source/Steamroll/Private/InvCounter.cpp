@@ -36,3 +36,20 @@ AInvCounter::AInvCounter(const class FObjectInitializer& PCIP)
 	CoverBottom->AttachTo(RootComponent);
 }
 
+
+void AInvCounter::SetNumber(int32 Num)
+{
+	ANumberCounter* ChildActor = Cast<ANumberCounter>(NumberCounter->ChildActor);
+
+	if (Num != ChildActor->Count)
+	{
+		ChildActor->Count = Num;
+		Num = FMath::Clamp(Num, 0, 99);
+
+		ChildActor->NumberLeftText->SetText(FString::Printf(TEXT("%d"), Num / 10));
+		ChildActor->NumberRightText->SetText(FString::Printf(TEXT("%d"), Num % 10));
+
+		ChildActor->bRotating = true;
+	}
+}
+

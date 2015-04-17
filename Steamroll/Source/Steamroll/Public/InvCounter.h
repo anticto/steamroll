@@ -32,4 +32,6 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Counter)
 	USkeletalMeshComponent* CoverBottom;
+
+	void SetNumber(int32 Num);
 };

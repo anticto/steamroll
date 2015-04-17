@@ -29,5 +29,34 @@ ANumberCounter::ANumberCounter(const class FObjectInitializer& PCIP)
 	NumberRightText = PCIP.CreateDefaultSubobject<UTextRenderComponent>(this, TEXT("NumberRightText"));
 	NumberRightText->SetText("0");
 	NumberRightText->AttachTo(NumberRightCube);
+
+	bRotating = false;
+	TimeRotating = 0.f;
+
+	PrimaryActorTick.bCanEverTick = true;
+}
+
+
+void ANumberCounter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if (bRotating)
+	{
+		TimeRotating += DeltaSeconds;
+
+		if (TimeRotating > 1.f)
+		{
+			bRotating = false;
+			TimeRotating = 0.f;
+			NumberLeftCube->SetRelativeRotation(FRotator(0.f, 0.f, 0.f));
+			NumberRightCube->SetRelativeRotation(FRotator(0.f, 0.f, 0.f));
+		}
+		else
+		{			
+			NumberLeftCube->AddRelativeRotation(FRotator(5000.f * DeltaSeconds, 0.f, 0.f));
+			NumberRightCube->AddRelativeRotation(FRotator(3000.f * DeltaSeconds, 0.f, 0.f));
+		}
+	}
 }
 
