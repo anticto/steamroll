@@ -92,4 +92,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = Inventory)
 	void UpdateNumBalls(int32 NumBalls);
+
+	UFUNCTION(BlueprintCallable, Category = Inventory)
+	void ClearInventory();
 };

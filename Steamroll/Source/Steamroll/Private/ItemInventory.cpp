@@ -17,7 +17,7 @@ AItemInventory::AItemInventory()
 	Frame = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Frame"));
 	RootComponent = Frame;
 
-	NumCounters = 7;
+	NumCounters = 6;
 	Counters.Reserve(NumCounters);
 
 	Counter0 = CreateAbstractDefaultSubobject<UChildActorComponent>("Counter0");
@@ -26,7 +26,7 @@ AItemInventory::AItemInventory()
 	Counter3 = CreateAbstractDefaultSubobject<UChildActorComponent>("Counter3");
 	Counter4 = CreateAbstractDefaultSubobject<UChildActorComponent>("Counter4");
 	Counter5 = CreateAbstractDefaultSubobject<UChildActorComponent>("Counter5");
-	Counter6 = CreateAbstractDefaultSubobject<UChildActorComponent>("Counter6");
+	//Counter6 = CreateAbstractDefaultSubobject<UChildActorComponent>("Counter6");
 	
 	Counters.Add(Counter0);
 	Counters.Add(Counter1);
@@ -34,7 +34,7 @@ AItemInventory::AItemInventory()
 	Counters.Add(Counter3);
 	Counters.Add(Counter4);
 	Counters.Add(Counter5);
-	Counters.Add(Counter6);
+	//Counters.Add(Counter6);
 
 	for (auto& Counter : Counters)
 	{
@@ -47,15 +47,18 @@ void AItemInventory::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
-	AInvCounter* NumCounter = Cast<AInvCounter>(Counters.Last()->ChildActor);
+	if (Counters.Last() && Counters.Last()->ChildActor)
+	{
+		AInvCounter* NumCounter = Cast<AInvCounter>(Counters.Last()->ChildActor);
 
-	NumCounter->CoverTop->SetPlayRate(-1.f);
-	NumCounter->CoverTop->Play(false);
-	
-	NumCounter->CoverBottom->SetPlayRate(-1.f);
-	NumCounter->CoverBottom->Play(false);
+		NumCounter->CoverTop->SetPlayRate(-1.f);
+		NumCounter->CoverTop->Play(false);
 
-	NumCounter->Item->SetMaterial(0, BallMaterial);
+		NumCounter->CoverBottom->SetPlayRate(-1.f);
+		NumCounter->CoverBottom->Play(false);
+
+		NumCounter->Item->SetMaterial(0, BallMaterial);
+	}
 }
 
 // Called when the game starts or when spawned
@@ -139,8 +142,29 @@ void AItemInventory::UpdateInventory(const TArray<FSlotContentConfigStruct>& Slo
 
 void AItemInventory::UpdateNumBalls(int32 NumBalls)
 {
-	AInvCounter* NumCounter = Cast<AInvCounter>(Counters.Last()->ChildActor);
+	if (Counters.Last() && Counters.Last()->ChildActor)
+	{
+		AInvCounter* NumCounter = Cast<AInvCounter>(Counters.Last()->ChildActor);
 
-	NumCounter->SetNumber(NumBalls);
+		NumCounter->SetNumber(NumBalls);
+	}
+}
+
+
+void AItemInventory::ClearInventory()
+{
+	for (int32 i = 0; i < Counters.Num() - 1; ++i)
+	{
+		AInvCounter* Counter = GetCounter(i);
+
+		if (Counter)
+		{
+			Counter->ItemType = ESlotTypeEnum::SE_EMPTY;
+
+			// Close all covers
+			Counter->CoverTop->SetPosition(10.f);
+			Counter->CoverBottom->SetPosition(10.f);
+		}
+	}
 }
 
