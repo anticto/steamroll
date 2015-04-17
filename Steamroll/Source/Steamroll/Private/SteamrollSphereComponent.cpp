@@ -69,12 +69,26 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 		ResetTimedSlots(BallActor);
 	}
 
+	ETraceTypeQuery TraceTypeQuery;
+	ECollisionChannel CollisionChannel;
+
+	if (Ball.bSimulationBall)
+	{
+		CollisionChannel = ECollisionChannel::ECC_GameTraceChannel4; // PredictionTraceChannel	
+	}
+	else
+	{
+		CollisionChannel = ECollisionChannel::ECC_GameTraceChannel7; // RealBallTraceChannel
+	}
+
+	TraceTypeQuery = UEngineTypes::ConvertToTraceType(CollisionChannel);
+
 	float DeltaSeconds = MaxDeltaSeconds; // Constant timestep
 	float CurrentTime = 0.f;
 
 	while (CurrentTime <= DeltaSecondsUnsubdivided)
 	{
-		bool bTouchingFloor = Ball.IsTouchingFloor();
+		bool bTouchingFloor = IsTouchingFloor(CollisionChannel);
 
 		Ball.DrawTimedSlots(BallActor, CurrentTime, Velocity);
 
@@ -94,7 +108,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 		float Speed = Velocity.Size();
 		FVector CurrentLocation = Ball.GetActorLocation();
 		Ball.AddLocation(CurrentLocation, CurrentTime);
-		Ball.ReduceVerticalVelocity(Velocity, bTouchingFloor, DeltaSeconds);
+		Ball.ReduceVerticalVelocity(Velocity, bTouchingFloor, DeltaSeconds, CollisionChannel);
 		FVector NewLocation = CurrentLocation + Velocity * DeltaSeconds;
 
 		TArray<AActor*> ActorsToIgnore;
@@ -104,17 +118,6 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 		ASteamrollBall* CollidedWithBallThisFrame = nullptr;
 
 		float RemainingTime = DeltaSeconds;
-
-		ETraceTypeQuery TraceTypeQuery;
-		
-		if (Ball.bSimulationBall)
-		{
-			TraceTypeQuery = UEngineTypes::ConvertToTraceType(ECollisionChannel::ECC_GameTraceChannel4); // PredictionTraceChannel	
-		}
-		else
-		{
-			TraceTypeQuery = UEngineTypes::ConvertToTraceType(ECollisionChannel::ECC_GameTraceChannel7); // RealBallTraceChannel
-		}
 
 		for (uint32 Iteration = 0; Iteration < NumIterations && RemainingTime > 0.f; ++Iteration)
 		{
@@ -293,6 +296,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 					//DrawDebugDirectionalArrow(Ball.GetWorld(), OutHit.ImpactPoint, OutHit.ImpactPoint + OutHit.ImpactNormal * 100.f, 3.f, FColor::Yellow);
 					//DrawDebugDirectionalArrow(Ball.GetWorld(), OutHit.ImpactPoint, OutHit.ImpactPoint + ReflectedVector * 100.f, 3.f, FColor::Green);
 					//DrawDebugString(Ball.GetWorld(), OutHit.ImpactPoint, FString::Printf(TEXT("Itr=%d, Speed=%f"), Iteration, Speed), nullptr, FColor::White, 0.f);
+					//DrawDebugString(Ball.GetWorld(), OutHit.ImpactPoint, OutHit.Actor->GetName(), nullptr, FColor::White, 0.f);
 
 					Velocity = ReflectedVector * Speed;
 					FVector VelocityN = OutHit.ImpactNormal * (Velocity | OutHit.ImpactNormal);
@@ -311,7 +315,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 					Speed = Velocity.Size();
 				}
 
-				Ball.ReduceVerticalVelocity(Velocity, bTouchingFloor, DeltaSeconds);
+				Ball.ReduceVerticalVelocity(Velocity, bTouchingFloor, DeltaSeconds, CollisionChannel);
 				NewLocation = CurrentLocation + Velocity * RemainingTime;
 			}
 			else
@@ -685,9 +689,9 @@ void USteamrollSphereComponent::AddLocation(const FVector& Location, float Curre
 }
 
 
-void USteamrollSphereComponent::ReduceVerticalVelocity(FVector& Velocity, bool bTouchingFloor, float DeltaSeconds)
+void USteamrollSphereComponent::ReduceVerticalVelocity(FVector& Velocity, bool bTouchingFloor, float DeltaSeconds, ECollisionChannel CollisionChannel)
 {
-	bTouchingFloor = IsTouchingFloor(true);
+	bTouchingFloor = IsTouchingFloor(CollisionChannel, true);
 
 	if (!bTouchingFloor && Velocity.Z > 10.f)
 	{
@@ -716,7 +720,7 @@ void USteamrollSphereComponent::ReduceVerticalVelocity(FVector& Velocity, bool b
 }
 
 
-bool USteamrollSphereComponent::IsTouchingFloor(bool bSphereTrace) const
+bool USteamrollSphereComponent::IsTouchingFloor(ECollisionChannel CollisionChannel, bool bSphereTrace) const
 {
 	if (!bSphereTrace)
 	{
@@ -731,7 +735,7 @@ bool USteamrollSphereComponent::IsTouchingFloor(bool bSphereTrace) const
 			RV_Hit, //result
 			GetActorLocation(), //start
 			GetActorLocation() + FVector(0.f, 0.f, -2.f * GetScaledSphereRadius()), //end at twice the radius
-			ECC_PhysicsBody, //collision channel
+			CollisionChannel, //collision channel
 			RV_TraceParams
 			);
 
@@ -754,7 +758,7 @@ bool USteamrollSphereComponent::IsTouchingFloor(bool bSphereTrace) const
 		ActorsToIgnore.Add(GetAttachmentRootActor());
 		FHitResult OutHit;
 
-		if (UKismetSystemLibrary::SphereTraceSingle_NEW(GetWorld(), GetActorLocation(), GetActorLocation() + FVector(0.f, 0.f, -1.5f), GetScaledSphereRadius() + 10.5f, UEngineTypes::ConvertToTraceType(ECollisionChannel::ECC_PhysicsBody), true, ActorsToIgnore, EDrawDebugTrace::None, OutHit, true))
+		if (UKismetSystemLibrary::SphereTraceSingle_NEW(GetWorld(), GetActorLocation(), GetActorLocation() + FVector(0.f, 0.f, -1.5f), GetScaledSphereRadius() + 10.5f, UEngineTypes::ConvertToTraceType(CollisionChannel), true, ActorsToIgnore, EDrawDebugTrace::None, OutHit, true))
 		{
 			/*if (OutHit.Time < 0.05f)
 			{

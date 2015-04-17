@@ -64,13 +64,13 @@ class STEAMROLL_API USteamrollSphereComponent : public USphereComponent
 	void ResetTimedSlots(ASteamrollBall* BallActor);
 	void DrawTimedSlots(ASteamrollBall* BallActor, float CurrentTime, const FVector& Velocity, bool bForceRemainingSlots = false);
 	void HandleImpactSlots(ASteamrollBall* BallActor, AActor* HitActor, const FVector& Velocity, float CurrentTime);
-	bool IsTouchingFloor(bool bSphereTrace = false) const;
+	bool IsTouchingFloor(ECollisionChannel CollisionChannel, bool bSphereTrace = false) const;
 	FVector GetActorLocation() const;
 	void SetActorLocation(const FVector& Location);
 
 private:
 	void AddLocation(const FVector& Location, float CurrentTime);
-	void ReduceVerticalVelocity(FVector& Velocity, bool bTouchingFloor, float DeltaSeconds);
+	void ReduceVerticalVelocity(FVector& Velocity, bool bTouchingFloor, float DeltaSeconds, ECollisionChannel CollisionChannel);
 	void DrawSimulationWall(ASteamrollBall* BallActor, uint32 SlotIndex, float CurrentTime);
 	void DrawSimulationExplosion(ASteamrollBall* BallActor, float CurrentTime);
 	void DrawSimulationRamp(const FVector& Location, const FVector& Normal, float CurrentTime);
