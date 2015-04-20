@@ -592,7 +592,7 @@ void APlayerBase::DrawSimulatedRamp(const FVector &Location, const FRotator& Rot
 		{
 			MatInstance->SetScalarParameterValue("ManualTime", CurrentTime * 0.1f/* * 256.f*/);
 			MatInstance->SetScalarParameterValue("Charging", ChargeTime != TargetChargeTime ? 1.f : 0.f);
-			MatInstance->SetScalarParameterValue("Selected", SlotIndex == SelectedSlot ? 1.f : 0.15f);
+			MatInstance->SetScalarParameterValue("Selected", SlotIndex == SelectedSlot ? 1.f : 0.25f);
 		}
 
 		NumUsedSimulatedRamps++;
