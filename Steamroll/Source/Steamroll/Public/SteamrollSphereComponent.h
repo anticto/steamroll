@@ -71,9 +71,9 @@ class STEAMROLL_API USteamrollSphereComponent : public USphereComponent
 private:
 	void AddLocation(const FVector& Location, float CurrentTime);
 	void ReduceVerticalVelocity(FVector& Velocity, bool bTouchingFloor, float DeltaSeconds, ECollisionChannel CollisionChannel);
-	void DrawSimulationWall(ASteamrollBall* BallActor, uint32 SlotIndex, float CurrentTime);
-	void DrawSimulationExplosion(ASteamrollBall* BallActor, float CurrentTime);
-	void DrawSimulationRamp(const FVector& Location, const FVector& Normal, float CurrentTime);
+	void DrawSimulationWall(ASteamrollBall* BallActor, int32 SlotIndex, float CurrentTime);
+	void DrawSimulationExplosion(ASteamrollBall* BallActor, int32 SlotIndex, float CurrentTime);
+	void DrawSimulationRamp(const FVector& Location, int32 SlotIndex, const FVector& Normal, float CurrentTime);
 	void ActivateSnapRamp(ASteamrollBall* BallActor, const FVector& Location, const FVector& Normal, float CurrentTime);
 	void ActivateStopTriggers(ASteamrollBall* BallActor, float CurrentTime);
 	void SetLastPredictionTime(ASteamrollBall* BallActor, float LastPredictionTime);

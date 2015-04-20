@@ -102,6 +102,7 @@ APlayerBase::APlayerBase(const class FObjectInitializer& PCIP)
 	}
 
 	NumUsedSimulatedExplosions = 0;
+	SelectedSlot = 1;
 
 	CumulativeYaw = 0.f;
 	SteppedYaw = 0.f;
@@ -553,7 +554,7 @@ void APlayerBase::ClearSimulatedItems()
 }
 
 
-void APlayerBase::DrawSimulatedWall(const FVector &Location, const FRotator& Rotation, float CurrentTime)
+void APlayerBase::DrawSimulatedWall(const FVector &Location, const FRotator& Rotation, float CurrentTime, uint32 SlotIndex)
 {
 	if (NumUsedSimulatedWalls < 4)
 	{
@@ -567,6 +568,7 @@ void APlayerBase::DrawSimulatedWall(const FVector &Location, const FRotator& Rot
 		{
 			MatInstance->SetScalarParameterValue("ManualTime", CurrentTime * 0.1f/* * 256.f*/);
 			MatInstance->SetScalarParameterValue("Charging", ChargeTime != TargetChargeTime ? 1.f : 0.f);
+			MatInstance->SetScalarParameterValue("Selected", SlotIndex == SelectedSlot ? 1.f : 0.15f);
 		}
 
 		//SimulatedWallsMaterials[NumUsedSimulatedWalls]->SetScalarParameterValue("ManualTime", CurrentTime * 0.1f/* * 256.f*/);
@@ -576,7 +578,7 @@ void APlayerBase::DrawSimulatedWall(const FVector &Location, const FRotator& Rot
 }
 
 
-void APlayerBase::DrawSimulatedRamp(const FVector &Location, const FRotator& Rotation, float CurrentTime)
+void APlayerBase::DrawSimulatedRamp(const FVector &Location, const FRotator& Rotation, float CurrentTime, uint32 SlotIndex)
 {
 	if (NumUsedSimulatedRamps < 4)
 	{
@@ -590,6 +592,7 @@ void APlayerBase::DrawSimulatedRamp(const FVector &Location, const FRotator& Rot
 		{
 			MatInstance->SetScalarParameterValue("ManualTime", CurrentTime * 0.1f/* * 256.f*/);
 			MatInstance->SetScalarParameterValue("Charging", ChargeTime != TargetChargeTime ? 1.f : 0.f);
+			MatInstance->SetScalarParameterValue("Selected", SlotIndex == SelectedSlot ? 1.f : 0.15f);
 		}
 
 		NumUsedSimulatedRamps++;
@@ -597,7 +600,7 @@ void APlayerBase::DrawSimulatedRamp(const FVector &Location, const FRotator& Rot
 }
 
 
-void APlayerBase::DrawSimulatedExplosion(const FVector &Location, float Radius, float CurrentTime)
+void APlayerBase::DrawSimulatedExplosion(const FVector &Location, float Radius, float CurrentTime, uint32 SlotIndex)
 {
 	if (NumUsedSimulatedExplosions < 4)
 	{

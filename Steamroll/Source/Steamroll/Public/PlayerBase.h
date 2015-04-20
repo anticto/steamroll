@@ -67,6 +67,9 @@ class STEAMROLL_API APlayerBase : public ASteamrollPawn
 
 	uint32 NumUsedSimulatedExplosions;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Slots)
+	int32 SelectedSlot;
+
 	// Aiming Controls
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Base)
 	float SteppedYaw;
@@ -91,9 +94,9 @@ class STEAMROLL_API APlayerBase : public ASteamrollPawn
 	AActor* GetViewTargetActor();
 
 	void ClearSimulatedItems();
-	void DrawSimulatedWall(const FVector &Location, const FRotator& Rotation, float CurrentTime);
-	void DrawSimulatedRamp(const FVector &Location, const FRotator& Rotation, float CurrentTime);
-	void DrawSimulatedExplosion(const FVector &Location, float Radius, float CurrentTime);
+	void DrawSimulatedWall(const FVector &Location, const FRotator& Rotation, float CurrentTime, uint32 SlotIndex);
+	void DrawSimulatedRamp(const FVector &Location, const FRotator& Rotation, float CurrentTime, uint32 SlotIndex);
+	void DrawSimulatedExplosion(const FVector &Location, float Radius, float CurrentTime, uint32 SlotIndex);
 
 protected:
 

@@ -533,7 +533,7 @@ void USteamrollSphereComponent::DrawTimedSlots(ASteamrollBall* BallActor, float 
 						}
 						else if (BallActor->GetSlotState(i) == ESlotTypeEnum::SE_EXPL)
 						{
-							DrawSimulationExplosion(BallActor, TestTime);
+							DrawSimulationExplosion(BallActor, i, TestTime);
 						}
 
 						BallActor->SlotsConfig.SetSlotUsed(i);
@@ -578,7 +578,7 @@ void USteamrollSphereComponent::HandleImpactSlots(ASteamrollBall* BallActor, AAc
 					{
 						if (bSimulationBall)
 						{
-							DrawSimulationExplosion(BallActor, CurrentTime);
+							DrawSimulationExplosion(BallActor, i, CurrentTime);
 						}
 						else
 						{
@@ -596,7 +596,7 @@ void USteamrollSphereComponent::HandleImpactSlots(ASteamrollBall* BallActor, AAc
 }
 
 
-void USteamrollSphereComponent::DrawSimulationWall(ASteamrollBall* BallActor, uint32 SlotIndex, float CurrentTime)
+void USteamrollSphereComponent::DrawSimulationWall(ASteamrollBall* BallActor, int32 SlotIndex, float CurrentTime)
 {
 	if (BallActor)
 	{
@@ -606,7 +606,7 @@ void USteamrollSphereComponent::DrawSimulationWall(ASteamrollBall* BallActor, ui
 
 		if (PlayerBase)
 		{
-			PlayerBase->DrawSimulatedWall(GetActorLocation() - FVector(0.f, 0.f, 95.f), FRotator(0.f, Angle, 0.f), CurrentTime);
+			PlayerBase->DrawSimulatedWall(GetActorLocation() - FVector(0.f, 0.f, 95.f), FRotator(0.f, Angle, 0.f), CurrentTime, SlotIndex);
 		}
 
 		// Rebound prediction
@@ -664,7 +664,7 @@ void USteamrollSphereComponent::DrawSimulationWall(ASteamrollBall* BallActor, ui
 }
 
 
-void USteamrollSphereComponent::DrawSimulationExplosion(ASteamrollBall* BallActor, float CurrentTime)
+void USteamrollSphereComponent::DrawSimulationExplosion(ASteamrollBall* BallActor, int32 SlotIndex, float CurrentTime)
 {
 	if (BallActor)
 	{
@@ -673,13 +673,13 @@ void USteamrollSphereComponent::DrawSimulationExplosion(ASteamrollBall* BallActo
 
 		if (PlayerBase)
 		{
-			PlayerBase->DrawSimulatedExplosion(GetActorLocation(), Radius, CurrentTime);
+			PlayerBase->DrawSimulatedExplosion(GetActorLocation(), Radius, CurrentTime, SlotIndex);
 		}
 	}
 }
 
 
-void USteamrollSphereComponent::DrawSimulationRamp(const FVector& Location, const FVector& Normal, float CurrentTime)
+void USteamrollSphereComponent::DrawSimulationRamp(const FVector& Location, int32 SlotIndex, const FVector& Normal, float CurrentTime)
 {
 	float Size = 150.f;
 	FRotator Rotation = Normal.Rotation();
@@ -689,7 +689,7 @@ void USteamrollSphereComponent::DrawSimulationRamp(const FVector& Location, cons
 
 	if (PlayerBase)
 	{
-		PlayerBase->DrawSimulatedRamp(Location + Normal * Size * 2.62f - FVector(0.f, 0.f, 95.f), Rotation, CurrentTime);
+		PlayerBase->DrawSimulatedRamp(Location + Normal * Size * 2.62f - FVector(0.f, 0.f, 95.f), Rotation, CurrentTime, SlotIndex);
 	}
 }
 
@@ -814,7 +814,7 @@ void USteamrollSphereComponent::ActivateSnapRamp(ASteamrollBall* BallActor, cons
 
 				if (bSimulationBall)
 				{
-					DrawSimulationRamp(Location, Normal, CurrentTime);
+					DrawSimulationRamp(Location, i, Normal, CurrentTime);
 				}
 				else
 				{
@@ -852,7 +852,7 @@ void USteamrollSphereComponent::ActivateStopTriggers(ASteamrollBall* BallActor, 
 				{
 					if (bSimulationBall)
 					{
-						DrawSimulationExplosion(BallActor, CurrentTime);
+						DrawSimulationExplosion(BallActor, i, CurrentTime);
 						BallActor->SlotsConfig.SetSlotUsed(i);
 					}
 					else
