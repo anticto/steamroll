@@ -76,4 +76,5 @@ private:
 	void DrawSimulationRamp(const FVector& Location, const FVector& Normal, float CurrentTime);
 	void ActivateSnapRamp(ASteamrollBall* BallActor, const FVector& Location, const FVector& Normal, float CurrentTime);
 	void ActivateStopTriggers(ASteamrollBall* BallActor, float CurrentTime);
+	void SetLastPredictionTime(ASteamrollBall* BallActor, float LastPredictionTime);
 };

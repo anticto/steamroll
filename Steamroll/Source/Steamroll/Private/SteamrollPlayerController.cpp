@@ -349,3 +349,9 @@ void ASteamrollPlayerController::AddDebris(ADebris* DebrisActor)
 	}
 }
 
+
+void ASteamrollPlayerController::SetLastPredictionTime_Implementation(float LastPredictionTime)
+{
+
+}
+

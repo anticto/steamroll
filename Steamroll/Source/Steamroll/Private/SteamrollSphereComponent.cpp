@@ -12,6 +12,7 @@
 #include "PlayerBase.h"
 #include "BallTunnel.h"
 #include "PhysicsVirtualSphereComponent.h"
+#include "SteamrollPlayerController.h"
 
 
 USteamrollSphereComponent::USteamrollSphereComponent(const class FObjectInitializer& PCIP)
@@ -150,6 +151,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 							if (!BallTunnel->bDiscovered)
 							{
 								DrawDebugString(Ball.GetWorld(), OutHit.ImpactPoint, FString::Printf(TEXT("?")), nullptr, FColor::Red, 0.f);
+								SetLastPredictionTime(BallActor, CurrentTime);
 								return DeltaSecondsUnsubdivided - CurrentTime; // Stop simulation if we hit an undiscovered tunnel
 							}
 
@@ -360,6 +362,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 
 				if (Ball.bSimulationBall)
 				{
+					SetLastPredictionTime(BallActor, CurrentTime);
 					return DeltaSecondsUnsubdivided - CurrentTime; // Stop simulation if we are stopped
 				}
 
@@ -410,13 +413,14 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 
 			if (AuxTime >= 10.f && !BallActor->Activated)
 			{
-				DrawTimedSlots(BallActor, 999999.f, Velocity); // Force all remaining timed slots to activate
+				DrawTimedSlots(BallActor, AuxTime, Velocity, true); // Force all remaining timed slots to activate
 				ActivateStopTriggers(BallActor, CurrentTime);
 
 				BallActor->ActivateBall();
 
 				if (Ball.bSimulationBall)
 				{
+					SetLastPredictionTime(BallActor, CurrentTime);
 					return DeltaSecondsUnsubdivided - CurrentTime; // Stop simulation
 				}
 			}
@@ -424,8 +428,18 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 	}
 
 	//if (SimulationLocations) DrawDebugString(Ball.GetWorld(), Ball.GetActorLocation(), FString::Printf(TEXT("Simulation end!")), nullptr, FColor::Red, 0.f);
-
+	
+	SetLastPredictionTime(BallActor, CurrentTime);
 	return DeltaSecondsUnsubdivided - CurrentTime;
+}
+
+
+void USteamrollSphereComponent::SetLastPredictionTime(ASteamrollBall* BallActor, float LastPredictionTime)
+{
+	if (bSimulationBall)
+	{
+		BallActor->GetLocalPlayerController()->SetLastPredictionTime(LastPredictionTime);
+	}
 }
 
 
@@ -463,7 +477,7 @@ void USteamrollSphereComponent::SeparateBalls(ASteamrollBall* OtherBall, const F
 
 void USteamrollSphereComponent::RotateBall(FVector& Velocity, float Speed, float DeltaSeconds)
 {
-	// Make ball rotate in the movement direction only if there's significat horizontal movement
+	// Make ball rotate in the movement direction only if there's significant horizontal movement
 	float HorizontalSpeed = FVector2D(Velocity.X, Velocity.Y).Size();
 	
 	if (HorizontalSpeed > 0.1f)

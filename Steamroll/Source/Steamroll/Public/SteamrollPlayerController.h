@@ -134,4 +134,8 @@ class STEAMROLL_API ASteamrollPlayerController : public APlayerController
 
 	UFUNCTION(BlueprintCallable, Category = Debris)
 	void AddDebris(ADebris* DebrisActor);
+
+	/** Set how long the last steamball trajectory prediction lasted, used in the 3d ui to reduce a timer's time when it's past the total prediction time */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = Simulation)
+	void SetLastPredictionTime(float LastPredictionTime);
 };
