@@ -86,6 +86,11 @@ void AItemInventory::UpdateInventory(const TArray<FSlotContentConfigStruct>& Slo
 {
 	for (auto& Slot : SlotContent)
 	{
+		if (Slot.SlotType == ESlotTypeEnum::SE_EMPTY)
+		{
+			continue;
+		}
+
 		bool bFound = false;
 		AInvCounter* FreeCounter = nullptr;
 
