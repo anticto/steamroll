@@ -28,6 +28,7 @@ ASteamrollBall::ASteamrollBall(const class FObjectInitializer& PCIP)
 	CollectCapacity = 10.f;
 
 	bExplosionBlockedByContactSlot = false;
+	ExplosionRadius = 1000.f;
 	CurrentTime = 0.f;
 	TimeForNextPaint = 1.f;
 	bTravellingInTunnel = false;
@@ -331,5 +332,11 @@ void ASteamrollBall::Destroyed()
 	{
 		Ball->Destroy();
 	}
+}
+
+
+float ASteamrollBall::ComputeExplosionRadius()
+{
+	return ExplosionRadius * FMath::Pow(SlotsConfig.CountSlotType(ESlotTypeEnum::SE_EXPL), 2);
 }
 

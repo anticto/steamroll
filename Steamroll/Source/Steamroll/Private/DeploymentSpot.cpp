@@ -12,6 +12,7 @@ ADeploymentSpot::ADeploymentSpot(const class FObjectInitializer& PCIP)
 	NumBalls = 1000;
 	SteamPressure = 1.f;
 	LaunchPowerFactor = 1.f;
+	ExplosionRadius = 1000.f;
 }
 
 void ADeploymentSpot::NextCamera()

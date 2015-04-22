@@ -182,6 +182,11 @@ ASteamrollBall* APlayerBase::CreateSimulatedBall()
 
 		SimulatedBall->VirtualSphere->SetSimulatePhysics(false);
 		SimulatedBall->VirtualSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		if (AttachedToDeploymentSpot)
+		{
+			SimulatedBall->ExplosionRadius = AttachedToDeploymentSpot->ExplosionRadius;
+		}
 	}
 
 	return SimulatedBall;
@@ -418,6 +423,7 @@ void APlayerBase::Fire(float ChargeTime)
 			Ball->SetVelocity(LaunchVelocity);
 			Ball->VirtualSphere->SetWorldLocation(LaunchLocation);
 			Ball->VirtualSphere->SetPhysicsLinearVelocity(LaunchVelocity);
+			Ball->ExplosionRadius = AttachedToDeploymentSpot->ExplosionRadius;
 
 			GetLocalPlayerController()->SpendBallsInDeploymentSpot(1);
 			GetLocalPlayerController()->SpendItemsInSlots();

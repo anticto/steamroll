@@ -41,11 +41,14 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface
 
 	virtual void Tick(float DeltaSeconds) override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Slots)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Slots)
 	FSlotsConfigStruct SlotsConfig;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Slots)
+	UPROPERTY(BlueprintReadWrite, Category = Slots)
 	bool bExplosionBlockedByContactSlot;
+
+	UPROPERTY(BlueprintReadWrite, Category = Slots)
+	float ExplosionRadius;
 
 	UPROPERTY()
 	TArray<ASteamrollBall*> WallReboundPredictionBalls;
@@ -124,6 +127,9 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface
 
 	UFUNCTION(BlueprintCallable, Category = Ball)
 	bool HasUnusedExplosionSlot();
+
+	UFUNCTION(BlueprintCallable, Category = Slots)
+	float ComputeExplosionRadius();
 
 	/** Trigger and slot activation system */
 	void ActivateTimerTrigger(int32 SlotIndex);
