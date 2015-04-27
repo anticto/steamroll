@@ -67,7 +67,8 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 
 	USteamrollSphereComponent& Ball = *this;
 	FVector& Velocity = Ball.Velocity;
-	ASteamrollBall* BallActor = Cast<ASteamrollBall>(GetAttachmentRootActor());
+	AActor* SoundActor = GetAttachmentRootActor();
+	ASteamrollBall* BallActor = Cast<ASteamrollBall>(SoundActor);
 	float BallRadius = Ball.GetScaledSphereRadius();
 	
 	if (bSimulationBall)
@@ -325,7 +326,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 
 					if (!bSimulationBall && OldSpeed > 0.f && Speed > 0.f && FMath::Acos(FVector::DotProduct(OldVelocity / OldSpeed, Velocity / Speed)) > FMath::DegreesToRadians(20.f))
 					{
-						PlayBounceSound(BallActor, OldSpeed / MaxInitialSpeed);
+						PlayBounceSound(SoundActor, OldSpeed / MaxInitialSpeed);
 					}
 				}
 

@@ -35,6 +35,8 @@ ABaseBall::ABaseBall(const class FObjectInitializer& PCIP)
 	MaxSpeed = 3000.f;
 	SteamPressure = 1.f;
 
+	Sphere->MaxInitialSpeed = MaxSpeed;
+
 	PrimaryActorTick.bCanEverTick = true;	
 }
 
