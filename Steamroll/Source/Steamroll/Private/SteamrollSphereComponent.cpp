@@ -13,6 +13,7 @@
 #include "BallTunnel.h"
 #include "PhysicsVirtualSphereComponent.h"
 #include "SteamrollPlayerController.h"
+#include "PlayerBase.h"
 
 
 USteamrollSphereComponent::USteamrollSphereComponent(const class FObjectInitializer& PCIP)
@@ -22,6 +23,7 @@ USteamrollSphereComponent::USteamrollSphereComponent(const class FObjectInitiali
 	TrajectoryComponent->AttachTo(this);
 
 	Velocity = FVector::ZeroVector;
+	MaxInitialSpeed = 10000000.f;
 	bPhysicsEnabled = true;
 	RotationAxis = FVector::ZeroVector;
 	NumFramesCollidingWithBall = 0;
@@ -36,6 +38,9 @@ USteamrollSphereComponent::USteamrollSphereComponent(const class FObjectInitiali
 	DragCoefficientSlow = 0.95f;
 	DragCoefficientSlowSpeed = 500.f;
 	DragConstantSlowSpeed = 10.f;
+
+	static ConstructorHelpers::FObjectFinder<USoundCue> SoundCueLoader(TEXT("SoundCue'/Game/So/BallBounce/BallBounceSoundCue.BallBounceSoundCue'"));
+	BounceSoundCue = SoundCueLoader.Object;
 }
 
 
@@ -218,7 +223,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 				Ball.AddLocation(CurrentLocation, CurrentTime);
 
 				// Activate steamball by contact trigger
-				HandleImpactSlots(BallActor, Ball.LastCollidedActor, Velocity, CurrentTime);				
+				HandleImpactSlots(BallActor, Ball.LastCollidedActor, Velocity, CurrentTime);
 
 				if (OtherBall) // Collided with another ball
 				{
@@ -282,10 +287,12 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 						OutHit.ImpactNormal = ImpactRadiusVector;
 						//DrawDebugSphere(Ball.GetWorld(), Ball.GetActorLocation(), Ball.GetScaledSphereRadius() + 0.1f, 20, FColor::Green, false, 0.f);
 					}
-
+					
 					FVector ReflectedVector = Velocity.MirrorByVector(OutHit.ImpactNormal);
 					ReflectedVector.Normalize();
 					Speed = Velocity.Size();
+					FVector OldVelocity = Velocity;
+					float OldSpeed = Speed;
 
 					if (BallActor && Speed > 0.f && ((ReflectedVector | (Velocity / Speed)) < 0.f) && (FMath::Abs(OutHit.ImpactNormal | FVector::UpVector) < 0.1f))
 					{
@@ -315,6 +322,11 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 
 					Velocity = VelocityT + VelocityN * Restitution;
 					Speed = Velocity.Size();
+
+					if (!bSimulationBall && OldSpeed > 0.f && Speed > 0.f && FMath::Acos(FVector::DotProduct(OldVelocity / OldSpeed, Velocity / Speed)) > FMath::DegreesToRadians(20.f))
+					{
+						PlayBounceSound(BallActor, OldSpeed / MaxInitialSpeed);
+					}
 				}
 
 				Ball.ReduceVerticalVelocity(Velocity, bTouchingFloor, DeltaSeconds, CollisionChannel);
@@ -486,7 +498,7 @@ void USteamrollSphereComponent::RotateBall(FVector& Velocity, float Speed, float
 		RotationVector.Normalize();
 
 		float ChangeRotationTime = 0.25f;
-		RotationAxis = FMath::Lerp(RotationAxis, RotationVector, DeltaSeconds / ChangeRotationTime);
+		RotationAxis = FMath::Lerp(RotationAxis, RotationVector, FMath::Min(1.f, DeltaSeconds / ChangeRotationTime));
 
 		float NumRotations = HorizontalSpeed * DeltaSeconds / (2.f * PI * GetScaledSphereRadius()); // Distance travelled / Sphere circumference
 		float RotationAngle = -360.f * NumRotations; // Convert Rotations to degrees
@@ -864,6 +876,15 @@ void USteamrollSphereComponent::ActivateStopTriggers(ASteamrollBall* BallActor, 
 				break;
 			}
 		}
+	}
+}
+
+
+void USteamrollSphereComponent::PlayBounceSound(AActor* Actor, float VolumeFactor)
+{
+	if (!bSimulationBall)
+	{
+		Actor->PlaySoundOnActor(BounceSoundCue, VolumeFactor);
 	}
 }
 

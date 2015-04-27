@@ -33,6 +33,9 @@ class STEAMROLL_API USteamrollSphereComponent : public USphereComponent
 	UPROPERTY()
 	class APlayerBase* PlayerBase;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sound)
+	USoundCue* BounceSoundCue;
+
 	// Physics constants
 
 	/** How many collision tests are going to be made per subtick */
@@ -48,6 +51,9 @@ class STEAMROLL_API USteamrollSphereComponent : public USphereComponent
 
 	// Physical Simulation of trajectory or actual player gameplay?
 	bool bSimulationBall;
+
+	// Max Speed this ball could have been launched with, used to scale bounce sound volumes
+	float MaxInitialSpeed;
 
 	/** How many consecutive frames the ball has been colliding with a ball, used to stop the ball velocity if it has become stuck */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Physics)
@@ -77,4 +83,5 @@ private:
 	void ActivateSnapRamp(ASteamrollBall* BallActor, const FVector& Location, const FVector& Normal, float CurrentTime);
 	void ActivateStopTriggers(ASteamrollBall* BallActor, float CurrentTime);
 	void SetLastPredictionTime(ASteamrollBall* BallActor, float LastPredictionTime);
+	void PlayBounceSound(AActor* Actor, float VolumeFactor);
 };

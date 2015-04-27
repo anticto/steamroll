@@ -77,6 +77,9 @@ class STEAMROLL_API APlayerBase : public ASteamrollPawn
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Base)
 	class ADeploymentSpot* AttachedToDeploymentSpot;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sound)
+	USoundCue* FireSoundCue;
+
 	/** Called from blueprint to fire with the current ChargeTime */
 	UFUNCTION(BlueprintCallable, Category = Base)
 	void FireBlueprint();

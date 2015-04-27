@@ -111,6 +111,9 @@ APlayerBase::APlayerBase(const class FObjectInitializer& PCIP)
 	SecondsWithoutMoving = 0.f;
 	PrevSign = 0.f;
 
+	static ConstructorHelpers::FObjectFinder<USoundCue> SoundCueLoader(TEXT("SoundCue'/Game/So/PlayerBase/FireSoundCue.FireSoundCue'"));
+	FireSoundCue = SoundCueLoader.Object;
+
 	PrimaryActorTick.bCanEverTick = true;
 }
 
@@ -421,6 +424,7 @@ void APlayerBase::Fire(float ChargeTime)
 			SetLastDeployedActor(Ball);
 			FVector LaunchVelocity = GetLaunchVelocity(ChargeTime);
 			Ball->SetVelocity(LaunchVelocity);
+			Ball->Sphere->MaxInitialSpeed = MaxLaunchSpeed * AttachedToDeploymentSpot->LaunchPowerFactor;
 			Ball->VirtualSphere->SetWorldLocation(LaunchLocation);
 			Ball->VirtualSphere->SetPhysicsLinearVelocity(LaunchVelocity);
 			Ball->ExplosionRadius = AttachedToDeploymentSpot->ExplosionRadius;
@@ -428,6 +432,7 @@ void APlayerBase::Fire(float ChargeTime)
 			GetLocalPlayerController()->SpendBallsInDeploymentSpot(1);
 			GetLocalPlayerController()->SpendItemsInSlots();
 			ExplosionClient();
+			PlaySoundOnActor(FireSoundCue, ChargeTime / FiringTimeout);
 		}
 	}
 
