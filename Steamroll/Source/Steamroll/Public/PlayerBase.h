@@ -80,6 +80,9 @@ class STEAMROLL_API APlayerBase : public ASteamrollPawn
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sound)
 	USoundCue* FireSoundCue;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Sound)
+	UAudioComponent* AudioRotation;
+
 	/** Called from blueprint to fire with the current ChargeTime */
 	UFUNCTION(BlueprintCallable, Category = Base)
 	void FireBlueprint();

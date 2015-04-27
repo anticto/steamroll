@@ -114,6 +114,9 @@ APlayerBase::APlayerBase(const class FObjectInitializer& PCIP)
 	static ConstructorHelpers::FObjectFinder<USoundCue> SoundCueLoader(TEXT("SoundCue'/Game/So/PlayerBase/FireSoundCue.FireSoundCue'"));
 	FireSoundCue = SoundCueLoader.Object;
 
+	AudioRotation = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioRotation"));
+	AudioRotation->AttachTo(RootComponent);
+
 	PrimaryActorTick.bCanEverTick = true;
 }
 
@@ -226,7 +229,7 @@ void APlayerBase::Tick(float DeltaSeconds)
 		SecondsWithoutMoving += DeltaSeconds;
 	}
 
-	if (!FMath::IsNearlyEqual(CurrentYaw, SteppedYaw, 0.05f))
+	if (!FMath::IsNearlyEqual(CurrentYaw, SteppedYaw, 1.5f))
 	{
 		float Increment = SteppedYaw - CurrentYaw;
 
@@ -243,6 +246,12 @@ void APlayerBase::Tick(float DeltaSeconds)
 		CurrentYaw = FMath::UnwindDegrees(CurrentYaw);
 		AimTransform->SetWorldRotation(FRotator(0.f, CurrentYaw, 0.f));
 		//UE_LOG(LogTemp, Warning, TEXT("Inc to %f, speed=%f"), CurrentYaw, IncrementSpeed);
+
+		if (!AudioRotation->IsPlaying())
+		{
+			AudioRotation->SetBoolParameter("LeftRotation", Increment < 0.f);
+			AudioRotation->Play();
+		}
 	}
 	else if (CurrentYaw != SteppedYaw)
 	{
@@ -250,6 +259,12 @@ void APlayerBase::Tick(float DeltaSeconds)
 		CurrentYaw = FMath::UnwindDegrees(CurrentYaw);
 		AimTransform->SetWorldRotation(FRotator(0.f, CurrentYaw, 0.f));
 		//UE_LOG(LogTemp, Warning, TEXT("Snap to %f"), CurrentYaw);
+
+		AudioRotation->FadeOut(0.1f, 0.f);
+	}
+	else
+	{
+		AudioRotation->FadeOut(0.1f, 0.f);
 	}
 
 	// Charging, firing and simulation
