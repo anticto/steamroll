@@ -324,7 +324,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 					Velocity = VelocityT + VelocityN * Restitution;
 					Speed = Velocity.Size();
 
-					if (!bSimulationBall && OldSpeed > 0.f && Speed > 0.f && FMath::Acos(FVector::DotProduct(OldVelocity / OldSpeed, Velocity / Speed)) > FMath::DegreesToRadians(20.f))
+					if (!bSimulationBall && OldSpeed > 100.f && Speed > 0.f && FMath::Acos(FVector::DotProduct(OldVelocity / OldSpeed, Velocity / Speed)) > FMath::DegreesToRadians(20.f))
 					{
 						PlayBounceSound(SoundActor, OldSpeed / MaxInitialSpeed);
 					}
