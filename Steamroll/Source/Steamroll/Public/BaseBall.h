@@ -48,6 +48,9 @@ class STEAMROLL_API ABaseBall : public ASteamrollPawn
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Base)
 	float SteamPressure;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Sound)
+	UAudioComponent* AudioSteam;
+
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = Base)
 	void UndeployInstantly();
 

@@ -37,6 +37,9 @@ ABaseBall::ABaseBall(const class FObjectInitializer& PCIP)
 
 	Sphere->MaxInitialSpeed = MaxSpeed;
 
+	AudioSteam = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioSteam"));
+	AudioSteam->AttachTo(RootComponent);
+
 	PrimaryActorTick.bCanEverTick = true;	
 }
 
@@ -87,6 +90,15 @@ void ABaseBall::Tick(float DeltaSeconds)
 		{
 			Sphere->Velocity = Sphere->Velocity / Speed * MaxSpeed;
 		}
+
+		if (!AudioSteam->IsPlaying())
+		{
+			AudioSteam->Play();
+		}
+	}
+	else
+	{
+		AudioSteam->FadeOut(0.2f, 0.f);
 	}
 }
 
