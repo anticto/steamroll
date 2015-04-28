@@ -14,6 +14,7 @@
 #include "PhysicsVirtualSphereComponent.h"
 #include "SteamrollPlayerController.h"
 #include "PlayerBase.h"
+#include "BaseBall.h"
 
 
 USteamrollSphereComponent::USteamrollSphereComponent(const class FObjectInitializer& PCIP)
@@ -41,6 +42,9 @@ USteamrollSphereComponent::USteamrollSphereComponent(const class FObjectInitiali
 
 	static ConstructorHelpers::FObjectFinder<USoundCue> SoundCueLoader(TEXT("SoundCue'/Game/So/BallBounce/BallBounceSoundCue.BallBounceSoundCue'"));
 	BounceSoundCue = SoundCueLoader.Object;
+
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> ParticleSystemLoader(TEXT("ParticleSystem'/Game/Ball/Particles/P_SparkBurst.P_SparkBurst'"));
+	SparksParticleSystem = ParticleSystemLoader.Object;
 }
 
 
@@ -69,6 +73,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 	FVector& Velocity = Ball.Velocity;
 	AActor* SoundActor = GetAttachmentRootActor();
 	ASteamrollBall* BallActor = Cast<ASteamrollBall>(SoundActor);
+	ABaseBall* BaseBallActor = Cast<ABaseBall>(SoundActor);
 	float BallRadius = Ball.GetScaledSphereRadius();
 	
 	if (bSimulationBall)
@@ -125,6 +130,8 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 		ASteamrollBall* CollidedWithBallThisFrame = nullptr;
 
 		float RemainingTime = DeltaSeconds;
+
+		PlayRollingSound(BallActor, BaseBallActor, Speed, bTouchingFloor);
 
 		for (uint32 Iteration = 0; Iteration < NumIterations && RemainingTime > 0.f; ++Iteration)
 		{
@@ -327,6 +334,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 					if (!bSimulationBall && OldSpeed > 100.f && Speed > 0.f && FMath::Acos(FVector::DotProduct(OldVelocity / OldSpeed, Velocity / Speed)) > FMath::DegreesToRadians(20.f))
 					{
 						PlayBounceSound(SoundActor, OldSpeed / MaxInitialSpeed);
+						UGameplayStatics::SpawnEmitterAtLocation(GWorld, SparksParticleSystem, OutHit.ImpactPoint, Velocity.Rotation());
 					}
 				}
 
@@ -885,7 +893,36 @@ void USteamrollSphereComponent::PlayBounceSound(AActor* Actor, float VolumeFacto
 {
 	if (!bSimulationBall)
 	{
-		Actor->PlaySoundOnActor(BounceSoundCue, VolumeFactor);
+		UGameplayStatics::PlaySoundAtLocation(GWorld, BounceSoundCue, Actor->GetActorLocation(), VolumeFactor);
+	}
+}
+
+
+void USteamrollSphereComponent::PlayRollingSound(ASteamrollBall* BallActor, ABaseBall* BaseBallActor, float Speed, bool bTouchingFloor)
+{
+	if (!bSimulationBall)
+	{
+		UAudioComponent* AudioRolling = BallActor ? BallActor->AudioRolling : BaseBallActor->AudioRolling;
+
+		if (!AudioRolling)
+		{
+			return;
+		}
+
+		if (bTouchingFloor && Speed > 0.f)
+		{
+			if (!AudioRolling->IsPlaying())
+			{
+				AudioRolling->Play();
+			}
+
+			AudioRolling->SetVolumeMultiplier(FMath::Min(1.f, Speed / MaxInitialSpeed));
+			AudioRolling->SetPitchMultiplier(1.f + FMath::Min(1.f, Speed / MaxInitialSpeed) * 0.25f);
+		}
+		else
+		{
+			AudioRolling->FadeOut(0.1f, 0.f);
+		}
 	}
 }
 

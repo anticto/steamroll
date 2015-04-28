@@ -32,6 +32,9 @@ ASteamrollBall::ASteamrollBall(const class FObjectInitializer& PCIP)
 	CurrentTime = 0.f;
 	TimeForNextPaint = 1.f;
 	bTravellingInTunnel = false;
+
+	AudioRolling = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioRolling"));
+	AudioRolling->AttachTo(RootComponent);
 }
 
 

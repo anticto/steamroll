@@ -51,6 +51,9 @@ class STEAMROLL_API ABaseBall : public ASteamrollPawn
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Sound)
 	UAudioComponent* AudioSteam;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Sound)
+	UAudioComponent* AudioRolling;
+
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = Base)
 	void UndeployInstantly();
 

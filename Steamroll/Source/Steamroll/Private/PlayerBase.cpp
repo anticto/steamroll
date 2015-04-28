@@ -448,6 +448,7 @@ void APlayerBase::Fire(float ChargeTime)
 			GetLocalPlayerController()->SpendItemsInSlots();
 			ExplosionClient();
 			PlaySoundOnActor(FireSoundCue, ChargeTime / FiringTimeout);
+			//UGameplayStatics::PlaySoundAtLocation(GWorld, FireSoundCue, GetActorLocation(), ChargeTime / FiringTimeout);
 		}
 	}
 

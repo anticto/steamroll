@@ -40,6 +40,9 @@ ABaseBall::ABaseBall(const class FObjectInitializer& PCIP)
 	AudioSteam = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioSteam"));
 	AudioSteam->AttachTo(RootComponent);
 
+	AudioRolling = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioRolling"));
+	AudioRolling->AttachTo(RootComponent);
+
 	PrimaryActorTick.bCanEverTick = true;	
 }
 

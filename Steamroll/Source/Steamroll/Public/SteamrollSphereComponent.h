@@ -36,6 +36,9 @@ class STEAMROLL_API USteamrollSphereComponent : public USphereComponent
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sound)
 	USoundCue* BounceSoundCue;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ParticleSystem)
+	UParticleSystem* SparksParticleSystem;
+
 	// Physics constants
 
 	/** How many collision tests are going to be made per subtick */
@@ -84,4 +87,5 @@ private:
 	void ActivateStopTriggers(ASteamrollBall* BallActor, float CurrentTime);
 	void SetLastPredictionTime(ASteamrollBall* BallActor, float LastPredictionTime);
 	void PlayBounceSound(AActor* Actor, float VolumeFactor);
+	void PlayRollingSound(ASteamrollBall* BallActor, class ABaseBall* BaseBallActor, float Speed, bool bTouchingFloor);
 };

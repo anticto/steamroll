@@ -53,6 +53,9 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface
 	UPROPERTY()
 	TArray<ASteamrollBall*> WallReboundPredictionBalls;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Sound)
+	UAudioComponent* AudioRolling;
+
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = Ball)
 	void ActivateBall();
 
