@@ -53,7 +53,7 @@ APlayerBase::APlayerBase(const class FObjectInitializer& PCIP)
 
 	TargetChargeTime = 0.f;
 	ChargeTime = 0.f;
-	ChargeTimeSpeed = 2.f;
+	ChargeTimeSpeed = 4.f;
 
 	// Simulated walls for ball trajectory prediction
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> Object0(TEXT("StaticMesh'/Game/Ball/Prediction/paretStatic.paretStatic'"));
@@ -542,14 +542,14 @@ void APlayerBase::FireDebug10() { TargetChargeTime = 1.0f * FiringTimeout; }
 
 void APlayerBase::SetChargeUp()
 {
-	TargetChargeTime += 0.1f * FiringTimeout;
+	TargetChargeTime += 0.05f * FiringTimeout;
 	TargetChargeTime = FMath::Min(TargetChargeTime, FiringTimeout);
 }
 
 
 void APlayerBase::SetChargeDown()
 {
-	TargetChargeTime -= 0.1f * FiringTimeout;
+	TargetChargeTime -= 0.05f * FiringTimeout;
 	TargetChargeTime = FMath::Max(TargetChargeTime, 0.f);
 }
 
