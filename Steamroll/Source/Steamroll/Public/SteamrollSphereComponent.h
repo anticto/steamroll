@@ -87,5 +87,5 @@ private:
 	void ActivateStopTriggers(ASteamrollBall* BallActor, float CurrentTime);
 	void SetLastPredictionTime(ASteamrollBall* BallActor, float LastPredictionTime);
 	void PlayBounceSound(AActor* Actor, float VolumeFactor);
-	void PlayRollingSound(ASteamrollBall* BallActor, class ABaseBall* BaseBallActor, float Speed, bool bTouchingFloor);
+	void PlayRollingSoundAndSparks(ASteamrollBall* BallActor, class ABaseBall* BaseBallActor, float Speed, bool bTouchingFloor);
 };

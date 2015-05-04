@@ -35,6 +35,9 @@ ASteamrollBall::ASteamrollBall(const class FObjectInitializer& PCIP)
 
 	AudioRolling = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioRolling"));
 	AudioRolling->AttachTo(RootComponent);
+
+	SpeedSparks = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("SpeedSparks"));
+	SpeedSparks->AttachTo(RootComponent);
 }
 
 

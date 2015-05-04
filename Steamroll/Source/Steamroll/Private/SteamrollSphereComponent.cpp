@@ -131,7 +131,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 
 		float RemainingTime = DeltaSeconds;
 
-		PlayRollingSound(BallActor, BaseBallActor, Speed, bTouchingFloor);
+		PlayRollingSoundAndSparks(BallActor, BaseBallActor, Speed, bTouchingFloor);
 
 		for (uint32 Iteration = 0; Iteration < NumIterations && RemainingTime > 0.f; ++Iteration)
 		{
@@ -898,7 +898,7 @@ void USteamrollSphereComponent::PlayBounceSound(AActor* Actor, float VolumeFacto
 }
 
 
-void USteamrollSphereComponent::PlayRollingSound(ASteamrollBall* BallActor, ABaseBall* BaseBallActor, float Speed, bool bTouchingFloor)
+void USteamrollSphereComponent::PlayRollingSoundAndSparks(ASteamrollBall* BallActor, ABaseBall* BaseBallActor, float Speed, bool bTouchingFloor)
 {
 	if (!bSimulationBall)
 	{
@@ -922,6 +922,18 @@ void USteamrollSphereComponent::PlayRollingSound(ASteamrollBall* BallActor, ABas
 		else
 		{
 			AudioRolling->FadeOut(0.1f, 0.f);
+		}
+
+		if (BallActor)
+		{
+			if (bTouchingFloor && Speed > 1000.f)
+			{
+				BallActor->SpeedSparks->Activate();
+			}
+			else
+			{
+				BallActor->SpeedSparks->Deactivate();
+			}
 		}
 	}
 }

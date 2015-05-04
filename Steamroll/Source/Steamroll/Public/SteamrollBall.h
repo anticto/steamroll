@@ -56,6 +56,9 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Sound)
 	UAudioComponent* AudioRolling;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = PasrticleSystem)
+	UParticleSystemComponent* SpeedSparks;
+
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = Ball)
 	void ActivateBall();
 
