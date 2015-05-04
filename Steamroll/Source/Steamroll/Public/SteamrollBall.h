@@ -24,6 +24,9 @@ class ASteamrollBall : public AActor, public IExplosionDestructibleInterface
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Ball)
 	bool Activated;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Ball)
+	bool bPermanentBall;
+
 	/** Last tick's ball location */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Ball)
 	FVector LastLoc;

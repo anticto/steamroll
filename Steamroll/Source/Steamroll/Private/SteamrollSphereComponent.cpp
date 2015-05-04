@@ -387,7 +387,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 					return DeltaSecondsUnsubdivided - CurrentTime; // Stop simulation if we are stopped
 				}
 
-				if (BallActor && !BallActor->Activated)
+				if (BallActor && !BallActor->Activated && !BallActor->bPermanentBall)
 				{
 					BallActor->ActivateBall();
 				}
@@ -437,7 +437,10 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 				DrawTimedSlots(BallActor, AuxTime, Velocity, true); // Force all remaining timed slots to activate
 				ActivateStopTriggers(BallActor, CurrentTime);
 
-				BallActor->ActivateBall();
+				if (!BallActor->bPermanentBall)
+				{
+					BallActor->ActivateBall();
+				}
 
 				if (Ball.bSimulationBall)
 				{

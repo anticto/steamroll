@@ -20,6 +20,7 @@ ASteamrollBall::ASteamrollBall(const class FObjectInitializer& PCIP)
 	VirtualSphere->AttachTo(RootComponent);
 
 	Activated = false;
+	bPermanentBall = false;
 
 	SetReplicates(true);
 	PrimaryActorTick.bCanEverTick = true;
