@@ -83,6 +83,9 @@ class STEAMROLL_API APlayerBase : public ASteamrollPawn
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Sound)
 	UAudioComponent* AudioRotation;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = CameraShake)
+	TSubclassOf<UCameraShake> FireCameraShake;
+
 	/** Called from blueprint to fire with the current ChargeTime */
 	UFUNCTION(BlueprintCallable, Category = Base)
 	void FireBlueprint();

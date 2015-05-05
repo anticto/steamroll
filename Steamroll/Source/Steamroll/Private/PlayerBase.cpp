@@ -449,6 +449,8 @@ void APlayerBase::Fire(float ChargeTime)
 			ExplosionClient();
 			PlaySoundOnActor(FireSoundCue, ChargeTime / FiringTimeout);
 			//UGameplayStatics::PlaySoundAtLocation(GWorld, FireSoundCue, GetActorLocation(), ChargeTime / FiringTimeout);
+			//UGameplayStatics::PlayWorldCameraShake(GWorld, FireCameraShake, LaunchLocation, 0.f, 10000.f);
+			GetLocalPlayerController()->ClientPlayCameraShake(FireCameraShake, ChargeTime / FiringTimeout);
 		}
 	}
 
