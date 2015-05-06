@@ -185,7 +185,7 @@ FTransform ASteamrollBall::GetBallAdjustedTransform() const
 
 bool ASteamrollBall::IsTouchingFloor() const
 {
-	return Sphere->IsTouchingFloor(ECollisionChannel::ECC_GameTraceChannel7, false); // RealBallTraceChannel
+	return Sphere->IsTouchingFloor(GetActorLocation(), ECollisionChannel::ECC_GameTraceChannel7, false); // RealBallTraceChannel
 }
 
 
