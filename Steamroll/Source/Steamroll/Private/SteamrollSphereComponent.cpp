@@ -15,6 +15,7 @@
 #include "SteamrollPlayerController.h"
 #include "PlayerBase.h"
 #include "BaseBall.h"
+#include "ItemCrate.h"
 
 
 USteamrollSphereComponent::USteamrollSphereComponent(const class FObjectInitializer& PCIP)
@@ -188,6 +189,17 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 						// NewLocation = CurrentLocation + Velocity * TravelTime;
 
 						continue;
+					}
+				}
+
+				//Check for item crates
+				if (!Ball.bSimulationBall)
+				{
+					auto ItemCrate = Cast<AItemCrate>(&*OutHit.Actor);
+
+					if (BallActor && ItemCrate)
+					{
+						ItemCrate->BallCollision(GetAttachmentRootActor(), Velocity.Size());
 					}
 				}
 				
