@@ -86,6 +86,9 @@ class STEAMROLL_API ASteamrollPlayerController : public APlayerController
 	void SpendSlotItem(TEnumAsByte<ESlotTypeEnum::SlotType> SlotTypeEnum);
 
 	UFUNCTION(BlueprintCallable, Category = Slots)
+	bool IsItemAvailable(TEnumAsByte<ESlotTypeEnum::SlotType> SlotTypeEnum);
+
+	UFUNCTION(BlueprintCallable, Category = Slots)
 	void IncrementSlotItem(TEnumAsByte<ESlotTypeEnum::SlotType> SlotTypeEnum, int32 Quantity);
 
 	/** Checks whether the currently assembled steamball has all the required items in the current deployment spot */

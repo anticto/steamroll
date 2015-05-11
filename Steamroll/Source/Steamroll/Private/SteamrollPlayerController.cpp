@@ -130,6 +130,25 @@ void ASteamrollPlayerController::SpendSlotItem(TEnumAsByte<ESlotTypeEnum::SlotTy
 }
 
 
+bool ASteamrollPlayerController::IsItemAvailable(TEnumAsByte<ESlotTypeEnum::SlotType> SlotTypeEnum)
+{
+	if (SlotTypeEnum == ESlotTypeEnum::SE_EMPTY)
+	{
+		return true;
+	}
+
+	for (auto& Slot : SlotContent)
+	{
+		if (Slot.SlotType == SlotTypeEnum && Slot.Quantity > 0)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+
 bool ASteamrollPlayerController::CheckItemAvailability()
 {
 	if (GetNumAvailableBalls() < 1)
