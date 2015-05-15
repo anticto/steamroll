@@ -6,6 +6,6 @@ public class Steamroll : ModuleRules
 {
     public Steamroll(TargetInfo Target)
 	{
-        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "RHI", "RenderCore", "ShaderCore" });
+        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "RHI", "RenderCore", "ShaderCore", "UMG", "Slate", "SlateCore" });
 	}
 }
