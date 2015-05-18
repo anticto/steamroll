@@ -16,6 +16,7 @@
 #include "PlayerBase.h"
 #include "BaseBall.h"
 #include "ItemCrate.h"
+#include "JetStream.h"
 
 
 USteamrollSphereComponent::USteamrollSphereComponent(const class FObjectInitializer& PCIP)
@@ -33,7 +34,7 @@ USteamrollSphereComponent::USteamrollSphereComponent(const class FObjectInitiali
 	RemainingTime = 0.f;
 
 	NumIterations = 10;
-	MaxDeltaSeconds = 1.f / 121.f;
+	MaxDeltaSeconds = 1.f / 120.f;
 	StoppingSpeed = 50.f;
 	DepenetrationSpeed = 1000.f;
 	DragCoefficient = 0.2f;
@@ -127,28 +128,32 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 
 		TArray<AActor*> ActorsToIgnore;
 		ActorsToIgnore.Add(Ball.GetAttachmentRootActor());
-		FHitResult OutHit;
+		TArray<FHitResult> OutHits;
 		Ball.LastCollidedActor = nullptr;
 		ASteamrollBall* CollidedWithBallThisFrame = nullptr;
 
 		float RemainingTime = DeltaSeconds;
 
-		PlayRollingSoundAndSparks(BallActor, BaseBallActor, Speed, bTouchingFloor);
+		PlayRollingSoundAndSparks(BallActor, BaseBallActor, Speed, bTouchingFloor);		
 
 		for (uint32 Iteration = 0; Iteration < NumIterations && RemainingTime > 0.f; ++Iteration)
 		{
-			bool bCollision = UKismetSystemLibrary::SphereTraceSingle_NEW(Ball.GetWorld(), CurrentLocation, NewLocation, BallRadius, TraceTypeQuery, true, ActorsToIgnore, EDrawDebugTrace::None, OutHit, true);
-			ASteamrollBall* OtherBall;
-				
-			OtherBall = bCollision ? Cast<ASteamrollBall>(&*OutHit.Actor) : nullptr;
-
-			if (OutHit.Actor != nullptr && OutHit.GetComponent()->GetCollisionProfileName() == FName("DynamicPhysics"))
-			{
-				DrawDebugString(Ball.GetWorld(), OutHit.ImpactPoint, FString::Printf(TEXT("?")), nullptr, FColor::Red, 0.f);
-			}		
+			bool bCollision = UKismetSystemLibrary::SphereTraceMulti_NEW(Ball.GetWorld(), CurrentLocation, NewLocation, BallRadius, TraceTypeQuery, true, ActorsToIgnore, EDrawDebugTrace::None, OutHits, true);
 			
-			if (bCollision)
+			FHitResult* FirstBlockingHit = FHitResult::GetFirstBlockingHit(OutHits);
+
+			ASteamrollBall* OtherBall;				
+			OtherBall = bCollision && FirstBlockingHit ? Cast<ASteamrollBall>(&*FirstBlockingHit->Actor) : nullptr;
+
+			if (FirstBlockingHit && FirstBlockingHit->Actor != nullptr && FirstBlockingHit->GetComponent()->GetCollisionProfileName() == FName("DynamicPhysics"))
+			{
+				DrawDebugString(Ball.GetWorld(), FirstBlockingHit->ImpactPoint, FString::Printf(TEXT("?")), nullptr, FColor::Red, 0.f);
+			}					
+			
+			if (bCollision && FirstBlockingHit)
 			{				
+				FHitResult& OutHit = *FirstBlockingHit;
+
 				// Check for tunnels
 				auto BallTunnel = Cast<ABallTunnel>(&*OutHit.Actor);
 				
@@ -230,11 +235,9 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 
 				float TravelTime = OutHit.Time * RemainingTime;
 				Velocity = DragPhysics(Velocity, TravelTime);
+				ProcessJetStreams(OutHits, TravelTime);
 
-				if (!Ball.bSimulationBall)
-				{
-					Ball.RotateBall(Velocity, Speed, TravelTime);
-				}
+				Ball.RotateBall(Velocity, Speed, TravelTime);
 
 				RemainingTime = RemainingTime - TravelTime;
 				CurrentLocation = OutHit.Location + OutHit.ImpactNormal * 0.1f;
@@ -356,12 +359,10 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 			{
 				CollidedWithBallThisFrame = nullptr;
 
-				if (!Ball.bSimulationBall)
-				{
-					Ball.RotateBall(Velocity, Speed, RemainingTime);
-				}
+				Ball.RotateBall(Velocity, Speed, RemainingTime);
 
 				Velocity = DragPhysics(Velocity, RemainingTime);
+				ProcessJetStreams(OutHits, RemainingTime);
 				CurrentLocation = NewLocation; // No collision, so the ball can travel all the way
 				Ball.AddLocation(CurrentLocation, CurrentTime);
 
@@ -515,23 +516,26 @@ void USteamrollSphereComponent::SeparateBalls(FVector& ActorLocation, ASteamroll
 
 void USteamrollSphereComponent::RotateBall(FVector& Velocity, float Speed, float DeltaSeconds)
 {
-	// Make ball rotate in the movement direction only if there's significant horizontal movement
-	float HorizontalSpeed = FVector2D(Velocity.X, Velocity.Y).Size();
-	
-	if (HorizontalSpeed > 0.1f)
+	if (!bSimulationBall)
 	{
-		FVector RotationVector = FVector::CrossProduct(Velocity / Speed, FVector(0.f, 0.f, 1.f)); // Compute rotation axis
-		RotationVector.Normalize();
+		// Make ball rotate in the movement direction only if there's significant horizontal movement
+		float HorizontalSpeed = FVector2D(Velocity.X, Velocity.Y).Size();
 
-		float ChangeRotationTime = 0.25f;
-		RotationAxis = FMath::Lerp(RotationAxis, RotationVector, FMath::Min(1.f, DeltaSeconds / ChangeRotationTime));
+		if (HorizontalSpeed > 0.1f)
+		{
+			FVector RotationVector = FVector::CrossProduct(Velocity / Speed, FVector(0.f, 0.f, 1.f)); // Compute rotation axis
+			RotationVector.Normalize();
 
-		float NumRotations = HorizontalSpeed * DeltaSeconds / (2.f * PI * GetScaledSphereRadius()); // Distance travelled / Sphere circumference
-		float RotationAngle = -360.f * NumRotations; // Convert Rotations to degrees
-		
-		FVector RotatedForwardVector = FVector(0.f, 0.f, 1.f).RotateAngleAxis(RotationAngle, RotationAxis);
-		FQuat Quat = FQuat::FindBetween(FVector(0.f, 0.f, 1.f), RotatedForwardVector);
-		AddWorldRotation(Quat.Rotator());
+			float ChangeRotationTime = 0.25f;
+			RotationAxis = FMath::Lerp(RotationAxis, RotationVector, FMath::Min(1.f, DeltaSeconds / ChangeRotationTime));
+
+			float NumRotations = HorizontalSpeed * DeltaSeconds / (2.f * PI * GetScaledSphereRadius()); // Distance travelled / Sphere circumference
+			float RotationAngle = -360.f * NumRotations; // Convert Rotations to degrees
+
+			FVector RotatedForwardVector = FVector(0.f, 0.f, 1.f).RotateAngleAxis(RotationAngle, RotationAxis);
+			FQuat Quat = FQuat::FindBetween(FVector(0.f, 0.f, 1.f), RotatedForwardVector);
+			AddWorldRotation(Quat.Rotator());
+		}
 	}
 }
 
@@ -950,6 +954,30 @@ void USteamrollSphereComponent::PlayRollingSoundAndSparks(ASteamrollBall* BallAc
 			else
 			{
 				BallActor->SpeedSparks->Deactivate();
+			}
+		}
+	}
+}
+
+
+void USteamrollSphereComponent::ProcessJetStreams(TArray<FHitResult> &Hits, float DeltaSeconds)
+{
+	for (auto Hit : Hits)
+	{
+		AJetStream* JetStream = Cast<AJetStream>(&*Hit.Actor);
+
+		if (!Hit.bBlockingHit && JetStream)
+		{
+			//Velocity += (Hit.Location - Hit.Actor->GetActorLocation()).GetSafeNormal() * JetStream->Power * DeltaSeconds;
+			FVector JetDirection = Hit.Component->GetUpVector();
+			FVector Aux = Velocity - Velocity.ProjectOnTo(JetDirection);
+			Velocity += JetDirection * JetStream->Power * DeltaSeconds - Aux * JetStream->TurnFactor * DeltaSeconds;
+
+			float SpeedSquared = Velocity.SizeSquared();
+
+			if (SpeedSquared > JetStream->MaxSpeed)
+			{
+				Velocity = Velocity / FMath::Sqrt(SpeedSquared) * JetStream->MaxSpeed;
 			}
 		}
 	}

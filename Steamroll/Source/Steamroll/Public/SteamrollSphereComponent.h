@@ -88,4 +88,5 @@ private:
 	void SetLastPredictionTime(ASteamrollBall* BallActor, float LastPredictionTime);
 	void PlayBounceSound(const FVector& ActorLocation, AActor* Actor, float VolumeFactor);
 	void PlayRollingSoundAndSparks(ASteamrollBall* BallActor, class ABaseBall* BaseBallActor, float Speed, bool bTouchingFloor);
+	void ProcessJetStreams(TArray<FHitResult> &Hits, float DeltaSeconds);
 };
