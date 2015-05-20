@@ -975,7 +975,7 @@ void USteamrollSphereComponent::ProcessJetStreams(TArray<FHitResult> &Hits, floa
 
 			float SpeedSquared = Velocity.SizeSquared();
 
-			if (SpeedSquared > JetStream->MaxSpeed)
+			if (SpeedSquared > FMath::Square(JetStream->MaxSpeed))
 			{
 				Velocity = Velocity / FMath::Sqrt(SpeedSquared) * JetStream->MaxSpeed;
 			}
