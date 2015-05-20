@@ -61,13 +61,33 @@ class STEAMROLL_API USteamrollSphereComponent : public USphereComponent
 	/** How many consecutive frames the ball has been colliding with a ball, used to stop the ball velocity if it has become stuck */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Physics)
 	uint32 NumFramesCollidingWithBall;
-	float RemainingTime;
 
-	/** Returns how much time from the DeltaSeconds was actually simulated */
-	float SteamrollTick(float DeltaSeconds);
+	/** Frame interpolation data */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Physics)
+	FVector LastLoc;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Physics)
+	FQuat LastRot;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Physics)
+	FVector Location;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Physics)
+	FQuat Rotation;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Physics)
+	float TimeToNextPhysTick;
+
+	bool bInterpolationDataInitialized;
+
+	UFUNCTION(BlueprintCallable, Category = Physics)
+	void SetInterpRotation(FRotator NewRotation);
+
+	void SteamrollTick(float DeltaSeconds);
 	FVector DragPhysics(const FVector& Velocity, float TravelTime);
 	
-	float UpdateBallPhysics(float DeltaSeconds);
+	void UpdateBallPhysics(uint32 NumPhysTicks);
+	void UpdateBallPhysics(float DeltaSeconds);
 	void SeparateBalls(FVector& InOutActorLocation, class ASteamrollBall* OtherBall, const FVector& PushVector, float DepenetrationSpeed, float DeltaSeconds, float CurrentTime);
 	void RotateBall(FVector& Velocity, float Speed, float DeltaSeconds);
 	void ResetTimedSlots(ASteamrollBall* BallActor);

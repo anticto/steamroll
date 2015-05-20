@@ -31,16 +31,18 @@ USteamrollSphereComponent::USteamrollSphereComponent(const class FObjectInitiali
 	RotationAxis = FVector::ZeroVector;
 	NumFramesCollidingWithBall = 0;
 	bSimulationBall = false;
-	RemainingTime = 0.f;
 
 	NumIterations = 10;
-	MaxDeltaSeconds = 1.f / 120.f;
+	MaxDeltaSeconds = 1.f / 60.f;
 	StoppingSpeed = 50.f;
 	DepenetrationSpeed = 1000.f;
 	DragCoefficient = 0.2f;
 	DragCoefficientSlow = 0.95f;
 	DragCoefficientSlowSpeed = 500.f;
 	DragConstantSlowSpeed = 10.f;
+
+	TimeToNextPhysTick = 0.f;
+	bInterpolationDataInitialized = false;
 
 	static ConstructorHelpers::FObjectFinder<USoundCue> SoundCueLoader(TEXT("SoundCue'/Game/So/BallBounce/BallBounceSoundCue.BallBounceSoundCue'"));
 	BounceSoundCue = SoundCueLoader.Object;
@@ -50,26 +52,46 @@ USteamrollSphereComponent::USteamrollSphereComponent(const class FObjectInitiali
 }
 
 
-float USteamrollSphereComponent::SteamrollTick(float DeltaSeconds)
+void USteamrollSphereComponent::SteamrollTick(float DeltaSeconds)
 {
 	if (bSimulationBall)
 	{
-		return 0.f;
+		return;
 	}
 
-	float TimeToSimulate = DeltaSeconds + RemainingTime;
-	RemainingTime = UpdateBallPhysics(TimeToSimulate);
-	//UE_LOG(LogTemp, Warning, TEXT("TimeToSimulate=%f, SimulatedTime=%f"), TimeToSimulate, TimeToSimulate - RemainingTime);
+	TimeToNextPhysTick -= DeltaSeconds;
 
-	return TimeToSimulate - RemainingTime;
+	uint32 NumPhysTicks = 0;
+
+	while (TimeToNextPhysTick < 0.f)
+	{
+		NumPhysTicks++;
+		TimeToNextPhysTick += MaxDeltaSeconds;
+	}
+
+	UpdateBallPhysics(NumPhysTicks);
+
+	float Factor = (MaxDeltaSeconds - TimeToNextPhysTick) / MaxDeltaSeconds;
+
+	SetActorLocation(LastLoc + (Location - LastLoc) * Factor);
+	SetWorldRotation((LastRot + (Rotation - LastRot) * Factor).Rotator());
+	
+	//UE_LOG(LogTemp, Warning, TEXT("Factor=%f"), Factor);
 }
 
 
-float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivided)
+void USteamrollSphereComponent::UpdateBallPhysics(uint32 NumPhysTicks)
 {
 	if (!bPhysicsEnabled)
 	{
-		return 0.f;
+		return;
+	}
+
+	if (!bInterpolationDataInitialized)
+	{
+		Location = GetComponentLocation();
+		Rotation = GetComponentRotation().Quaternion();
+		bInterpolationDataInitialized = true;
 	}
 
 	USteamrollSphereComponent& Ball = *this;
@@ -100,10 +122,13 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 
 	float DeltaSeconds = MaxDeltaSeconds; // Constant timestep
 	float CurrentTime = 0.f;
-	FVector CurrentLocation = Ball.GetActorLocation();
+	FVector& CurrentLocation = Location;
 
-	while (CurrentTime <= DeltaSecondsUnsubdivided)
+	for (uint32 CurrentTick = 0; CurrentTick < NumPhysTicks; ++CurrentTick)
 	{
+		LastLoc = Location;
+		LastRot = Rotation;
+
 		bool bTouchingFloor = IsTouchingFloor(CurrentLocation, CollisionChannel);
 
 		Ball.DrawTimedSlots(CurrentLocation, BallActor, CurrentTime, Velocity);
@@ -162,6 +187,8 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 					if ((BallTunnel->TriggerVolume->GetComponentLocation() - OutHit.Location).Size() < BallRadius + BallTunnel->TriggerVolume->GetScaledSphereRadius())
 					{
 						CurrentLocation = BallTunnel->ConnectedTunnel->GetActorLocation();
+						LastLoc = Location; // Prevent interpolation between tunnel ends
+						LastRot = Rotation;
 						Speed = Velocity.Size() * BallTunnel->ConnectedTunnel->SpeedMultiplier;
 						Velocity = BallTunnel->ConnectedTunnel->Mesh->GetUpVector() * Speed;
 
@@ -172,9 +199,8 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 								DrawDebugString(Ball.GetWorld(), OutHit.ImpactPoint, FString::Printf(TEXT("?")), nullptr, FColor::Red, 0.f);
 								SetLastPredictionTime(BallActor, CurrentTime);
 								Ball.SetActorLocation(CurrentLocation);
-								return DeltaSecondsUnsubdivided - CurrentTime; // Stop simulation if we hit an undiscovered tunnel
+								return; // Stop simulation if we hit an undiscovered tunnel
 							}
-
 							
 							TrajectoryComponent->CutTrajectory();
 							Ball.AddLocation(CurrentLocation, CurrentTime);
@@ -388,7 +414,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 
 		if (FVector2D(Velocity.X, Velocity.Y).SizeSquared() < FMath::Square(StoppingSpeed)) // Stop horizontal movement if very low speed
 		{			
-			if (bTouchingFloor)
+			if (IsTouchingFloor(CurrentLocation + FVector(0.f, 0.f, -1.5f), CollisionChannel)) // Check it again instead of using bTouchingFloor since it may have been a long time since it was updated and this is a key gameplay element
 			{
 				DrawTimedSlots(CurrentLocation, BallActor, CurrentTime, Velocity, true); // Force all remaining timed slots to activate
 				ActivateStopTriggers(CurrentLocation, BallActor, CurrentTime);
@@ -397,7 +423,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 				{
 					SetLastPredictionTime(BallActor, CurrentTime);
 					Ball.SetActorLocation(CurrentLocation);
-					return DeltaSecondsUnsubdivided - CurrentTime; // Stop simulation if we are stopped
+					return; // Stop simulation if we are stopped
 				}
 
 				if (BallActor && !BallActor->Activated && !BallActor->bPermanentBall)
@@ -459,7 +485,7 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 				{
 					SetLastPredictionTime(BallActor, CurrentTime);
 					Ball.SetActorLocation(CurrentLocation);
-					return DeltaSecondsUnsubdivided - CurrentTime; // Stop simulation
+					return; // Stop simulation
 				}
 			}
 		}
@@ -468,8 +494,14 @@ float USteamrollSphereComponent::UpdateBallPhysics(float DeltaSecondsUnsubdivide
 	//if (SimulationLocations) DrawDebugString(Ball.GetWorld(), ActorLocation, FString::Printf(TEXT("Simulation end!")), nullptr, FColor::Red, 0.f);
 	
 	SetLastPredictionTime(BallActor, CurrentTime);
-	Ball.SetActorLocation(CurrentLocation);
-	return DeltaSecondsUnsubdivided - CurrentTime;
+	//Ball.SetActorLocation(CurrentLocation);
+	return;
+}
+
+
+void USteamrollSphereComponent::UpdateBallPhysics(float DeltaSeconds)
+{
+	UpdateBallPhysics(uint32(FMath::RoundToInt(DeltaSeconds / MaxDeltaSeconds)));
 }
 
 
@@ -534,7 +566,8 @@ void USteamrollSphereComponent::RotateBall(FVector& Velocity, float Speed, float
 
 			FVector RotatedForwardVector = FVector(0.f, 0.f, 1.f).RotateAngleAxis(RotationAngle, RotationAxis);
 			FQuat Quat = FQuat::FindBetween(FVector(0.f, 0.f, 1.f), RotatedForwardVector);
-			AddWorldRotation(Quat.Rotator());
+			//AddWorldRotation(Quat.Rotator());
+			Rotation = Quat * Rotation;
 		}
 	}
 }
@@ -690,8 +723,8 @@ void USteamrollSphereComponent::DrawSimulationWall(const FVector& ActorLocation,
 				SimulatedBall->SetVelocity(NewVelocity.MirrorByVector(Normal));
 
 				SimulatedBall->Sphere->TrajectoryComponent->DeleteLocations();
-
-				float TotalTime = SimulatedBall->Sphere->UpdateBallPhysics(2.f);
+				
+				SimulatedBall->Sphere->UpdateBallPhysics(2.f);
 				auto MaterialInstance = SimulatedBall->Sphere->TrajectoryComponent->CreateAndSetMaterialInstanceDynamicFromMaterial(0, SimulatedBall->Sphere->TrajectoryComponent->GetMaterial(0));
 				MaterialInstance->SetScalarParameterValue("Charging", 0.f);
 
@@ -981,5 +1014,11 @@ void USteamrollSphereComponent::ProcessJetStreams(TArray<FHitResult> &Hits, floa
 			}
 		}
 	}
+}
+
+
+void USteamrollSphereComponent::SetInterpRotation(FRotator NewRotation)
+{
+	Rotation = NewRotation.Quaternion();
 }
 
