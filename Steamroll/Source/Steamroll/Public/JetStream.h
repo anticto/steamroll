@@ -22,4 +22,7 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	float TurnFactor;
+
+	UPROPERTY(EditAnywhere)
+	TArray<bool> StreamActive;
 };

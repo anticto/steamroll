@@ -10,5 +10,8 @@ AJetStream::AJetStream()
 	Power = 1000.f;
 	MaxSpeed = 5000.f;
 	TurnFactor = 10.f;
+
+	StreamActive.SetNumZeroed(4);
+	StreamActive[0] = true;
 }
 

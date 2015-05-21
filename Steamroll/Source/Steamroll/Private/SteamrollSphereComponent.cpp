@@ -1001,16 +1001,22 @@ void USteamrollSphereComponent::ProcessJetStreams(TArray<FHitResult> &Hits, floa
 
 		if (!Hit.bBlockingHit && JetStream)
 		{
-			//Velocity += (Hit.Location - Hit.Actor->GetActorLocation()).GetSafeNormal() * JetStream->Power * DeltaSeconds;
-			FVector JetDirection = Hit.Component->GetUpVector();
-			FVector Aux = Velocity - Velocity.ProjectOnTo(JetDirection);
-			Velocity += JetDirection * JetStream->Power * DeltaSeconds - Aux * JetStream->TurnFactor * DeltaSeconds;
-
-			float SpeedSquared = Velocity.SizeSquared();
-
-			if (SpeedSquared > FMath::Square(JetStream->MaxSpeed))
+			FString Name = Hit.Component->GetName();
+			int32 Num = FCString::Atoi(&Name[Name.Len() - 1]);
+			
+			if (JetStream->StreamActive[Num - 1])
 			{
-				Velocity = Velocity / FMath::Sqrt(SpeedSquared) * JetStream->MaxSpeed;
+				//Velocity += (Hit.Location - Hit.Actor->GetActorLocation()).GetSafeNormal() * JetStream->Power * DeltaSeconds;
+				FVector JetDirection = Hit.Component->GetUpVector();
+				FVector Aux = Velocity - Velocity.ProjectOnTo(JetDirection);
+				Velocity += JetDirection * JetStream->Power * DeltaSeconds - Aux * JetStream->TurnFactor * DeltaSeconds;
+
+				float SpeedSquared = Velocity.SizeSquared();
+
+				if (SpeedSquared > FMath::Square(JetStream->MaxSpeed))
+				{
+					Velocity = Velocity / FMath::Sqrt(SpeedSquared) * JetStream->MaxSpeed;
+				}
 			}
 		}
 	}
