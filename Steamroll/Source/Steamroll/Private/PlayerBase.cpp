@@ -117,6 +117,10 @@ APlayerBase::APlayerBase(const class FObjectInitializer& PCIP)
 	AudioRotation = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioRotation"));
 	AudioRotation->AttachTo(RootComponent);
 
+	KeyChargeTime = 0.f;
+	bChargingUp = false;
+	bChargingDown = false;
+
 	PrimaryActorTick.bCanEverTick = true;
 }
 
@@ -148,6 +152,11 @@ void APlayerBase::SetupPlayerInputComponent(class UInputComponent* InputComponen
 
 	InputComponent->BindAction("ChargeUp", IE_Pressed, this, &APlayerBase::SetChargeUp);
 	InputComponent->BindAction("ChargeDown", IE_Pressed, this, &APlayerBase::SetChargeDown);
+
+	InputComponent->BindAction("KeyChargeUp", IE_Pressed, this, &APlayerBase::KeyChargeUpPressed);
+	InputComponent->BindAction("KeyChargeUp", IE_Released, this, &APlayerBase::KeyChargeUpReleased);
+	InputComponent->BindAction("KeyChargeDown", IE_Pressed, this, &APlayerBase::KeyChargeDownPressed);
+	InputComponent->BindAction("KeyChargeDown", IE_Released, this, &APlayerBase::KeyChargeDownReleased);
 }
 
 
@@ -217,6 +226,27 @@ void APlayerBase::BeginPlay()
 void APlayerBase::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+
+	// Charging with keyboard w and s
+	if (bChargingUp || bChargingDown)
+	{
+		KeyChargeTime += DeltaSeconds;
+		const float Offset = 0.025f;
+		float Increment = KeyChargeTime < Offset ? 0.005f : (KeyChargeTime - Offset) * 4.f * DeltaSeconds;
+
+		if (bChargingUp)
+		{
+			ChargeTime += Increment;
+			ChargeTime = FMath::Min(ChargeTime, FiringTimeout);			
+		}
+		else if (bChargingDown)
+		{
+			ChargeTime -= Increment;
+			ChargeTime = FMath::Max(ChargeTime, 0.f);
+		}
+
+		TargetChargeTime = ChargeTime;
+	}
 
 	// Aiming
 	if (bMovedDuringTick)
@@ -768,5 +798,31 @@ AActor* APlayerBase::GetViewTargetActor()
 	}
 
 	return this;
+}
+
+
+void APlayerBase::KeyChargeUpPressed()
+{
+	bChargingUp = true;
+	KeyChargeTime = 0.f;
+}
+
+
+void APlayerBase::KeyChargeUpReleased()
+{
+	bChargingUp = false;
+}
+
+
+void APlayerBase::KeyChargeDownPressed()
+{
+	bChargingDown = true;
+	KeyChargeTime = 0.f;
+}
+
+
+void APlayerBase::KeyChargeDownReleased()
+{
+	bChargingDown = false;
 }
 

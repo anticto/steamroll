@@ -152,6 +152,14 @@ protected:
 	/** Set fire charge in increments when a button is pressed, for example with the mouse wheel */
 	virtual void SetChargeUp();
 	virtual void SetChargeDown();
+	void KeyChargeUpPressed();
+	void KeyChargeUpReleased();
+	void KeyChargeDownPressed();
+	void KeyChargeDownReleased();
+	/** Time charging up or down */
+	float KeyChargeTime; 
+	bool bChargingUp;
+	bool bChargingDown;
 
 	/** Deletes last deployed actor */
 	void Undo();

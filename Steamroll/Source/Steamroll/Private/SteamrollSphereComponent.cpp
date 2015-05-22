@@ -980,14 +980,14 @@ void USteamrollSphereComponent::PlayRollingSoundAndSparks(ASteamrollBall* BallAc
 
 		if (BallActor)
 		{
-			if (bTouchingFloor && Speed > 1000.f)
-			{
+			if (bTouchingFloor && Speed > 1000.f && !BallActor->SpeedSparks->IsActive())
+			{				
 				BallActor->SpeedSparks->Activate();
 			}
-			else
-			{
-				BallActor->SpeedSparks->Deactivate();
-			}
+			//else
+			//{
+			//	BallActor->SpeedSparks->Deactivate();
+			//}
 		}
 	}
 }
