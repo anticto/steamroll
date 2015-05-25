@@ -14,15 +14,15 @@ public:
 	// Sets default values for this actor's properties
 	AJetStream();
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = JetStream)
 	float Power;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = JetStream)
 	float MaxSpeed;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = JetStream)
 	float TurnFactor;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = JetStream)
 	TArray<bool> StreamActive;
 };
