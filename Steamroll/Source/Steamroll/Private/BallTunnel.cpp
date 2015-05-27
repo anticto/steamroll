@@ -20,10 +20,17 @@ ABallTunnel::ABallTunnel(const class FObjectInitializer& PCIP)
 	TriggerVolume = PCIP.CreateDefaultSubobject<USphereComponent>(this, TEXT("TriggerVolume"));
 	TriggerVolume->AttachTo(RootComponent);
 
+	QuestionMarkMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("QuestionMarkMesh"));
+	QuestionMarkMesh->AttachTo(RootComponent);
+	QuestionMarkMesh->SetVisibility(false);
+
 	ConnectedTunnel = nullptr;
 	bDiscovered = false;
 	TransportDelaySeconds = 1.f;
 	SpeedMultiplier = 1.f;
+	TimeQuestionMarkVisible = -1.f;
+
+	PrimaryActorTick.bCanEverTick = true;
 }
 
 
@@ -56,6 +63,23 @@ void ABallTunnel::TransportToOtherTunnelEnd(AActor* OtherActor)
 			{
 				Ball->ExecuteTransport(ConnectedTunnel, 0.f);
 			}
+		}
+	}
+}
+
+
+void ABallTunnel::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if (!bDiscovered && TimeQuestionMarkVisible >= 0.f)
+	{
+		TimeQuestionMarkVisible -= DeltaSeconds;
+
+		if (TimeQuestionMarkVisible <= 0.f)
+		{
+			QuestionMarkMesh->SetVisibility(false);
+			TimeQuestionMarkVisible = -1.f;
 		}
 	}
 }

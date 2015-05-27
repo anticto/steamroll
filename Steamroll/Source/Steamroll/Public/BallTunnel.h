@@ -22,6 +22,9 @@ class STEAMROLL_API ABallTunnel : public AActor
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Tunnel)
 	class USphereComponent* TriggerVolume;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Tunnel)
+	UStaticMeshComponent* QuestionMarkMesh;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Tunnel)
 	ABallTunnel* ConnectedTunnel;
 
@@ -38,10 +41,13 @@ class STEAMROLL_API ABallTunnel : public AActor
 	UPROPERTY(BlueprintReadWrite, Category = Tunnel)
 	class ASteamrollBall* IncomingBall;
 
+	float TimeQuestionMarkVisible;
+
 	UFUNCTION(BlueprintCallable, Category = Tunnel)
 	void TransportToOtherTunnelEnd(AActor* OtherActor);
 
 	/** Timer to control the tunnel time. */
 	FTimerHandle TunnelTimer;
 
+	virtual void Tick(float DeltaSeconds) override;
 };
