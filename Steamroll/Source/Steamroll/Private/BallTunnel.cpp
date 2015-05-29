@@ -72,7 +72,7 @@ void ABallTunnel::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	if (!bDiscovered && TimeQuestionMarkVisible >= 0.f)
+	if (TimeQuestionMarkVisible >= 0.f)
 	{
 		TimeQuestionMarkVisible -= DeltaSeconds;
 

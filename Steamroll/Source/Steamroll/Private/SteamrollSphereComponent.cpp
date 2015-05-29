@@ -198,7 +198,7 @@ void USteamrollSphereComponent::UpdateBallPhysics(uint32 NumPhysTicks)
 							{
 								//DrawDebugString(Ball.GetWorld(), OutHit.ImpactPoint, FString::Printf(TEXT("?")), nullptr, FColor::Red, 0.f);
 								BallTunnel->QuestionMarkMesh->SetVisibility(true);
-								BallTunnel->TimeQuestionMarkVisible = 1.f;
+								BallTunnel->TimeQuestionMarkVisible = 0.2f;
 								SetLastPredictionTime(BallActor, CurrentTime);
 								Ball.SetActorLocation(CurrentLocation);
 								return; // Stop simulation if we hit an undiscovered tunnel
