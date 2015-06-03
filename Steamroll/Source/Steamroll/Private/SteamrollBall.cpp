@@ -289,7 +289,7 @@ void ASteamrollBall::ExecuteTransport(ABallTunnel* ConnectedTunnel, float Speed)
 	ASteamrollBall* Ball = this;
 
 	//FVector NewLocation = ConnectedTunnel->GetActorLocation();
-	//FVector NewVelocity = ConnectedTunnel->Mesh->GetUpVector() * (Speed * ConnectedTunnel->SpeedMultiplier);
+	//FVector NewVelocity = ConnectedTunnel->Mesh->GetUpVector() * (Speed * ConnectedTunnel->SpeedMultiplier + BallTunnel->ConnectedTunnel->SpeedSum);
 	//Ball->TeleportTo(NewLocation, Ball->GetActorRotation(), false, true);
 	//Ball->SetVelocity(NewVelocity);
 

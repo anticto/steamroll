@@ -190,7 +190,7 @@ void USteamrollSphereComponent::UpdateBallPhysics(uint32 NumPhysTicks)
 						CurrentLocation = BallTunnel->ConnectedTunnel->GetActorLocation();
 						LastLoc = Location; // Prevent interpolation between tunnel ends
 						LastRot = Rotation;
-						Speed = Velocity.Size() * BallTunnel->ConnectedTunnel->SpeedMultiplier;
+						Speed = Velocity.Size() * BallTunnel->ConnectedTunnel->SpeedMultiplier + BallTunnel->ConnectedTunnel->SpeedSum;
 						Velocity = BallTunnel->ConnectedTunnel->Mesh->GetUpVector() * Speed;
 
 						if (Ball.bSimulationBall)

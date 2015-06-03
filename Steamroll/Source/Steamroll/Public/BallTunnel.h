@@ -38,6 +38,9 @@ class STEAMROLL_API ABallTunnel : public AActor
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Tunnel)
 	float SpeedMultiplier;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Tunnel)
+	float SpeedSum;
+
 	UPROPERTY(BlueprintReadWrite, Category = Tunnel)
 	class ASteamrollBall* IncomingBall;
 

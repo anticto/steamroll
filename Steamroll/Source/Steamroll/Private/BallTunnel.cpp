@@ -28,6 +28,7 @@ ABallTunnel::ABallTunnel(const class FObjectInitializer& PCIP)
 	bDiscovered = false;
 	TransportDelaySeconds = 1.f;
 	SpeedMultiplier = 1.f;
+	SpeedSum = 0.f;
 	TimeQuestionMarkVisible = -1.f;
 
 	PrimaryActorTick.bCanEverTick = true;
