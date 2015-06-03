@@ -55,6 +55,9 @@ class STEAMROLL_API USteamrollSphereComponent : public USphereComponent
 	// Physical Simulation of trajectory or actual player gameplay?
 	bool bSimulationBall;
 
+	/** True if the ball is simulating a secondary bounce from a wall item */
+	bool bSecondarySimulation;
+
 	// Max Speed this ball could have been launched with, used to scale bounce sound volumes
 	float MaxInitialSpeed;
 

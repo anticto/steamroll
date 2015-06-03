@@ -31,6 +31,7 @@ USteamrollSphereComponent::USteamrollSphereComponent(const class FObjectInitiali
 	RotationAxis = FVector::ZeroVector;
 	NumFramesCollidingWithBall = 0;
 	bSimulationBall = false;
+	bSecondarySimulation = false;
 
 	NumIterations = 10;
 	MaxDeltaSeconds = 1.f / 60.f;
@@ -203,6 +204,11 @@ void USteamrollSphereComponent::UpdateBallPhysics(uint32 NumPhysTicks)
 								Ball.SetActorLocation(CurrentLocation);
 								return; // Stop simulation if we hit an undiscovered tunnel
 							}
+
+							if (bSecondarySimulation)
+							{
+								return; // Stop simulation if this is a secondary simulation that has hit a tunnel
+							}
 							
 							TrajectoryComponent->CutTrajectory();
 							Ball.AddLocation(CurrentLocation, CurrentTime);
@@ -363,11 +369,17 @@ void USteamrollSphereComponent::UpdateBallPhysics(uint32 NumPhysTicks)
 
 					// If impact normal is not flat or vertical, that is, we hit a ramp, set restitution to 0 to cancel normal velocity and snap ball to the ramp to prevent it from rebounding hard and flying away
 					float Restitution = OutHit.PhysMaterial->Restitution;
+					float NormalDotUpVector = OutHit.ImpactNormal | FVector::UpVector;
 
-					if (FMath::IsWithin(OutHit.ImpactNormal | FVector::UpVector, 0.1f, 0.9f))
+					if (FMath::IsWithin(NormalDotUpVector, 0.1f, 0.9f))
 					{
 						VelocityT = VelocityT.GetSafeNormal() * Speed;
 						Restitution = 0.f;
+					}
+					
+					if (bSecondarySimulation && FMath::IsWithin(NormalDotUpVector, -0.3f, 0.3f))
+					{
+						return;  // Stop simulation if secondary simulation and hit a vertical wall
 					}
 
 					Velocity = VelocityT + VelocityN * Restitution;
@@ -706,6 +718,7 @@ void USteamrollSphereComponent::DrawSimulationWall(const FVector& ActorLocation,
 			{
 				BallActor->WallReboundPredictionBalls.Add(SimulatedBall);
 				SimulatedBall->Sphere->TrajectoryComponent->MatInstance->SetScalarParameterValue("IsPrimaryPrediction", 0.f);
+				SimulatedBall->Sphere->bSecondarySimulation = true;
 
 				SimulatedBall->Sphere->bSimulationBall = true;
 				SimulatedBall->SetActorEnableCollision(false);
